@@ -13,6 +13,21 @@ from duplicate_ghprb_jobs.deduper import (
 
 
 def sample_data(running_builds, not_running_builds):
+    """
+    Args:
+        running_builds: (list of str) A list of PR numbers that have
+            running builds. For example, ['1', '1', '2'] indicates
+            that there are currently 2 builds running for PR #1 and
+            1 build running for PR #2. The last instance of '1' in
+            the list will correlate to the currently relevant build.
+            The build number will be the array index of the item.
+        not_running_builds: (list of str) A list of PR numbers that
+            have previously run builds. The build number will be the
+            array index of the item plus the length of running_builds.
+    Returns:
+        Python dict of build data. This is in the format expected to
+        be returned by the jenkins api.
+    """
     builds = []
     first_time = int(time())
     for i in range(0, len(running_builds)):

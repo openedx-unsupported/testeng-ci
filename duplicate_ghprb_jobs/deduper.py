@@ -1,7 +1,7 @@
 """
 This script is intended to be used to abort outdated builds
 on a jenkins job that uses the ghprbPlugin. In this case,
-an outdate build is one for which the PR that triggered it
+an outdated build is one for which the PR that triggered it
 has a more recently triggered build also running.
 """
 from collections import defaultdict
