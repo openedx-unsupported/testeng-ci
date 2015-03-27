@@ -1,51 +1,57 @@
 """
-Requires:
-    requests==2.5.3
+This script is intended to be used to abort outdated builds
+on a jenkins job that uses the ghprbPlugin. In this case,
+an outdate build is one for which the PR that triggered it
+has a more recently triggered build also running.
 """
 from collections import defaultdict
 from operator import itemgetter
 import argparse
 import json
+import logging
 import re
 import requests
-import logging
+import sys
+
 logging.basicConfig(format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 
-class GhprbOutdatedBuildAborter():
+def append_url(base, addition):
+    """
+    Add something to a url, ensuring that there are the
+    right amount of `/`.
+
+    :Args:
+        base: The original url.
+        addition: the thing to add to the end of the url
+
+    :Returns: The combined url as a string of the form
+        `base/addition`
+    """
+    if not base.endswith('/'):
+        base += '/'
+    if addition.startswith('/'):
+        addition = addition[1:]
+    return base + addition
+
+
+class GhprbOutdatedBuildAborter:
     """
     A class for programatically finding and aborting outdated
     jenkins builds that were started using the GHPRB plugin.
 
     :Args:
         job_url: URL of jenkins job that uses the GHPRB plugin
-        username: jenkins username
+        username: jenkins userme
         token: jeknins api token
     """
     def __init__(self, job_url, username, token):
         self.job_url = job_url
         self.auth = (username, token)
 
-    def _append_url(self, base, addition):
-        """
-        Add something to a url, ensuring that there are the
-        right amount of `/`.
-
-        :Args:
-            base: The original url.
-            addition: the thing to add to the end of the url
-
-        :Returns: The combined url as a string of the form
-            `base/addition`
-        """
-        if not base.endswith('/'):
-            base += '/'
-        if addition.startswith('/'):
-            addition = addition[1:]
-        return base + addition
-
-    def _aborted_description(self, current_build_id, pr):
+    @staticmethod
+    def _aborted_description(current_build_id, pr):
         """
         :Args:
             current_build_id: the id of the most recently started
@@ -84,7 +90,7 @@ class GhprbOutdatedBuildAborter():
                     item used in this script is 'parameters' which can
                     be used to find the PR number.
         """
-        api_url = self._append_url(self.job_url, '/api/json')
+        api_url = append_url(self.job_url, '/api/json')
 
         response = requests.get(
             api_url,
@@ -94,9 +100,11 @@ class GhprbOutdatedBuildAborter():
             }
         )
 
+        response.raise_for_status()
         return response.json()
 
-    def get_running_builds(self, data):
+    @staticmethod
+    def get_running_builds(data):
         """
         Return build data for currently running builds.
 
@@ -157,8 +165,8 @@ class GhprbOutdatedBuildAborter():
 
                 for b in old_build_ids:
                     try:
-                        self.update_build_desc(b, desc)
                         self.stop_build(b)
+                        self.update_build_desc(b, desc)
                     except Exception as e:
                         logger.error(e.message)
 
@@ -179,8 +187,8 @@ class GhprbOutdatedBuildAborter():
             build_id: id number of build to update
             description: the new description
         """
-        build_url = self._append_url(self.job_url, str(build_id))
-        url = self._append_url(build_url, "/submitDescription")
+        build_url = append_url(self.job_url, str(build_id))
+        url = append_url(build_url, "/submitDescription")
 
         response = requests.post(
             url,
@@ -193,6 +201,9 @@ class GhprbOutdatedBuildAborter():
         logger.info("Updating description for build #{}. Response: {}".format(
             build_id, response.status_code))
 
+        response.raise_for_status()
+        return response.ok
+
     def stop_build(self, build_id):
         """
         Stops a build.
@@ -200,16 +211,20 @@ class GhprbOutdatedBuildAborter():
         :Args:
             build_id: id number of build to abort
         """
-        build_url = self._append_url(self.job_url, str(build_id))
-        url = self._append_url(build_url, "/stop")
+        build_url = append_url(self.job_url, str(build_id))
+        url = append_url(build_url, "/stop")
 
         response = requests.post(url, auth=self.auth)
 
         logger.info("Aborting build #{}. Response: {}".format(
             build_id, response.status_code))
 
+        response.raise_for_status()
+        return response.ok
 
-def main():
+
+def deduper_main(raw_args):
+    # Get args
     parser = argparse.ArgumentParser(
         description="Programatically abort oldest builds for"
                     "a PR so that only one is running.")
@@ -222,7 +237,7 @@ def main():
                         required=True)
     parser.add_argument('--log-level', dest='log_level',
                         default="INFO", help="set logging level")
-    args = parser.parse_args()
+    args = parser.parse_args(raw_args)
 
     # Set logging level
     logger.setLevel(args.log_level.upper())
@@ -234,4 +249,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    deduper_main(sys.argv[1:])
