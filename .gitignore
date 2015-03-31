@@ -1,0 +1,24 @@
+### Editor and IDE artifacts
+*~
+*.swp
+*.orig
+/nbproject
+.idea/
+.redcar/
+codekit-config.json
+.pycharm_helpers/
+
+### OS X artifacts
+*.DS_Store
+.AppleDouble
+:2e_*
+:2e#
+
+### Testing artifacts
+.noseids
+nosetests.xml
+.coverage
+.coverage.*
+coverage.xml
+cover/
+cover_html/
