@@ -9,4 +9,4 @@ install:
   - pip install -r test-requirements.txt
 script:
   - pep8 .
-  - nosetests duplicate_ghprb_jobs -v --with-coverage --cover-package=duplicate_ghprb_jobs
+  - nosetests jenkins -v --with-coverage --cover-package=jenkins

@@ -7,33 +7,16 @@ has a more recently triggered build also running.
 from collections import defaultdict
 from operator import itemgetter
 import argparse
-import json
 import logging
+import json
 import re
-import requests
 import sys
+
+from job import JenkinsJob
+
 
 logging.basicConfig(format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
-
-
-def append_url(base, addition):
-    """
-    Add something to a url, ensuring that there are the
-    right amount of `/`.
-
-    :Args:
-        base: The original url.
-        addition: the thing to add to the end of the url
-
-    :Returns: The combined url as a string of the form
-        `base/addition`
-    """
-    if not base.endswith('/'):
-        base += '/'
-    if addition.startswith('/'):
-        addition = addition[1:]
-    return base + addition
 
 
 class GhprbOutdatedBuildAborter:
@@ -42,13 +25,11 @@ class GhprbOutdatedBuildAborter:
     jenkins builds that were started using the GHPRB plugin.
 
     :Args:
-        job_url: URL of jenkins job that uses the GHPRB plugin
-        username: jenkins userme
-        token: jeknins api token
+        job: An instance of jenkins_api.job.JenkinsJob
     """
-    def __init__(self, job_url, username, token):
-        self.job_url = job_url
-        self.auth = (username, token)
+
+    def __init__(self, job):
+        self.job = job
 
     @staticmethod
     def _aborted_description(current_build_id, pr):
@@ -72,36 +53,9 @@ class GhprbOutdatedBuildAborter:
         description of aborted jobs to indicate why they where
         stopped.
         """
-        data = self.get_json()
+        data = self.job.get_json()
         builds = self.get_running_builds(data)
         self.stop_duplicates(builds)
-
-    def get_json(self):
-        """
-        Get build data for a given job_url.
-
-        :Returns:
-            A python dict from the jeknins api response including:
-            * builds: a list of dicts, each containing:
-                ** building: Boolean of whether it is actively building
-                ** timestamp: the time the build started
-                ** number: the build id number
-                ** actions: a list of 'actions', from which the only
-                    item used in this script is 'parameters' which can
-                    be used to find the PR number.
-        """
-        api_url = append_url(self.job_url, '/api/json')
-
-        response = requests.get(
-            api_url,
-            params={
-                "tree": ("builds[building,timestamp,"
-                         "number,actions[parameters[*]]]"),
-            }
-        )
-
-        response.raise_for_status()
-        return response.json()
 
     @staticmethod
     def get_running_builds(data):
@@ -165,8 +119,8 @@ class GhprbOutdatedBuildAborter:
 
                 for b in old_build_ids:
                     try:
-                        self.stop_build(b)
-                        self.update_build_desc(b, desc)
+                        self.job.stop_build(b)
+                        self.job.update_build_desc(b, desc)
                     except Exception as e:
                         logger.error(e.message)
 
@@ -178,49 +132,6 @@ class GhprbOutdatedBuildAborter:
             logger.info(out)
         else:
             logger.info("No extra running builds found.")
-
-    def update_build_desc(self, build_id, description):
-        """
-        Updates build description.
-
-        :Args:
-            build_id: id number of build to update
-            description: the new description
-        """
-        build_url = append_url(self.job_url, str(build_id))
-        url = append_url(build_url, "/submitDescription")
-
-        response = requests.post(
-            url,
-            auth=self.auth,
-            params={
-                'description': description,
-            },
-        )
-
-        logger.info("Updating description for build #{}. Response: {}".format(
-            build_id, response.status_code))
-
-        response.raise_for_status()
-        return response.ok
-
-    def stop_build(self, build_id):
-        """
-        Stops a build.
-
-        :Args:
-            build_id: id number of build to abort
-        """
-        build_url = append_url(self.job_url, str(build_id))
-        url = append_url(build_url, "/stop")
-
-        response = requests.post(url, auth=self.auth)
-
-        logger.info("Aborting build #{}. Response: {}".format(
-            build_id, response.status_code))
-
-        response.raise_for_status()
-        return response.ok
 
 
 def deduper_main(raw_args):
@@ -240,11 +151,11 @@ def deduper_main(raw_args):
     args = parser.parse_args(raw_args)
 
     # Set logging level
-    logger.setLevel(args.log_level.upper())
+    logging.getLogger().setLevel(args.log_level.upper())
 
     # Abort extra jobs
-    deduper = GhprbOutdatedBuildAborter(
-        args.job_url, args.username, args.token)
+    job = JenkinsJob(args.job_url, args.username, args.token)
+    deduper = GhprbOutdatedBuildAborter(job)
     deduper.abort_duplicate_builds()
 
 
