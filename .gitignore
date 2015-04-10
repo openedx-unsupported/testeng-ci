@@ -2,6 +2,7 @@
 *~
 *.swp
 *.orig
+*.pyc
 /nbproject
 .idea/
 .redcar/
