@@ -2,12 +2,13 @@ from mock import patch, call
 from requests.exceptions import HTTPError
 from unittest import TestCase
 
-from jenkins.tests.helpers import sample_data, mock_utcnow
+from jenkins.tests.helpers import sample_data, mock_utcnow, Pr
 from jenkins.timeout import BuildTimeout, timeout_main
 from jenkins.job import JenkinsJob
 
 
 class TimeoutTestCase(TestCase):
+
     """
     TestCase class for testing timeout.py.
     """
@@ -21,19 +22,22 @@ class TimeoutTestCase(TestCase):
 
     @mock_utcnow
     def test_get_stuck_builds_3_building(self):
-        data = sample_data(['1', '2', '3'], ['4'])
+        data = sample_data(
+            [Pr('1').dict, Pr('2').dict, Pr('3').dict], [Pr('4').dict])
         builds = self.timer.get_stuck_builds(data)
         self.assertEqual(len(builds), 1)
 
     @mock_utcnow
     def test_get_stuck_builds_1_building(self):
-        data = sample_data(['4'], ['1', '2', '3'])
+        data = sample_data(
+            [Pr('4').dict], [Pr('1').dict, Pr('2').dict, Pr('3').dict])
         builds = self.timer.get_stuck_builds(data)
         self.assertEqual(len(builds), 0)
 
     @mock_utcnow
     def test_get_stuck_builds_none_building(self):
-        data = sample_data([], ['1', '2', '3', '4'])
+        data = sample_data(
+            [], [Pr('1').dict, Pr('2').dict, Pr('3').dict, Pr('4').dict])
         builds = self.timer.get_stuck_builds(data)
         self.assertEqual(len(builds), 0)
 
@@ -52,7 +56,8 @@ class TimeoutTestCase(TestCase):
     def test_stop_stuck_builds_with_stuck(self, mock_desc,
                                           update_desc,
                                           stop_build):
-        sample_buid_data = sample_data(['0', '1', '2', '3'], [])
+        sample_buid_data = sample_data(
+            [Pr('0').dict, Pr('1').dict, Pr('2').dict, Pr('3').dict], [])
         build_data = self.timer.get_stuck_builds(sample_buid_data)
         self.timer.stop_stuck_builds(build_data)
 
@@ -67,7 +72,8 @@ class TimeoutTestCase(TestCase):
     @patch('jenkins.job.JenkinsJob.stop_build', side_effect=HTTPError())
     @patch('jenkins.job.JenkinsJob.update_build_desc', return_value=True)
     def test_stop_stuck_builds_failed_to_stop(self, update_desc, stop_build):
-        sample_buid_data = sample_data(['1', '2', '3'], [])
+        sample_buid_data = sample_data(
+            [Pr('1').dict, Pr('2').dict, Pr('3').dict], [])
         build_data = self.timer.get_stuck_builds(sample_buid_data)
         self.timer.stop_stuck_builds(build_data)
         stop_build.assert_called_once_with(2)
@@ -77,15 +83,17 @@ class TimeoutTestCase(TestCase):
     @patch('jenkins.job.JenkinsJob.stop_build', return_value=True)
     @patch('jenkins.job.JenkinsJob.update_build_desc', return_value=True)
     def test_stop_stuck_builds_none_stuck(self, update_desc, stop_build):
-        sample_buid_data = sample_data(['1', '2'], ['2'])
+        sample_buid_data = sample_data(
+            [Pr('1').dict, Pr('2').dict], [Pr('2').dict])
         build_data = self.timer.get_stuck_builds(sample_buid_data)
         self.timer.stop_stuck_builds(build_data)
         self.assertFalse(stop_build.called)
         self.assertFalse(update_desc.called)
 
     @mock_utcnow
-    @patch('jenkins.job.JenkinsJob.get_json',
-           return_value=sample_data(['1', '2', '2'], ['4', '5', '5']))
+    @patch('jenkins.job.JenkinsJob.get_json', return_value=sample_data(
+        [Pr('1').dict, Pr('2').dict, Pr('2').dict],
+        [Pr('4').dict, Pr('5').dict, Pr('5').dict]))
     @patch('jenkins.job.JenkinsJob.stop_build', return_value=True)
     @patch('jenkins.job.JenkinsJob.update_build_desc', return_value=True)
     @patch('jenkins.timeout.BuildTimeout._aborted_description',

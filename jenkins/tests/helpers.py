@@ -14,6 +14,7 @@ def mock_response(status_code, data=None):
 
 def mock_utcnow(func):
     class MockDatetime(datetime.datetime):
+
         @classmethod
         def utcnow(cls):
             return datetime.datetime.utcfromtimestamp(142009200.0)
@@ -29,18 +30,42 @@ def mock_utcnow(func):
     return wrapper
 
 
+class Pr(object):
+
+    """
+    Sample PR dict to use as test data
+    """
+
+    def __init__(self, prnum, author='foo@example.com'):
+        self.prnum = prnum
+        self.author = author
+
+    @property
+    def dict(self):
+        """
+        Return the PR object as a dict
+        """
+        return self.__dict__
+
+
 def sample_data(running_builds, not_running_builds):
     """
     Args:
-        running_builds: (list of str) A list of PR numbers that have
-            running builds. For example, ['1', '1', '2'] indicates
-            that there are currently 2 builds running for PR #1 and
-            1 build running for PR #2. The last instance of '1' in
-            the list will correlate to the currently relevant build.
-            The build number will be the array index of the item.
-        not_running_builds: (list of str) A list of PR numbers that
-            have previously run builds. The build number will be the
-            array index of the item plus the length of running_builds.
+        running_builds: (list of dict) A list of dicts, one for each
+            PR with a running build. Each dict has key/value pairs for
+            PR number and commit author's email. For example,
+            [{'pr': '1', 'author': 'foo@example.com'}, {'pr': '1',
+            'author': 'foo@example.com'}, {'pr': '2', 'author':
+            'bar@example.com'}] indicates that there are currently
+            2 builds running for PR #1 and 1 build running for PR #2.
+            (In this example the same author happened to push commits
+            twice for PR #1.) The last iterable for PR '1' in the
+            list will correlate to the currently relevant build.
+            We will use the array index of the item as the build number.
+        not_running_builds: (list of dict) A list of dicts for PRs that
+            have previously run builds. So that all the build numbers
+            are unique, we will use the length of running_builds plus
+            the array index of the item as the build number.
     Returns:
         Python dict of build data. This is in the format expected to
         be returned by the jenkins api.
@@ -55,7 +80,10 @@ def sample_data(running_builds, not_running_builds):
     for i in range(0, len(running_builds)):
         builds.append(
             '{"actions" : [{"parameters" :[{"name": "ghprbPullId",'
-            '"value" : "' + running_builds[i] + '"}]},{},{}], '
+            '"value" : "' +
+            running_builds[i].get(
+                'prnum') + '"}, {"name":"ghprbActualCommitAuthorEmail",'
+            '"value":"' + running_builds[i].get('author') + '"}]},{},{}], '
             '"building": true, "number": ' + str(i) +
             ', "timestamp" : ' + mktimestamp(i) + '}'
         )
@@ -64,9 +92,12 @@ def sample_data(running_builds, not_running_builds):
         num = i + len(running_builds)
         builds.append(
             '{"actions" : [{"parameters" :[{"name": "ghprbPullId",'
-            '"value" : "' + not_running_builds[i] + '"}]},{},{}], '
-            '"building": false, "number": ' + str(num)
-            + ', "timestamp" : ' + mktimestamp(num) + '}'
+            '"value" : "' +
+            not_running_builds[i].get(
+                'prnum') + '"}, {"name":"ghprbActualCommitAuthorEmail",'
+            '"value":"' + not_running_builds[i].get('author') + '"}]},{},{}], '
+            '"building": false, "number": ' + str(num) +
+            ', "timestamp" : ' + mktimestamp(num) + '}'
         )
 
     build_data = ''.join([

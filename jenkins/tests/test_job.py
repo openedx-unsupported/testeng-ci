@@ -2,11 +2,12 @@ from mock import patch
 from requests.exceptions import HTTPError
 from unittest import TestCase
 
-from jenkins.tests.helpers import mock_response, sample_data
+from jenkins.tests.helpers import mock_response, sample_data, Pr
 from jenkins.job import JenkinsJob
 
 
 class JenkinsJobTestCase(TestCase):
+
     """
     TestCase class for testing deduper.py.
     """
@@ -18,7 +19,7 @@ class JenkinsJobTestCase(TestCase):
         self.job = JenkinsJob(self.job_url, self.user, self.api_key)
 
     def test_get_json_ok(self):
-        data = sample_data(['1'], [])
+        data = sample_data([Pr('1').dict], [])
         with patch('requests.get', return_value=mock_response(200, data)):
             response = self.job.get_json()
             self.assertEqual(data, response)
