@@ -13,6 +13,7 @@ logging.getLogger('requests').setLevel('ERROR')
 
 
 class JenkinsJob:
+
     """
     A class for interacting with the jenkins job API
 

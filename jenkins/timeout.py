@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class BuildTimeout:
+
     """
     A class for programatically finding and aborting stuck builds.
 
