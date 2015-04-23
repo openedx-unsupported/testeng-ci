@@ -177,7 +177,7 @@ def deduper_main(raw_args):
         '--job', '-j', dest='job_url', required=True,
         help='URL of jenkins job that uses the GHPRB plugin')
     parser.add_argument(
-        '--one-per-author', dest='one_per_author', default=False,
+        '--one-per-author', dest='one_per_author', action='store_true',
         help="Leave one build for each unique last commit author for a PR.")
     parser.add_argument(
         '--log-level', dest='log_level',
