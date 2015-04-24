@@ -79,24 +79,42 @@ class DeduperTestCase(TestCase):
         self.assertFalse(update_desc.called)
 
     @patch('jenkins.job.JenkinsJob.get_json', return_value=sample_data(
-        [Pr('1').dict, Pr('2').dict, Pr('2').dict, Pr('3').dict],
+        [Pr('1').dict, Pr('2', author='a').dict, Pr('2', author='b').dict],
         [Pr('4').dict, Pr('5').dict, Pr('5').dict]))
     @patch('jenkins.job.JenkinsJob.stop_build', return_value=True)
     @patch('jenkins.job.JenkinsJob.update_build_desc', return_value=True)
     @patch('jenkins.deduper.GhprbOutdatedBuildAborter._aborted_description',
            return_value='new description')
-    def test_main(self, mock_desc, update_desc, stop_build, get_json):
+    def test_main_default_per_author(
+            self, mock_desc, update_desc, stop_build, get_json):
         args = [
             '-t', self.api_key,
             '-u', self.user,
             '-j', self.job_url,
             '--log-level', 'INFO',
         ]
-
         deduper_main(args)
         get_json.assert_called_once_with()
         stop_build.assert_called_once_with(2)
         update_desc.assert_called_once_with(2, mock_desc())
+
+    @patch('jenkins.job.JenkinsJob.get_json', return_value=sample_data(
+        [Pr('1').dict, Pr('2', author='a').dict, Pr('2', author='b').dict],
+        [Pr('4').dict, Pr('5').dict, Pr('5').dict]))
+    @patch('jenkins.job.JenkinsJob.stop_build', return_value=True)
+    @patch('jenkins.job.JenkinsJob.update_build_desc', return_value=True)
+    def test_main_one_per_author(self, update_desc, stop_build, get_json):
+        args = [
+            '-t', self.api_key,
+            '-u', self.user,
+            '-j', self.job_url,
+            '--log-level', 'INFO',
+            '--one-per-author'
+        ]
+        deduper_main(args)
+        get_json.assert_called_once_with()
+        self.assertFalse(stop_build.called)
+        self.assertFalse(update_desc.called)
 
 
 class DedupePerAuthorTestCase(TestCase):
