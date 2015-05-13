@@ -31,19 +31,39 @@ guard{
     }, 
     {
       unit = parallel(
-        { 
-          lms_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "lms", TEST_SUITE: "unit")
-          toolbox.slurpArtifacts(lms_unit)
-        },  
         {
-          other_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "cms-js-commonlib", TEST_SUITE: "unit") 
-          toolbox.slurpArtifacts(other_unit)
+          lms_unit_1 = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "lms-unit")
+          toolbox.slurpArtifacts(lms_unit_1)
+        },
+        {
+          lms_unit_2 = build('edx-platform-test-subset', sha1: sha1, SHARD: "2", TEST_SUITE: "lms-unit")
+          toolbox.slurpArtifacts(lms_unit_2)
+        },
+        {
+          cms_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit")
+          toolbox.slurpArtifacts(cms_unit)
+        },
+        {
+          commonlib_js_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "commonlib-js-unit")
+          toolbox.slurpArtifacts(commonlib_js_unit)
         },
       )
 
-      if (lms_unit.result.toString()  == 'SUCCESS' && other_unit.result.toString()  == 'SUCCESS'){      
-      	unit_coverage = build('edx-platform-unit-coverage', UNIT_BUILD_NUM_1: other_unit.number, UNIT_BUILD_NUM_2: lms_unit.number, sha1: sha1)
-      	toolbox.slurpArtifacts(unit_coverage)
+      check_coverage = (
+        lms_unit_1.result.toString() == 'SUCCESS' &&
+        lms_unit_2.result.toString() == 'SUCCESS' &&
+        cms_unit.result.toString() == 'SUCCESS' &&
+        commonlib_js_unit.result.toString() == 'SUCCESS')
+
+      if (check_coverage){
+        unit_coverage = build('edx-platform-unit-coverage',
+                              UNIT_BUILD_NUM_1: commonlib_js_unit.number,
+                              UNIT_BUILD_NUM_2: lms_unit_1.number,
+                              UNIT_BUILD_NUM_3: lms_unit_2.number,
+                              UNIT_BUILD_NUM_4: cms_unit.number,
+                              sha1: sha1)
+
+        toolbox.slurpArtifacts(unit_coverage)
       }
     },
     {
