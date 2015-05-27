@@ -10,3 +10,4 @@ install:
 script:
   - pep8 .
   - nosetests jenkins -v --with-coverage --cover-package=jenkins
+  - nosetests aws -v --with-coverage --cover-package=aws
