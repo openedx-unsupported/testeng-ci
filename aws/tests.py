@@ -47,7 +47,6 @@ class GetRunningEC2InstancesTestCase(TestCase):
         conn.run_instances('ami-1234abcd', key_name=self.key_name_2)
         conn.run_instances('ami-1234abcd', key_name=self.key_name_2)
 
-
         # Check that when searching for self.key_name, we count only 1
         # and confirm that the result is logged at INFO level.
         with LogCapture() as l:
@@ -55,8 +54,11 @@ class GetRunningEC2InstancesTestCase(TestCase):
                 self.key_name, self.key_id, self.secret_key
             )
             self.assertEqual(instances_1, 1)
-            expected_log = ('aws.get_running_instances', 'INFO',
-                'Number of some-key-name instances on EC2: 1')
+            expected_log = (
+                'aws.get_running_instances',
+                'INFO',
+                'Number of some-key-name instances on EC2: 1'
+            )
             l.check(expected_log)
 
         # Check that when searching for self.key_name_2, we count only 2
@@ -66,6 +68,9 @@ class GetRunningEC2InstancesTestCase(TestCase):
                 self.key_name_2, self.key_id, self.secret_key
             )
             self.assertEqual(instances_2, 2)
-            expected_log = ('aws.get_running_instances', 'INFO',
-                'Number of some-key-name-2 instances on EC2: 2')
+            expected_log = (
+                'aws.get_running_instances',
+                'INFO',
+                'Number of some-key-name-2 instances on EC2: 2'
+            )
             l.check(expected_log)
