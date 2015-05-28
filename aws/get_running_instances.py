@@ -31,9 +31,13 @@ def get_running_instances(key_name, aws_access_key_id, aws_secret_access_key):
         key_name: the ec2 key_name to match.
         aws_access_key_id
         aws_secret_access_key
+
+    :Raises:
+        EC2ResponseError
     """
     ec2conn = boto.connect_ec2(aws_access_key_id, aws_secret_access_key)
     reservations = ec2conn.get_all_instances()
+
     instances = [
         i for r in reservations for i in r.instances
         if i.state in ('running', 'pending') and i.key_name == key_name
@@ -73,6 +77,13 @@ def main(raw_args):
         '--log-level',
         dest='log_level',
         help="set logging level",
+        choices=[
+            'DEBUG', 'debug',
+            'INFO', 'info',
+            'WARNING', 'warning',
+            'ERROR', 'error',
+            'CRITICAL', 'critical',
+        ],
         default="INFO",
     )
     args = parser.parse_args(raw_args)

@@ -1,5 +1,5 @@
 """
-Use the jenkins queue and computer APIs to log info about workers.
+Use the jenkins queue and computer APIs to capture info about workers.
 
 Usage:
     `python jenkins/workers.py -j https://example.jenkins.com`
@@ -75,6 +75,13 @@ def main(raw_args):
         '--log-level',
         dest='log_level',
         default="INFO",
+        choices=[
+            'DEBUG', 'debug',
+            'INFO', 'info',
+            'WARNING', 'warning',
+            'ERROR', 'error',
+            'CRITICAL', 'critical',
+        ],
         help="set logging level"
     )
     args = parser.parse_args(raw_args)
