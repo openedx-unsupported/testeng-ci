@@ -10,7 +10,6 @@ import sys
 from job import JenkinsJob
 
 
-logging.basicConfig(format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -135,4 +134,5 @@ def timeout_main(raw_args):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='[%(levelname)s] %(message)s')
     timeout_main(sys.argv[1:])

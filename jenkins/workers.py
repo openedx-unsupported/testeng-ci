@@ -5,24 +5,39 @@ Usage:
     `python jenkins/workers.py -j https://example.jenkins.com`
 
 Example Output:
-    [INFO] Counts of workers and queue length from Jenkins API:
-    [INFO] Build Queue Length: 0
-    [INFO] Busy Executors: 25
-    [INFO] Total Executors: 37
+    2015-05-28 15:03:48,007 [INFO] datasrc=jenkins, \
+    jenkins_master=example.jenkins.com, queue_length=2, \
+    busy_executors_jenkins=36, total_executors_jenkins=40, \
+    worker-desc-1_count=34, worker-desc-2_count=5, master_count=1
+
+Because these are logged with a timestamp and formatted for automatic field
+extraction, splunk should recognize this as an event and make it easy to
+inspect the data there.
+(See http://dev.splunk.com/view/logging-best-practices/SP-CAAADP6)
+
+Assumptions:
+    This is implemented with some assumptions about the way that workers are
+    tagged. In particuar, it is assumed that the tags `master` and `worker` are
+    used. Values for `master` are expected to be the netloc of the jenkins
+    master.  Values for `worker` are expected to match the description given
+    in the Jenkins EC2 plugin configuration, but without ending in '-worker'.
+    For example, if my worker description in jenkins is 'abc-worker', then
+    the worker tag in EC2 is expected to be 'abc'.
 """
 import argparse
 import logging
 import requests
 import sys
+import urlparse
+from collections import Counter
 from helpers import append_url
 
 
-logging.basicConfig(format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 logging.getLogger('requests').setLevel('ERROR')
 
 
-def log_queue_length(jenkins_url):
+def get_queue_data(jenkins_url):
     """
     Logs the current queue length for the given jenkins instance.
 
@@ -34,10 +49,11 @@ def log_queue_length(jenkins_url):
     response.raise_for_status()
     data = response.json()
     length = len(data['items'])
-    logger.info('Build Queue Length: {}'.format(length))
+    fields = ['queue_length={}'.format(length)]
+    return fields
 
 
-def log_worker_counts(jenkins_url):
+def get_computer_data(jenkins_url):
     """
     Logs the current count of workers for the given jenkins instance.
     Logs counts of both busy executors and total executors.
@@ -48,13 +64,34 @@ def log_worker_counts(jenkins_url):
     api_url = append_url(jenkins_url, '/computer/api/json')
     response = requests.get(
         api_url,
-        params={'tree': "busyExecutors,totalExecutors"}
+        params={
+            'tree': (
+                "busyExecutors,totalExecutors,computer[displayName,offline]"
+            )
+        }
     )
     response.raise_for_status()
     data = response.json()
 
-    logger.info('Busy Executors: {}'.format(data['busyExecutors']))
-    logger.info('Total Executors: {}'.format(data['totalExecutors']))
+    fields = [
+        'busy_executors_jenkins={}'.format(data['busyExecutors']),
+        'total_executors_jenkins={}'.format(data['totalExecutors']),
+    ]
+
+    # displayName is made up of two parts -- the description as set in jenkins
+    # ami config and the the instance id. We just want just the description
+    # of workers that are online.
+    worker_counts = Counter([
+        c['displayName'].split("(i-")[0] for c in data['computer']
+        if not c['offline']
+    ])
+
+    fields.extend([
+        '{}_count={}'.format(type.strip(), count)
+        for type, count in worker_counts.iteritems()
+    ])
+
+    return fields
 
 
 def main(raw_args):
@@ -87,15 +124,19 @@ def main(raw_args):
     args = parser.parse_args(raw_args)
 
     # Set logging level
-    logging.getLogger().setLevel(args.log_level.upper())
+    logging.getLogger(__name__).setLevel(args.log_level.upper())
 
-    # Log the current queue length and worker counts
-    logger.info(
-        "Counts of workers and queue length for {}".format(args.jenkins_url)
-    )
-    log_queue_length(args.jenkins_url)
-    log_worker_counts(args.jenkins_url)
+    # Log the current queue length, worker counts, and jenkins_url
+    master = urlparse.urlsplit(args.jenkins_url).netloc
+    data_fields = [
+        'datasrc=jenkins',
+        'jenkins_master={}'.format(master),
+    ]
+    data_fields.extend(get_queue_data(args.jenkins_url))
+    data_fields.extend(get_computer_data(args.jenkins_url))
+    logger.info(', '.join(data_fields))
 
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s')
     main(sys.argv[1:])

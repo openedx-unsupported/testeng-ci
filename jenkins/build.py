@@ -4,7 +4,6 @@ A class for working with the build info returned from the jenkins job API
 import logging
 
 
-logging.basicConfig(format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 

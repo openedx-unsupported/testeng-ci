@@ -7,9 +7,7 @@ import requests
 from helpers import append_url
 
 
-logging.basicConfig(format='[%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
-logging.getLogger('requests').setLevel('ERROR')
 
 
 class JenkinsJob:
@@ -22,6 +20,10 @@ class JenkinsJob:
         username: jenkins username
         token: jenkins api token
     """
+
+    logging.basicConfig(format='[%(levelname)s] %(message)s')
+    logger = logging.getLogger(__name__)
+    logging.getLogger('requests').setLevel('ERROR')
 
     def __init__(self, job_url, username, token):
         self.job_url = job_url
