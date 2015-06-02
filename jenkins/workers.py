@@ -29,7 +29,7 @@ import logging
 import requests
 import sys
 import urlparse
-from collections import Counter
+from collections import defaultdict
 from helpers import append_url
 
 
@@ -66,7 +66,8 @@ def get_computer_data(jenkins_url):
         api_url,
         params={
             'tree': (
-                "busyExecutors,totalExecutors,computer[displayName,offline]"
+                "busyExecutors,totalExecutors,"
+                "computer[displayName,offline,numExecutors]"
             )
         }
     )
@@ -81,10 +82,11 @@ def get_computer_data(jenkins_url):
     # displayName is made up of two parts -- the description as set in jenkins
     # ami config and the the instance id. We just want just the description
     # of workers that are online.
-    worker_counts = Counter([
-        c['displayName'].split("(i-")[0] for c in data['computer']
-        if not c['offline']
-    ])
+    worker_counts = defaultdict(int)
+    for c in data['computer']:
+        if not c['offline']:
+            name = c['displayName'].split("(i-")[0]
+            worker_counts[name] += int(c['numExecutors'])
 
     fields.extend([
         '{}_count={}'.format(type.strip(), count)
