@@ -13,7 +13,8 @@ sample_comp_data = {
     "totalExecutors": 38,
     'computer': [{
         'offline': False,
-        'displayName': 'worker-tag (i-abcd1234)'
+        'displayName': 'worker-tag (i-abcd1234)',
+        'numExecutors': '1',
     }],
 }
 
