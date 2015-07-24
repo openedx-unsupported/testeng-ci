@@ -41,8 +41,8 @@ class GhprbOutdatedBuildAborter:
 
         :Returns: A description (string)
         """
-        return ("[PR #{}] Build automatically aborted because"
-                " there is a newer build for the same PR. See build"
+        return ("[PR #{}] You have a newer build running for this PR."
+                " Go see its results instead! Build"
                 " #{}.".format(pr, current_build_id))
 
     def abort_duplicate_builds(self):
