@@ -3,6 +3,8 @@ import hudson.model.*
 
 def toolbox = extension."build-flow-toolbox"
 def sha1 = build.environment.get("GIT_COMMIT")
+def jenkinsUrl = build.environment.get("JENKINS_URL")
+def jobUrl = jenkinsUrl + build.url
 
 try{
   def statusJobParams = [
@@ -10,7 +12,7 @@ try{
     new StringParameterValue("GITHUB_REPO", "edx-platform"),
     new StringParameterValue("GIT_SHA", "${sha1}"),
     new StringParameterValue("BUILD_STATUS", "pending"),
-    new StringParameterValue("TARGET_URL", "https://build.testeng.edx.org/job/edx-platform-bok-choy-master/${build.number}"),
+    new StringParameterValue("TARGET_URL", jobUrl),
     new StringParameterValue("DESCRIPTION", "Pending"),
     new StringParameterValue("CONTEXT", "jenkins/bokchoy"),
   ]
