@@ -33,5 +33,6 @@ guard{
   )
 }rescue{
   FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-  artifactsDir.copyRecursiveTo(build.workspace)
+  FilePath copyToDir = new FilePath(build.workspace, "edx-platform")
+  artifactsDir.copyRecursiveTo(copyToDir)
 }
