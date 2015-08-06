@@ -52,6 +52,10 @@ try{
           bok_choy_6 = build('edx-platform-test-subset', sha1: sha1, SHARD: "6", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
           toolbox.slurpArtifacts(bok_choy_6)
         },
+        {
+          bok_choy_7 = build('edx-platform-test-subset', sha1: sha1, SHARD: "7", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          toolbox.slurpArtifacts(bok_choy_7)
+        },
     )
   }rescue{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
