@@ -1,4 +1,5 @@
 # Travis CI configuration file for running tests
+sudo: false
 language: python
 branches:
     only:
