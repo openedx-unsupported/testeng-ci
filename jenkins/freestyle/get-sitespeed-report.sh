@@ -12,6 +12,7 @@ set -e
 # AUTH_PASS (optional, required if USE_BASIC_AUTH)
 # NUMBER_OF_TIMES
 # CONNECTION
+# SITESPEED_BROWSER
 
 : ${TEST_URL:?"The TEST_URL environment variable must be set."}
 : ${EDX_USER:?"The EDX_USER environment variable must be set."}
@@ -19,6 +20,7 @@ set -e
 : ${USE_BASIC_AUTH:?"The USE_BASIC_AUTH environment variable must be set."}
 : ${NUMBER_OF_TIMES:?"The NUMBER_OF_TIMES environment variable must be set."}
 : ${CONNECTION:?"The CONNECTION environment variable must be set."}
+: ${SITESPEED_BROWSER:?"The SITESPEED_BROWSER environment variable must be set."}
 
 echo "Cleaning out old results if they exist"
 rm -rf sitespeed-result
@@ -35,7 +37,7 @@ python ${ARGS}
 
 # use firefox as a browser with browsertime/browsermobproxy to get waterfalls etc
 ARGS="-u ${TEST_URL} --requestHeaders cookie.json --junit --suppressDomainFolder --outputFolderName results --screenshot --storeJson"
-ARGS="${ARGS} -b firefox -d 0 -n ${NUMBER_OF_TIMES} --connection ${CONNECTION}"
+ARGS="${ARGS} -b ${SITESPEED_BROWSER} -d 0 -n ${NUMBER_OF_TIMES} --connection ${CONNECTION}"
 if [ -n "$USE_BASIC_AUTH" ] ;
     then ARGS="${ARGS} --basicAuth ${AUTH_USER}:${AUTH_PASS}"
 fi
