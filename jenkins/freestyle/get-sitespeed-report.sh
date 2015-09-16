@@ -28,7 +28,7 @@ mkdir sitespeed-result
 
 # create a file with the session credential cookie
 ARGS="edx-sitespeed/edx_sitespeed/edx_sitespeed.py -e ${EDX_USER} -p ${EDX_PASS} -u ${TEST_URL}"
-if [ $USE_BASIC_AUTH == "True" ] ;
+if [ $USE_BASIC_AUTH == "true" ] ;
     then ARGS="${ARGS} --auth_user ${AUTH_USER} --auth_pass ${AUTH_PASS}"
 fi
 echo "Recording the session cookie for a logged-in user"
@@ -38,7 +38,7 @@ python ${ARGS}
 # use firefox as a browser with browsertime/browsermobproxy to get waterfalls etc
 ARGS="-u ${TEST_URL} --requestHeaders cookie.json --junit --suppressDomainFolder --outputFolderName results --screenshot --storeJson"
 ARGS="${ARGS} -b ${SITESPEED_BROWSER} -d 0 -n ${NUMBER_OF_TIMES} --connection ${CONNECTION}"
-if [ $USE_BASIC_AUTH == "True" ] ;
+if [ $USE_BASIC_AUTH == "true" ] ;
     then ARGS="${ARGS} --basicAuth ${AUTH_USER}:${AUTH_PASS}"
 fi
 
