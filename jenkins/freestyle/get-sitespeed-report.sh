@@ -35,9 +35,10 @@ set -e
 : ${CONNECTION:?"The CONNECTION environment variable must be set."}
 : ${SITESPEED_BROWSER:?"The SITESPEED_BROWSER environment variable must be set."}
 
-if [ -z $TEST_URL_FILE ] ; then
+# Test for the existence of TEST_URL_FILE
+if [ ! -z ${TEST_URL_FILE+x} ] ; then
 
-    if [ "$TEST_URL_FILE" = "" ] ; then
+    if [ "$TEST_URL_FILE" == "" ] ; then
         echo "TEST_URL_FILE environment variable is set, but empty. Skipping related logic."
 
     else
@@ -58,11 +59,13 @@ if [ -z $TEST_URL_FILE ] ; then
     	# in order to log in and capture the session information.
     	read -r TEST_URL< $TMP_URL_FILE
     fi
+else
+    # Verify that the TEST_URL environment was set either directly or
+    # via the TEST_URL_FILE contents.
+    : ${TEST_URL:?"The TEST_URL or TEST_URL_FILE environment variable must be set."}
+
 fi
 
-# Verify that the TEST_URL environment was set either directly or
-# via the TEST_URL_FILE contents.
-: ${TEST_URL:?"The TEST_URL environment variable must be set."}
 
 if [ $SITESPEED_USE_BUDGET == "true" ] ; then
 	msg="The SITESPEED_BUDGET_FILE environment variable must be set to the json file containing the budget."
