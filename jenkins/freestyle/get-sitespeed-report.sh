@@ -48,7 +48,7 @@ if [ ! -z ${TEST_URL_FILE+x} ] ; then
     	# have a known name ("results") and thus the artifacts can be
     	# archived correctly on jenkins
     	TMP_URL_FILE="/tmp/multiple_urls"
-    	cp -rf $TEST_URL_FILE $TMP_URL_FILE
+    	cp -rf "$TEST_URL_FILE" "$TMP_URL_FILE"
 
     	if [ ! -f $TMP_URL_FILE ]; then
             echo "ERROR: Could not copy '$TEST_URL_FILE' to '$TMP_URL_FILE'."
