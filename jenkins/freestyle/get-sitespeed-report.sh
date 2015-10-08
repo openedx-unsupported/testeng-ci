@@ -19,7 +19,7 @@ set -e
 # TEST_URL - A single URL to test
 # or
 # GET_URLS_FROM_FILE - If this (string) value is (case sensitive) "true"
-# SITESPEED_URL_FILE - The name of the file containing URLs to test
+# TEST_URL_FILE - The name of the file containing URLs to test
 #
 # To (optionally) run using a budget, set the following variables:
 # SITESPEED_USE_BUDGET - (string) value is (case sensitive) "true"
@@ -35,34 +35,33 @@ set -e
 : ${CONNECTION:?"The CONNECTION environment variable must be set."}
 : ${SITESPEED_BROWSER:?"The SITESPEED_BROWSER environment variable must be set."}
 
-if [ $GET_URLS_FROM_FILE == "true" ] ; then
-	msg="The SITESPEED_URL_FILE environment variable must be set to the file containing the URLs to test."
-	: ${SITESPEED_URL_FILE:?$msg}
+if [ -z $TEST_URL_FILE ] ; then
 
-	if [ ! -f $SITESPEED_URL_FILE ]; then
-        echo "ERROR: Specified SITESPEED_URL_FILE '$SITESPEED_URL_FILE' does not exist."
-        exit 1
-	fi
+    if [ "$TEST_URL_FILE" = "" ] ; then
+        echo "TEST_URL_FILE environment variable is set, but empty. Skipping related logic."
 
-	# HACK: Copy the contents of the URL file to a file
-	# named "results" and use that so that the output folder will
-	# have a known name ("results") and thus the artifacts can be
-	# archived correctly on jenkins
-	TMP_URL_FILE="/tmp/multiple_urls"
-	cp -rf $SITESPEED_URL_FILE $TMP_URL_FILE
+    else
 
-	if [ ! -f $TMP_URL_FILE ]; then
-        echo "ERROR: Could not copy '$SITESPEED_URL_FILE' to '$TMP_URL_FILE'."
-        exit 1
-	fi
+    	# HACK: Copy the contents of the URL file to a file
+    	# named "multiple_urls" and use that so that the output folder will
+    	# have a known name ("results") and thus the artifacts can be
+    	# archived correctly on jenkins
+    	TMP_URL_FILE="/tmp/multiple_urls"
+    	cp -rf $TEST_URL_FILE $TMP_URL_FILE
 
-	# Use the URL from the first line of the URL file as the TEST_URL,
-	# in order to log in and capture the session information.
-	read -r TEST_URL< $TMP_URL_FILE
+    	if [ ! -f $TMP_URL_FILE ]; then
+            echo "ERROR: Could not copy '$TEST_URL_FILE' to '$TMP_URL_FILE'."
+            exit 1
+    	fi
+
+    	# Use the URL from the first line of the URL file as the TEST_URL,
+    	# in order to log in and capture the session information.
+    	read -r TEST_URL< $TMP_URL_FILE
+    fi
 fi
 
 # Verify that the TEST_URL environment was set either directly or
-# via the SITESPEED_URL_FILE contents.
+# via the TEST_URL_FILE contents.
 : ${TEST_URL:?"The TEST_URL environment variable must be set."}
 
 if [ $SITESPEED_USE_BUDGET == "true" ] ; then
@@ -89,11 +88,12 @@ echo "Using this command: python ${ARGS}"
 python ${ARGS}
 
 # Construct the command to run the test under sitespeed.io
-if [ $GET_URLS_FROM_FILE == "true" ] ; then
+if [ -f $TMP_URL_FILE ] ; then
     ARGS="-f ${TMP_URL_FILE}"
 else
     ARGS="-u ${TEST_URL}"
 fi
+
 ARGS="${ARGS} --requestHeaders cookie.json --junit --suppressDomainFolder"
 ARGS="${ARGS} --outputFolderName results --screenshot --storeJson"
 ARGS="${ARGS} -d 0 -n ${NUMBER_OF_TIMES} --connection ${CONNECTION}"
