@@ -127,7 +127,7 @@ fi
 
 # Just for the first page in the file
 doConstructArgs firstpage
-ARGS="-u ${TEST_URL}"
+ARGS="${ARGS} -u ${TEST_URL}"
 if [ $SITESPEED_USE_BUDGET == "true" ] ; then
     ARGS="${ARGS} --budget ${SITESPEED_BUDGET_FILE} --junit"
 fi
