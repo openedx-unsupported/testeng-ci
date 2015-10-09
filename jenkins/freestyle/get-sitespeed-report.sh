@@ -81,41 +81,67 @@ echo "Cleaning out old results if they exist"
 rm -rf sitespeed-result
 mkdir sitespeed-result
 
-# Use the url and credential information to log in and create a file with the session cookie data
-ARGS="edx-sitespeed/edx_sitespeed/edx_sitespeed.py -e ${EDX_USER} -p ${EDX_PASS} -u ${TEST_URL}"
-if [ $USE_BASIC_AUTH == "true" ] ; then
-    ARGS="${ARGS} --auth_user ${AUTH_USER} --auth_pass ${AUTH_PASS}"
-fi
-echo "Recording the session cookie for a logged-in user"
-echo "Using this command: python ${ARGS}"
-python ${ARGS}
 
-# Construct the command to run the test under sitespeed.io
-if [ -f $TMP_URL_FILE ] ; then
-    ARGS="-f ${TMP_URL_FILE}"
-else
-    ARGS="-u ${TEST_URL}"
-fi
+doConstructArgs() {
+    local RESULTS_FOLDER=$1
 
-ARGS="${ARGS} --requestHeaders cookie.json --junit --suppressDomainFolder"
-ARGS="${ARGS} --outputFolderName results --screenshot --storeJson"
-ARGS="${ARGS} -d 0 -n ${NUMBER_OF_TIMES} --connection ${CONNECTION}"
+    # Use the url and credential information to log in and create a file with the session cookie data
+    ARGS="edx-sitespeed/edx_sitespeed/edx_sitespeed.py -e ${EDX_USER} -p ${EDX_PASS} -u ${TEST_URL}"
+    if [ $USE_BASIC_AUTH == "true" ] ; then
+        ARGS="${ARGS} --auth_user ${AUTH_USER} --auth_pass ${AUTH_PASS}"
+    fi
+    echo "Recording the session cookie for a logged-in user"
+    echo "Using this command: python ${ARGS}"
+    python ${ARGS}
 
+    ARGS="${ARGS} --requestHeaders cookie.json --suppressDomainFolder"
+    ARGS="${ARGS} --outputFolderName ${RESULTS_FOLDER} --screenshot --storeJson"
+    ARGS="${ARGS} -d 0 -n ${NUMBER_OF_TIMES} --connection ${CONNECTION}"
+
+
+    # Only try to take the timings with an actual browser.
+    # Note that the -b option is what uses the NUMBER_OF_TIMES
+    # setting and it is also what does the HAR file capture.
+    if [ $SITESPEED_BROWSER != "headless" ] ; then
+        ARGS="${ARGS} -b ${SITESPEED_BROWSER}"
+    fi
+
+    if [ $USE_BASIC_AUTH == "true" ] ; then
+        ARGS="${ARGS} --basicAuth ${AUTH_USER}:${AUTH_PASS}"
+    fi
+
+}
+
+# Just for the first page in the file
+doConstructArgs firstpage
+ARGS="-u ${TEST_URL}"
 if [ $SITESPEED_USE_BUDGET == "true" ] ; then
-    ARGS="${ARGS} --budget ${SITESPEED_BUDGET_FILE}"
+    ARGS="${ARGS} --budget ${SITESPEED_BUDGET_FILE} --junit"
+fi
+doConstructCMD
+
+# With --junit, sitespeed.io outputs the junit results to console.
+# Redirect them to a file instead so that a Jenkins plugin can interpret the results.
+echo "Measuring client side performance with sitespeed. First page."
+echo "Using this command: ${CMD} 2> sitespeed-result-first/stderr.log 1> sitespeed-result-first/junit.xml"
+${CMD} 2> sitespeed-result-first/stderr.log 1> sitespeed-result-first/junit.xml
+
+
+
+# Now for all the pages. No junit
+if [ -f $TMP_URL_FILE ] ; then
+    doConstructArgs allpages
+    ARGS="-f ${TMP_URL_FILE}"
 fi
 
-# Only try to take the timings with an actual browser.
-# Note that the -b option is what uses the NUMBER_OF_TIMES
-# setting and it is also what does the HAR file capture.
-if [ $SITESPEED_BROWSER != "headless" ] ; then
-    ARGS="${ARGS} -b ${SITESPEED_BROWSER}"
-fi
+doConstructCMD
+echo "Measuring client side performance with sitespeed. All pages (reporting purposes only.)"
+echo "Using this command: ${CMD} 2> sitespeed-result-all/stderr.log 1> sitespeed-result-all/stdout.log"
+${CMD} 2> sitespeed-result-all/stderr.log 1> sitespeed-result-all/stdout.log
 
-if [ $USE_BASIC_AUTH == "true" ] ; then
-    ARGS="${ARGS} --basicAuth ${AUTH_USER}:${AUTH_PASS}"
-fi
 
+
+doConstructCMD() {
 # This is the command with all the arguments defined as necessary.
 CMD="sitespeed.io ${ARGS}"
 
@@ -125,11 +151,13 @@ if [ $SITESPEED_BROWSER != "headless" ] ; then
     CMD="xvfb-run $CMD"
 fi
 
+}
+
 # With --junit, sitespeed.io outputs the junit results to console.
 # Redirect them to a file instead so that a Jenkins plugin can interpret the results.
-echo "Measuring client side performance with sitespeed"
-echo "Using this command: ${CMD} > sitespeed-result/junit.xml"
-${CMD} > sitespeed-result/junit.xml
+# echo "Measuring client side performance with sitespeed"
+# echo "Using this command: ${CMD} > sitespeed-result/junit.xml"
+# ${CMD} 2> sitespeed-result/stderr.log 1> sitespeed-result/junit.xml
 
 # Cleanup
 rm -rf cookie.json
