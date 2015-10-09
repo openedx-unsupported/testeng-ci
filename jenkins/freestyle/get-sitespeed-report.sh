@@ -112,35 +112,6 @@ doConstructArgs() {
 
 }
 
-# Just for the first page in the file
-doConstructArgs firstpage
-ARGS="-u ${TEST_URL}"
-if [ $SITESPEED_USE_BUDGET == "true" ] ; then
-    ARGS="${ARGS} --budget ${SITESPEED_BUDGET_FILE} --junit"
-fi
-doConstructCMD
-
-# With --junit, sitespeed.io outputs the junit results to console.
-# Redirect them to a file instead so that a Jenkins plugin can interpret the results.
-echo "Measuring client side performance with sitespeed. First page."
-echo "Using this command: ${CMD} 2> sitespeed-result-first/stderr.log 1> sitespeed-result-first/junit.xml"
-${CMD} 2> sitespeed-result-first/stderr.log 1> sitespeed-result-first/junit.xml
-
-
-
-# Now for all the pages. No junit
-if [ -f $TMP_URL_FILE ] ; then
-    doConstructArgs allpages
-    ARGS="-f ${TMP_URL_FILE}"
-fi
-
-doConstructCMD
-echo "Measuring client side performance with sitespeed. All pages (reporting purposes only.)"
-echo "Using this command: ${CMD} 2> sitespeed-result-all/stderr.log 1> sitespeed-result-all/stdout.log"
-${CMD} 2> sitespeed-result-all/stderr.log 1> sitespeed-result-all/stdout.log
-
-
-
 doConstructCMD() {
 # This is the command with all the arguments defined as necessary.
 CMD="sitespeed.io ${ARGS}"
@@ -152,6 +123,37 @@ if [ $SITESPEED_BROWSER != "headless" ] ; then
 fi
 
 }
+
+
+# Just for the first page in the file
+doConstructArgs firstpage
+ARGS="-u ${TEST_URL}"
+if [ $SITESPEED_USE_BUDGET == "true" ] ; then
+    ARGS="${ARGS} --budget ${SITESPEED_BUDGET_FILE} --junit"
+fi
+doConstructCMD
+
+# With --junit, sitespeed.io outputs the junit results to console.
+# Redirect them to a file instead so that a Jenkins plugin can interpret the results.
+echo "Measuring client side performance with sitespeed. First page."
+echo "Using this command: ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-junit.xml"
+${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result-first/junit.xml
+
+
+
+# Now for all the pages. No junit
+if [ -f $TMP_URL_FILE ] ; then
+    doConstructArgs allpages
+    ARGS="-f ${TMP_URL_FILE}"
+    doConstructCMD
+    echo "Measuring client side performance with sitespeed. All pages (reporting purposes only.)"
+    echo "Using this command: ${CMD} 2> sitespeed-result/all-stderr.log 1> sitespeed-result/all-stdout.log"
+    ${CMD} 2> sitespeed-result-all/stderr.log 1> sitespeed-result-all/stdout.log
+
+fi
+
+
+
 
 # With --junit, sitespeed.io outputs the junit results to console.
 # Redirect them to a file instead so that a Jenkins plugin can interpret the results.
