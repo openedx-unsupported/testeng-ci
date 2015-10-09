@@ -81,10 +81,7 @@ echo "Cleaning out old results if they exist"
 rm -rf sitespeed-result
 mkdir sitespeed-result
 
-
-doConstructArgs() {
-    local RESULTS_FOLDER=$1
-
+doGetCookie() {
     # Use the url and credential information to log in and create a file with the session cookie data
     ARGS="edx-sitespeed/edx_sitespeed/edx_sitespeed.py -e ${EDX_USER} -p ${EDX_PASS} -u ${TEST_URL}"
     if [ $USE_BASIC_AUTH == "true" ] ; then
@@ -94,7 +91,14 @@ doConstructArgs() {
     echo "Using this command: python ${ARGS}"
     python ${ARGS}
 
-    ARGS="${ARGS} --requestHeaders cookie.json --suppressDomainFolder"
+}
+
+
+doConstructArgs() {
+    local RESULTS_FOLDER=$1
+
+
+    ARGS="--requestHeaders cookie.json --suppressDomainFolder"
     ARGS="${ARGS} --outputFolderName ${RESULTS_FOLDER} --screenshot --storeJson"
     ARGS="${ARGS} -d 0 -n ${NUMBER_OF_TIMES} --connection ${CONNECTION}"
 
@@ -124,6 +128,8 @@ fi
 
 }
 
+# Get cookie.json
+doGetCookie
 
 # Just for the first page in the file
 doConstructArgs firstpage
@@ -144,7 +150,7 @@ ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result-first/junit.xml
 # Now for all the pages. No junit
 if [ -f $TMP_URL_FILE ] ; then
     doConstructArgs allpages
-    ARGS="-f ${TMP_URL_FILE}"
+    ARGS="${ARGS} -f ${TMP_URL_FILE}"
     doConstructCMD
     echo "Measuring client side performance with sitespeed. All pages (reporting purposes only.)"
     echo "Using this command: ${CMD} 2> sitespeed-result/all-stderr.log 1> sitespeed-result/all-stdout.log"
