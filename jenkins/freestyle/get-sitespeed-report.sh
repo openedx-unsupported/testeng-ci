@@ -143,7 +143,7 @@ doConstructCMD
 # Redirect them to a file instead so that a Jenkins plugin can interpret the results.
 echo "Measuring client side performance with sitespeed. First page."
 echo "Using this command: ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-junit.xml"
-${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result-first/junit.xml
+${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-junit.xml
 
 
 
