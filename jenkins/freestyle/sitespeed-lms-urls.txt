@@ -1,0 +1,3 @@
+http://jzoldak.sandbox.edx.org/dashboard
+http://jzoldak.sandbox.edx.org/account/settings
+http://jzoldak.sandbox.edx.org/u/audit
