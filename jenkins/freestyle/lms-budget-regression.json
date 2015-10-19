@@ -1,0 +1,20 @@
+{
+  "rules": {
+	"default": 77,
+	"spof": -1,
+	"criticalpath": -1,
+	"cssnumreq": 83,
+	"jsnumreq": 39,
+	"requests": 50,
+	"ycompress": -1,
+	"yminify": -1,
+	"ycookiefree": -1,
+	"ycdn": -1,
+	"avoidscalingimages": 89,
+	"syncjsinhead": 19,
+	"avoidfont": 89,
+	"expiresmod": 66,
+	"longexpirehead": 69,
+	"thirdpartyversions": 89
+  }
+}
