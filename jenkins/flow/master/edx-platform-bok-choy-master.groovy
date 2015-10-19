@@ -6,6 +6,10 @@ def sha1 = build.environment.get("GIT_COMMIT")
 def jenkinsUrl = build.environment.get("JENKINS_URL")
 def jobUrl = jenkinsUrl + build.url
 
+def paramString (String shardNum) {
+  return 'sha1: sha1, SHARD: ${shardNum}, TEST_SUITE: "bok-choy", PARENT_BUILD: "master #", ENV_VARS: ENV_VARS'
+}
+
 try{
   def statusJobParams = [
     new StringParameterValue("GITHUB_ORG", "edx"),
@@ -29,31 +33,31 @@ try{
   guard{
     parallel(
         {
-          bok_choy_1 = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          bok_choy_1 = build('edx-platform-test-subset', paramString(1) + build.number)
           toolbox.slurpArtifacts(bok_choy_1)
         },
         {
-          bok_choy_2 = build('edx-platform-test-subset', sha1: sha1, SHARD: "2", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          bok_choy_2 = build('edx-platform-test-subset', paramString(2) + build.number)
           toolbox.slurpArtifacts(bok_choy_2)
         },
         {
-          bok_choy_3 = build('edx-platform-test-subset', sha1: sha1, SHARD: "3", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          bok_choy_3 = build('edx-platform-test-subset', paramString(3) + build.number)
           toolbox.slurpArtifacts(bok_choy_3)
         },
         {
-          bok_choy_4 = build('edx-platform-test-subset', sha1: sha1, SHARD: "4", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          bok_choy_4 = build('edx-platform-test-subset', paramString(4) + build.number)
           toolbox.slurpArtifacts(bok_choy_4)
         },
         {
-          bok_choy_5 = build('edx-platform-test-subset', sha1: sha1, SHARD: "5", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          bok_choy_5 = build('edx-platform-test-subset', paramString(5) + build.number)
           toolbox.slurpArtifacts(bok_choy_5)
         },
         {
-          bok_choy_6 = build('edx-platform-test-subset', sha1: sha1, SHARD: "6", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          bok_choy_6 = build('edx-platform-test-subset', paramString(6) + build.number)
           toolbox.slurpArtifacts(bok_choy_6)
         },
         {
-          bok_choy_7 = build('edx-platform-test-subset', sha1: sha1, SHARD: "7", TEST_SUITE: "bok-choy", PARENT_BUILD: "master #" + build.number)
+          bok_choy_7 = build('edx-platform-test-subset', paramString(7) + build.number)
           toolbox.slurpArtifacts(bok_choy_7)
         },
     )
