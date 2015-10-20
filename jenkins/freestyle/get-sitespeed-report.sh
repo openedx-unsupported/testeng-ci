@@ -136,7 +136,6 @@ doGetCookie
 
 # Do all the pages first. (Because the one page may generate failures and kill the build.)
 if [ -f $TMP_URL_FILE && ! -z $TMP_URL_FILE ] ; then
-    echo "DOING IT MAN!!!! ${TMP_URL_FILE}"
     doConstructArgs allpages
     ARGS="${ARGS} -f ${TMP_URL_FILE}"
     doConstructCMD
