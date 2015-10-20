@@ -7,7 +7,7 @@ def jenkinsUrl = build.environment.get("JENKINS_URL")
 def jobUrl = jenkinsUrl + build.url
 
 try{
-  def statusJobparams = [
+  def statusJobParams = [
     new StringParameterValue("GITHUB_ORG", "edx"),
     new StringParameterValue("GITHUB_REPO", "edx-platform"),
     new StringParameterValue("GIT_SHA", "${sha1}"),
@@ -21,7 +21,7 @@ try{
   statusJob.scheduleBuild2(
       0,
       new Cause.UpstreamCause(build),
-      new ParametersAction(statusJobparams)
+      new ParametersAction(statusJobParams)
   )
 
   println "Triggered github-build-status"
