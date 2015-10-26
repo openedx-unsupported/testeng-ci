@@ -135,14 +135,15 @@ fi
 doGetCookie
 
 # Do all the pages first. (Because the one page may generate failures and kill the build.)
-if [ -f $TMP_URL_FILE && ! -z $TMP_URL_FILE ] ; then
-    doConstructArgs allpages
-    ARGS="${ARGS} -f ${TMP_URL_FILE}"
-    doConstructCMD
-    echo "Measuring client side performance with sitespeed. All pages (reporting purposes only.)"
-    echo "Using this command: ${CMD} 2> sitespeed-result/all-stderr.log 1> sitespeed-result/all-stdout.log"
-    ${CMD} 2> sitespeed-result/all-stderr.log 1> sitespeed-result/all-stdout.log
-
+if [ -f $TMP_URL_FILE ] ; then
+    if [ ! -z $TMP_URL_FILE ] ; then
+        doConstructArgs allpages
+        ARGS="${ARGS} -f ${TMP_URL_FILE}"
+        doConstructCMD
+        echo "Measuring client side performance with sitespeed. All pages (reporting purposes only.)"
+        echo "Using this command: ${CMD} 2> sitespeed-result/all-stderr.log 1> sitespeed-result/all-stdout.log"
+        ${CMD} 2> sitespeed-result/all-stderr.log 1> sitespeed-result/all-stdout.log
+    fi
 fi
 
 
