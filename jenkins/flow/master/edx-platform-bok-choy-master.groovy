@@ -18,13 +18,17 @@ try{
   ]
 
   def statusJob = Hudson.instance.getJob('github-build-status')
-  statusJob.scheduleBuild2(
-      0,
-      new Cause.UpstreamCause(build),
-      new ParametersAction(statusJobParams)
-  )
 
-  println "Triggered github-build-status"
+  if (params["SKIP_GITHUB_STATUS"] == null | params["SKIP_GITHUB_STATUS"] != "true") {
+    statusJob.scheduleBuild2(
+        0,
+        new Cause.UpstreamCause(build),
+        new ParametersAction(statusJobParams)
+    )
+    println "Triggered github-build-status"
+  } else {
+    println "Skipping github-build-status because SKIP_GITHUB_STATUS has been set"
+  }
 } finally{
   guard{
     parallel(
