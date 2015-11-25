@@ -1,5 +1,6 @@
 -r jenkins/requirements.txt
 -r aws/requirements.txt
+-r release/tests/requirements.txt
 
 coverage==3.7.1
 ddt==0.8.0

@@ -2,13 +2,16 @@
 
 """ Provides Access to the GitHub API """
 
-from release import get_token
 import requests
 from requests.auth import AuthBase
 
+GITHUB_API_VERSION = "application/vnd.github.v3+json"
+
 
 class RequestFailed(Exception):
-    """ Exception indicating a network request failed """
+    """
+    Exception indicating a network request failed.
+    """
     def __init__(self, response):
         payload = {
             "url": response.url,
@@ -21,7 +24,7 @@ class RequestFailed(Exception):
 
 class TokenAuth(AuthBase):
     """
-    Authorization method for requests library supporting github OAuth tokens
+    Authorization method for requests library supporting github OAuth tokens.
     """
     def __init__(self, token):
         self.token = token
@@ -32,46 +35,144 @@ class TokenAuth(AuthBase):
 
 
 class GithubApi(object):
-    """ Manages requests to the GitHub api for a given org/repo """
+    """
+    Manages requests to the GitHub api for a given org/repo
+    """
 
-    def __init__(self, org, repo, token=None):
-        self.token = token or get_token.get_token()
+    def __init__(self, org, repo, token):
+        """
+        Creates a new API access object.
+
+        Arguments:
+            org (string): Github org to access
+            repo (string): Github repo to access
+
+        """
+        self.token = token
         self.org = org
         self.repo = repo
 
-    def _method(self, path, maker, success_code=200):
-        """ Creates a new network request and returns the result """
+    def _request(self, path, method, success_code=200, **kwargs):
+        """
+        Performs a network request, validating its success.
+
+        Arguments:
+            path (string): An api path. Does not need to include the the url
+                domain.
+            method (string): An HTTP method like `'GET'` or `'POST'`.
+            success_code (int): The expected response code. Will raise
+                `RequestFailed` if the response doesn't match this code.
+                Defaults to 200.
+            kwargs (dict): Additional arguments are forwarded on to the request
+                constructor
+
+        Returns:
+            json: The output of the endpoint as a json object.
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
         url = ("https://api.github.com/%s" % path).format(
             repo=self.repo, org=self.org
         )
         auth = TokenAuth(self.token)
-        response = maker(url, auth)
+        headers = {"Accept": GITHUB_API_VERSION}
+        response = requests.request(
+            method, url, auth=auth, headers=headers, **kwargs
+        )
         if response.status_code != success_code:
             raise RequestFailed(response)
         return response.json()
 
     def _get(self, path):
-        """ Creates a new get request and returns the result """
-        maker = lambda url, auth: requests.get(url, auth=auth)
-        return self._method(path, maker)
+        """
+        Performs a network `GET` request, validating its success.
+
+        Arguments:
+            path (string): An api path. Does not need to include the the url
+                domain.
+
+        Returns:
+            json: The output of the endpoint as a json object.
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
+        return self._request(path, 'GET')
 
     def _post(self, path, args):
-        """ Creates a new post request and returns the result """
-        maker = lambda url, auth: requests.post(url, json=args, auth=auth)
-        return self._method(path, maker, success_code=201)
+        """
+        Performs a network `POST` request, validating its success.
+
+        Arguments:
+            path (string): An api path. Does not need to include the the url
+                domain.
+            args (json): Arguments to the endpoint
+
+        Returns:
+            json: The output of the endpoint as a json object.
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
+        return self._request(path, 'POST', success_code=201, json=args)
+
+    def user(self):
+        """
+        Calls GitHub's '/user' endpoint.
+            See
+            https://developer.github.com/v3/users/#get-the-authenticated-user
+
+        Returns:
+            dict: Information about the current user.
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
+        return self._get("user")
 
     def commit_statuses(self, commit_sha):
-        """ Returns all the known statuses for a given commit """
+        """
+        Calls GitHub's '<commit>/statuses' endpoint for a given commit. See
+        https://developer.github.com/v3/repos/statuses/#list-statuses-for-a-specific-ref
+
+        Returns:
+            list: A list of commit statuses
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
         path = "repos/{org}/{repo}/commits/%s/statuses" % commit_sha
         return self._get(path)
 
     def commits(self):
-        """ Returns the top commits for a repo """
+        """
+        Calls GitHub's 'commits' endpoint for master.
+        See
+        https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository
+
+        Returns:
+            A list of the most recent commits for the master branch.
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
         path = "repos/{org}/{repo}/commits"
         return self._get(path)
 
     def create_branch(self, branch_name, sha):
-        """ Creates a new branch based off an existing sha """
+        """
+        Calls GitHub's create ref (branch) API
+
+        Arguments:
+            branch_name (string): The name of the branch to create
+            sha (string): The commit to base the branch off of
+
+        Returns:
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
         path = "repos/{org}/{repo}/git/refs"
         payload = {
             "ref": "refs/heads/%s" % branch_name,
@@ -80,11 +181,12 @@ class GithubApi(object):
         return self._post(path, payload)
 
     def create_pull_request(
-            self,
-            branch_name,
-            base="release",
-            title="",
-            body=""):
+        self,
+        branch_name,
+        base="release",
+        title="",
+        body=""
+    ):
         """ Creates a new pull request from a branch """
         path = "repos/{org}/{repo}/pulls"
         payload = {

@@ -2,22 +2,14 @@
 Tests for testeng-ci/release/github_api
 """
 import ddt
-from mock import patch
 import json
 import re
 import responses
 from responses import GET, POST  # pylint: disable=no-name-in-module
 from unittest import TestCase
 
+from release.tests.aborted import Aborted
 from release.github_api import RequestFailed, GithubApi
-
-
-class RequestAborted(Exception):
-    """
-    Exception used to escape from request handling when verifying request
-    payload
-    """
-    pass
 
 
 class EndpointInfo(object):
@@ -25,12 +17,12 @@ class EndpointInfo(object):
     """ Encapsulates the info we need to test an end point """
 
     def __init__(
-            self,
-            expected_url,
-            request_maker,
-            success=200,
-            method=GET,
-            request_body=None
+        self,
+        expected_url,
+        request_maker,
+        success=200,
+        method=GET,
+        request_body=None
     ):  # pylint: disable=too-many-arguments
         self.expected_url = expected_url
         self.request_maker = request_maker
@@ -41,7 +33,11 @@ class EndpointInfo(object):
 ENDPOINTS = [
     EndpointInfo(
         "https://api.github.com/repos/test-org/test-repo/commits",
-        GithubApi.commits
+        lambda api: api.commits()
+    ),
+    EndpointInfo(
+        "https://api.github.com/user",
+        lambda api: api.user()
     ),
     EndpointInfo(
         "https://api.github.com/repos/test-org/test-repo/commits" +
@@ -58,7 +54,8 @@ ENDPOINTS = [
     EndpointInfo(
         "https://api.github.com/repos/test-org/test-repo/pulls",
         lambda api: api.create_pull_request(
-            'branch_name', 'base', title='some request', body='more text'),
+            'branch_name', 'base', title='some request', body='more text'
+        ),
         success=201,
         method=POST,
         request_body={
@@ -93,12 +90,6 @@ class GitHubApiTestCase(TestCase):
     def test_token_argument(self):
         """ Tests that the token argument is propagated. """
         self.assertEqual(self.api.token, "abc123")
-
-    @patch('release.get_token.get_token', return_value='def456')
-    def test_token_defeault(self, _):
-        "Tests that the token argument is loaded if not passed in "
-        api = GithubApi("test-org", "test-repo")
-        self.assertEqual(api.token, "def456")
 
     def verify_invalid_request(self, endpoint, verifier):
         """
@@ -139,7 +130,7 @@ class GitHubApiTestCase(TestCase):
             if endpoint.request_body:
                 body = json.loads(request.body)
                 self.assertEqual(body, endpoint.request_body)
-            raise RequestAborted(request)
+            raise Aborted(request)
 
         with responses.RequestsMock() as rsps:
             rsps.add_callback(
@@ -150,7 +141,7 @@ class GitHubApiTestCase(TestCase):
             )
             try:
                 endpoint.request_maker(self.api)
-            except RequestAborted:
+            except Aborted:
                 # Verifier escapes via exception
                 pass
 
