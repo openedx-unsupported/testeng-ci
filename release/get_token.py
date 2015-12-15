@@ -7,10 +7,14 @@ and saves it to disk.
 """
 from __future__ import print_function
 
+import logging
 import os
 import sys
 
 from release.github_api import GithubApi, RequestFailed
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 SAVED_TOKEN_PATH = os.path.expanduser("~/.edx-release")
 
@@ -33,7 +37,7 @@ def _fetch_github_token():
         string: The user entered token
 
     """
-    print(
+    logger.info(
         """
         You don't have a saved GitHub token.
         You can make one at https://github.com/settings/tokens/new
@@ -58,7 +62,7 @@ def _load_token():
     # first, check the environment
     token = os.getenv(EDX_RELEASE_GITHUB_TOKEN)
     if token:
-        print("Found token in environment")
+        logger.info("Found token in environment")
         return token
     # then, check if we've saved one to a dot file
     try:
@@ -67,7 +71,7 @@ def _load_token():
         if not token:
             raise EmptyToken()
 
-        print("Read saved token")
+        logger.info("Read saved token")
         return token
     except (IOError, EmptyToken):
         # No or invalid dot file. Try next strategy
@@ -87,9 +91,9 @@ def validate_token(token):
     try:
         api = GithubApi(None, None, token=token)
         user = api.user()
-        print("Authenticated {user}".format(user=user['login']))
+        logger.info("Authenticated {user}".format(user=user['login']))
     except RequestFailed as exception:
-        print(
+        logger.error(
             "Couldn't authenticated on Github. Error: {error}".format(
                 error=exception
             )

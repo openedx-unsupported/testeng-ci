@@ -12,10 +12,14 @@ the most recent commit to master that passed all the tests
 from __future__ import print_function
 
 import argparse
+import logging
+import sys
 
 from release.get_token import get_token
 from release.github_api import GithubApi, RequestFailed
 from release import utils
+
+logger = logging.getLogger(__name__)
 
 
 def _build_parser():
@@ -62,38 +66,53 @@ def _build_parser():
 
     return result
 
-parser = _build_parser()
-args = parser.parse_args()
 
-token = get_token()
-github_api = GithubApi(args.org, args.repo, token)
+def create_candidate_main(raw_args):
+    parser = _build_parser()
+    args = parser.parse_args(raw_args)
 
-print("Fetching commits...")
-try:
-    commit = utils.most_recent_good_commit(github_api)
-    commit_hash = commit['sha']
-    commit_message = commit['commit']['message']
-    message = utils.extract_message_summary(commit_message)
-except utils.NoValidCommitsError:
-    print("Couldn't find a recent commit without test failures. Aborting")
+    logger.info("Getting GitHub token...")
+    token = get_token()
+    github_api = GithubApi(args.org, args.repo, token)
 
-branch_name = utils.rc_branch_name_for_date(args.release_date.date())
+    logger.info("Fetching commits...")
+    try:
+        commit = utils.most_recent_good_commit(github_api)
+        commit_hash = commit['sha']
+        commit_message = commit['commit']['message']
+        message = utils.extract_message_summary(commit_message)
+    except utils.NoValidCommitsError:
+        logger.error(
+            "Couldn't find a recent commit without test failures. Aborting"
+        )
 
-print(
-    "Branching {rc} off {sha}. ({msg})".format(
-        rc=branch_name, sha=commit_hash, msg=message
+    branch_name = utils.rc_branch_name_for_date(args.release_date.date())
+
+    logger.info(
+        "Branching {rc} off {sha}. ({msg})".format(
+            rc=branch_name, sha=commit_hash, msg=message
+        )
     )
-)
-try:
-    github_api.create_branch(branch_name, commit_hash)
-except RequestFailed:
-    print("Unable to create branch. Aborting")
-    raise
+    try:
+        github_api.create_branch(branch_name, commit_hash)
+    except RequestFailed:
+        logger.error("Unable to create branch. Aborting")
+        raise
 
-print("Creating Pull Request for {rc} into release".format(rc=branch_name))
-try:
-    request_title = "Release Candidate {rc}".format(rc=branch_name)
-    github_api.create_pull_request(branch_name, title=request_title)
-except RequestFailed:
-    print("Unable to create branch. Aborting")
-    raise
+    logger.info(
+        "Creating Pull Request for {rc} into release".format(rc=branch_name)
+    )
+    try:
+        request_title = "Release Candidate {rc}".format(rc=branch_name)
+        github_api.create_pull_request(branch_name, title=request_title)
+    except RequestFailed:
+        logger.error("Unable to create branch. Aborting")
+        raise
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        format='%(asctime)s [%(levelname)s] %(message)s',
+        stream=sys.stdout
+    )
+    logger.setLevel(logging.INFO)
+    create_candidate_main(sys.argv[1:])
