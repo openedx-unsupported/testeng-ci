@@ -39,9 +39,9 @@ set -e
 # If TEST_URL_FILE is null or not set, then the parameter substitution
 # would result in a zero-length var.
 # See additional info here: https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html
-if [ ! -z ${TEST_URL_FILE+x} ] ; then
+if [[ ! -z ${TEST_URL_FILE+x} ]] ; then
 
-    if [ "$TEST_URL_FILE" == "" ] ; then
+    if [[ "$TEST_URL_FILE" == "" ]] ; then
         echo "TEST_URL_FILE environment variable is set, but empty. Skipping related logic."
 
     else
@@ -53,7 +53,7 @@ if [ ! -z ${TEST_URL_FILE+x} ] ; then
         TMP_URL_FILE="/tmp/multiple_urls"
         cp -rf "$TEST_URL_FILE" "$TMP_URL_FILE"
 
-        if [ ! -f $TMP_URL_FILE ]; then
+        if [[ ! -f $TMP_URL_FILE ]]; then
             echo "ERROR: Could not copy '$TEST_URL_FILE' to '$TMP_URL_FILE'."
             exit 1
         fi
@@ -70,11 +70,11 @@ else
 fi
 
 
-if [ $SITESPEED_USE_BUDGET == "true" ] ; then
+if [[ $SITESPEED_USE_BUDGET == "true" ]] ; then
     msg="The SITESPEED_BUDGET_FILE environment variable must be set to the json file containing the budget."
     : ${SITESPEED_BUDGET_FILE:?$msg}
 
-    if [ ! -f $SITESPEED_BUDGET_FILE ]; then
+    if [[ ! -f $SITESPEED_BUDGET_FILE ]]; then
         echo "ERROR: Specified SITESPEED_BUDGET_FILE '$SITESPEED_BUDGET_FILE' does not exist."
         exit 1
     fi
@@ -87,7 +87,7 @@ mkdir sitespeed-result
 doGetCookie() {
     # Use the url and credential information to log in and create a file with the session cookie data
     ARGS="edx-sitespeed/edx_sitespeed/edx_sitespeed.py -e ${EDX_USER} -p ${EDX_PASS} -u ${TEST_URL}"
-    if [ $USE_BASIC_AUTH == "true" ] ; then
+    if [[ $USE_BASIC_AUTH == "true" ]] ; then
         ARGS="${ARGS} --auth_user ${AUTH_USER} --auth_pass ${AUTH_PASS}"
     fi
     echo "Recording the session cookie for a logged-in user"
@@ -109,11 +109,11 @@ doConstructArgs() {
     # Only try to take the timings with an actual browser.
     # Note that the -b option is what uses the NUMBER_OF_TIMES
     # setting and it is also what does the HAR file capture.
-    if [ $SITESPEED_BROWSER != "headless" ] ; then
+    if [[ $SITESPEED_BROWSER != "headless" ]] ; then
         ARGS="${ARGS} -b ${SITESPEED_BROWSER}"
     fi
 
-    if [ $USE_BASIC_AUTH == "true" ] ; then
+    if [[ $USE_BASIC_AUTH == "true" ]] ; then
         ARGS="${ARGS} --basicAuth ${AUTH_USER}:${AUTH_PASS}"
     fi
 
@@ -125,7 +125,7 @@ CMD="sitespeed.io ${ARGS}"
 
 # If we specify a browser other than "headless" (e.g. firefox)
 # then we need to use xvfb to run the browser headlessly
-if [ $SITESPEED_BROWSER != "headless" ] ; then
+if [[ $SITESPEED_BROWSER != "headless" ]] ; then
     CMD="xvfb-run $CMD"
 fi
 
@@ -135,8 +135,8 @@ fi
 doGetCookie
 
 # Do all the pages first. (Because the one page may generate failures and kill the build.)
-if [ -f $TMP_URL_FILE ] ; then
-    if [ ! -z $TMP_URL_FILE ] ; then
+if [[ -f $TMP_URL_FILE ]] ; then
+    if [[ ! -z $TMP_URL_FILE ]] ; then
         doConstructArgs allpages
         ARGS="${ARGS} -f ${TMP_URL_FILE}"
         doConstructCMD
@@ -150,7 +150,7 @@ fi
 # Just for the first page in the file
 doConstructArgs firstpage
 ARGS="${ARGS} -u ${TEST_URL}"
-if [ $SITESPEED_USE_BUDGET == "true" ] ; then
+if [[ $SITESPEED_USE_BUDGET == "true" ]] ; then
     ARGS="${ARGS} --budget ${SITESPEED_BUDGET_FILE} --junit"
 fi
 doConstructCMD
