@@ -134,7 +134,7 @@ class GithubApi(object):
     def commit_statuses(self, commit_sha):
         """
         Calls GitHub's '<commit>/statuses' endpoint for a given commit. See
-        https://developer.github.com/v3/repos/statuses/#list-statuses-for-a-specific-ref
+        https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
 
         Returns:
             list: A list of commit statuses
@@ -142,7 +142,7 @@ class GithubApi(object):
         Raises:
             RequestFailed: If the response fails validation.
         """
-        path = "repos/{org}/{repo}/commits/%s/statuses" % commit_sha
+        path = "repos/{org}/{repo}/commits/%s/status" % commit_sha
         return self._get(path)
 
     def commits(self):

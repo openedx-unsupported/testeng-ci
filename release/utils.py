@@ -55,12 +55,19 @@ def most_recent_good_commit(github_api):
         Ensures there is at least one status update so that
         commits whose tests haven't started yet are not valid.
         """
-        statuses = github_api.commit_statuses(commit_sha)
+        commit_status = github_api.commit_statuses(commit_sha)
+        try:
+            statuses = commit_status['statuses']
 
-        # Determine if all statuses are success
-        passed_tests = all(status['state'] == 'success' for status in statuses)
+            # Determine if all statuses are success
+            passed_tests = all(
+                status['state'] == 'success' for status in statuses
+            )
 
-        return len(statuses) == NUMBER_OF_TEST_SUITES and passed_tests
+            return len(statuses) == NUMBER_OF_TEST_SUITES and passed_tests
+        # If JSON can't be parsed, we assume it is not a viable commit
+        except KeyError:
+            return False
 
     commits = github_api.commits()
 

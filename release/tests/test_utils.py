@@ -79,14 +79,20 @@ class ReleaseUtilsTestCase(TestCase):
 
         commit_statuses_mock = Mock()
         commit_statuses_mock.side_effect = [
-            [
-                {'state': 'failed'},
-                {'state': 'failed'},
-            ],
-            [
-                {'state': 'failed'},
-                {'state': 'failed'},
-            ]
+            {
+                'statuses':
+                    [
+                        {'state': 'failed'},
+                        {'state': 'failed'},
+                    ]
+            },
+            {
+                'statuses':
+                    [
+                        {'state': 'failed'},
+                        {'state': 'failed'},
+                    ]
+            }
         ]
 
         api = Mock(GithubApi)
@@ -105,15 +111,21 @@ class ReleaseUtilsTestCase(TestCase):
 
         commit_statuses_mock = Mock()
         commit_statuses_mock.side_effect = [
-            [
-                {'state': 'failed'},
-                {'state': 'failed'},
-            ],
-            [],
-            [
-                {'state': 'success'},
-                {'state': 'success'},
-            ]
+            {
+                'statuses':
+                    [
+                        {'state': 'failed'},
+                        {'state': 'failed'},
+                    ]
+            },
+            {},
+            {
+                    'statuses':
+                    [
+                        {'state': 'success', 'context': 'contextA'},
+                        {'state': 'success', 'context': 'contextC'},
+                    ]
+                }
         ]
 
         api = Mock(GithubApi)
@@ -124,3 +136,38 @@ class ReleaseUtilsTestCase(TestCase):
         utils.NUMBER_OF_TEST_SUITES = 2
         commit = utils.most_recent_good_commit(api)
         self.assertEquals(commit['sha'], 'c')
+
+    def test_good_commits_but_not_enough(self):
+        """
+        Tests that we properly return the last valid commit
+        """
+        commits_mock = Mock()
+        commits_mock.return_value = [{'sha': 'a'}, {'sha': 'b'}, {'sha': 'c'}]
+
+        commit_statuses_mock = Mock()
+        commit_statuses_mock.side_effect = [
+            {
+                'statuses':
+                    [
+                        {'state': 'failed'},
+                        {'state': 'failed'},
+                    ]
+            },
+            {},
+            {
+                'statuses':
+                    [
+                        {'state': 'success'},
+                        {'state': 'failed'},
+                    ]
+            }
+        ]
+
+        api = Mock(GithubApi)
+        api.commits = commits_mock
+        api.commit_statuses = commit_statuses_mock
+
+        # patch the number of successful test suites that need to pass
+        utils.NUMBER_OF_TEST_SUITES = 2
+        with self.assertRaises(utils.NoValidCommitsError):
+            utils.most_recent_good_commit(api)
