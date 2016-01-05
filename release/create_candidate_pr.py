@@ -49,7 +49,6 @@ def _build_parser():
     )
     result.add_argument(
         '--org',
-        nargs=1,
         default='edx',
         help="""
         Specify a github organization to work under. Default is 'edx'.
@@ -57,10 +56,19 @@ def _build_parser():
     )
     result.add_argument(
         '--repo',
-        nargs=1,
         default='edx-platform',
         help="""
         Specify a github repository to work with. Default is 'edx-platform'.
+        """
+    )
+
+    result.add_argument(
+        '--find-commit',
+        action='store_true',
+        default=False,
+        help="""
+        Do not create a branch or a pull request. Only return the commit
+        that would be used for the release candidate.
         """
     )
 
@@ -81,6 +89,14 @@ def create_candidate_main(raw_args):
         commit_hash = commit['sha']
         commit_message = commit['commit']['message']
         message = utils.extract_message_summary(commit_message)
+        if args.find_commit:
+            logger.info(
+                "\n\thash: {commit_hash}\n\tcommit message: {message}".format(
+                    commit_hash=commit_hash,
+                    message=message
+                    )
+                )
+            return
     except utils.NoValidCommitsError:
         logger.error(
             "Couldn't find a recent commit without test failures. Aborting"

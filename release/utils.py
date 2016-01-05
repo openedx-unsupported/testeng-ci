@@ -7,9 +7,6 @@ import string
 _TUESDAY = 1
 _NORMAL_RELEASE_WEEKDAY = _TUESDAY
 
-# Number of test suites we run on a PR
-NUMBER_OF_TEST_SUITES = 6
-
 
 class NoValidCommitsError(Exception):
     """
@@ -55,12 +52,10 @@ def most_recent_good_commit(github_api):
         Ensures there is at least one status update so that
         commits whose tests haven't started yet are not valid.
         """
-        statuses = github_api.commit_statuses(commit_sha)
+        commit_status = github_api.commit_statuses(commit_sha)
 
-        # Determine if all statuses are success
-        passed_tests = all(status['state'] == 'success' for status in statuses)
-
-        return len(statuses) == NUMBER_OF_TEST_SUITES and passed_tests
+        # Determine if the commit has passed all checks
+        return commit_status.get('state') == 'success'
 
     commits = github_api.commits()
 

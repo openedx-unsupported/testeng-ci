@@ -70,23 +70,38 @@ class ReleaseUtilsTestCase(TestCase):
         next_week = date + timedelta(weeks=1)
         self.assertTrue(date < next_week)
 
-    def test_no_good_commits(self):
+    def test_no_parseable_commit_data(self):
         """
-        Tests that if there are no commits that passed checks then we abort
+        Tests that if the JSON data we get back from Github is not parseable,
+        then we abort
         """
         commits_mock = Mock()
         commits_mock.return_value = [{'sha': 'a'}, {'sha': 'b'}]
 
         commit_statuses_mock = Mock()
         commit_statuses_mock.side_effect = [
-            [
-                {'state': 'failed'},
-                {'state': 'failed'},
-            ],
-            [
-                {'state': 'failed'},
-                {'state': 'failed'},
-            ]
+            {},
+            {'foo': 'bar'},
+        ]
+
+        api = Mock(GithubApi)
+        api.commits = commits_mock
+        api.commit_statuses = commit_statuses_mock
+
+        with self.assertRaises(utils.NoValidCommitsError):
+            utils.most_recent_good_commit(api)
+
+    def test_no_good_commits(self):
+        """
+        Tests that when there are no commits that passed checks, we abort
+        """
+        commits_mock = Mock()
+        commits_mock.return_value = [{'sha': 'a'}, {'sha': 'b'}]
+
+        commit_statuses_mock = Mock()
+        commit_statuses_mock.side_effect = [
+            {'state': 'failure'},
+            {'state': 'pending'},
         ]
 
         api = Mock(GithubApi)
@@ -105,22 +120,14 @@ class ReleaseUtilsTestCase(TestCase):
 
         commit_statuses_mock = Mock()
         commit_statuses_mock.side_effect = [
-            [
-                {'state': 'failed'},
-                {'state': 'failed'},
-            ],
-            [],
-            [
-                {'state': 'success'},
-                {'state': 'success'},
-            ]
+            {'state': 'failure'},
+            {},
+            {'state': 'success'},
         ]
 
         api = Mock(GithubApi)
         api.commits = commits_mock
         api.commit_statuses = commit_statuses_mock
 
-        # patch the number of successful test suites that need to pass
-        utils.NUMBER_OF_TEST_SUITES = 2
         commit = utils.most_recent_good_commit(api)
         self.assertEquals(commit['sha'], 'c')

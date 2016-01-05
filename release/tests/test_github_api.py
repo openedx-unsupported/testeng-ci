@@ -41,7 +41,7 @@ ENDPOINTS = [
     ),
     EndpointInfo(
         "https://api.github.com/repos/test-org/test-repo/commits" +
-        "/sample_hash/statuses",
+        "/sample_hash/status",
         lambda api: api.commit_statuses('sample_hash')
     ),
     EndpointInfo(
