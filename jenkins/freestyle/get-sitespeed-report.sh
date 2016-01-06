@@ -155,12 +155,23 @@ if [[ $SITESPEED_USE_BUDGET == "true" ]] ; then
 fi
 doConstructCMD
 
-# With --junit, sitespeed.io outputs the junit results to console.
-# Redirect them to a file instead so that a Jenkins plugin can interpret the results.
 echo "Measuring client side performance with sitespeed. First page."
-echo "Using this command: ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-junit.xml"
-${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-junit.xml
-
+if [[ ${CMD} =~ " --junit" ]] ; then
+    # With --junit, sitespeed.io outputs the junit results to console.
+    # Redirect them to a file instead so that a Jenkins plugin can interpret the results.
+    echo "Using this command: ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-junit.xml"
+    ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-junit.xml
+else
+    echo "Using this command: ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-stdout.log"
+    ${CMD} 2> sitespeed-result/first-stderr.log 1> sitespeed-result/first-stdout.log
+    # Write a placeholder result to the JUnit test result report so that Jenkins does not fail the build.
+    cat > sitespeed-result/first-junit.xml <<END
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="sitespeed" tests="1" errors="0" failures="0" skip="0">
+<testcase classname="sitespeed" name="placeholder" time="0.001"></testcase>
+</testsuite>
+END
+fi
 
 # Cleanup
 rm -rf cookie.json
