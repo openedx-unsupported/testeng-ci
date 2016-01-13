@@ -13,3 +13,4 @@ script:
   - nosetests jenkins -v --with-coverage --cover-package=jenkins
   - nosetests aws -v --with-coverage --cover-package=aws
   - nosetests release -v --with-coverage --cover-package=release
+  - nosetests mobile_app -v --with-coverage --cover-package=mobile_app
