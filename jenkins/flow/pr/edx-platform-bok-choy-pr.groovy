@@ -34,6 +34,14 @@ guard{
       bok_choy_7 = build('edx-platform-test-subset', sha1: sha1, SHARD: "7", TEST_SUITE: "bok-choy", PARENT_BUILD: "PR Build #" + build.number)
       toolbox.slurpArtifacts(bok_choy_7)
     },
+    {
+      bok_choy_8 = build('edx-platform-test-subset', sha1: sha1, SHARD: "8", TEST_SUITE: "bok-choy", PARENT_BUILD: "PR Build #" + build.number)
+      toolbox.slurpArtifacts(bok_choy_8)
+    },
+    {
+      bok_choy_9 = build('edx-platform-test-subset', sha1: sha1, SHARD: "9", TEST_SUITE: "bok-choy", PARENT_BUILD: "PR Build #" + build.number)
+      toolbox.slurpArtifacts(bok_choy_9)
+    },
   )
 }rescue{
   FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
