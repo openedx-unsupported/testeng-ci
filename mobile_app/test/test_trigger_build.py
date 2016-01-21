@@ -7,11 +7,12 @@ import json
 from mock import Mock, patch
 import os
 import shutil
-import tempfile
 from unittest import TestCase
 
 from mobile_app import trigger_build
+from mobile_app import path_constants
 from mobile_app import exceptions
+from mobile_app.test import utils
 
 TEST_BRANCH = "test-branch"
 
@@ -30,8 +31,11 @@ class TriggerBuildTestCase(TestCase):
     """
 
     def setUp(self):
-        self.repo_path = _make_temp_repo()
+        self.repo_path = utils.make_test_repo()
         self.addCleanup(self._clear_repo)
+
+        repo = git.Repo(self.repo_path)
+        repo.create_remote('origin', "https://example.com")
 
     def _clear_repo(self):
         """
@@ -80,7 +84,7 @@ class TriggerBuildTestCase(TestCase):
 
         config_path = os.path.join(
             self.repo_path,
-            trigger_build.CONFIG_FILE
+            path_constants.CONFIG_FILE
         )
         config = json.load(file(config_path))
 
@@ -135,22 +139,3 @@ def _dummy_environ():
     for key in trigger_build.EXPECTED_ENVIRONMENT_VARIABLES:
         result[key] = "test-value"
     return result
-
-
-def _make_temp_repo():
-    """
-    Creates a temporary repository for testing
-    """
-
-    repo_path = tempfile.mkdtemp(prefix="test-repo")
-    repo = git.Repo.init(repo_path)
-    dummy_file_path = os.path.join(repo_path, "README")
-
-    # Add a stub file. Git works funny with empty repos
-    open(dummy_file_path, 'wb').close()
-    repo.index.add([dummy_file_path])
-    repo.index.commit("initial commit")
-
-    repo.create_remote('origin', "https://example.com")
-
-    return repo_path

@@ -19,8 +19,8 @@ separate build machine.
 *Usage*
 
 * Create your virtual environment
-* Export the necessary environment variables. There's a list inside the script.
 * pip install -r mobile_app/requirements.txt
+* Export the necessary environment variables. There's a list inside the script.
 * Call script as a python module, e.g.
 
 	`python -m mobile_app.trigger_build --branch-name UniqueBranchName --trigger-repo-path ../my-repo`
@@ -29,3 +29,19 @@ separate build machine.
 The expectation is that the branch name will be some unique identifier like the
 jenkins job number and the date.
 	
+
+checkout_build_repos
+--------------------
+
+Checks out out a code and config repository and sets them up for building, by creating a properties file to point the code at the config.
+
+*Usage*
+* Create your virtual environment
+* pip install -r mobile_app/requirements.txt
+* Create a file called ``CONFIGURATION``. See ``trigger_build`` for more information on the format.
+* Call script as a python module,
+    e.g.
+
+    `python -m mobile_app.checkout_build_repos`
+
+This will result in two new folders, "code.git" and "config.git" cloned from the code and config URLs in CONFIGURATION. They will be checked out to the revision specified in CONFIGURATION.
