@@ -33,7 +33,7 @@ jenkins job number and the date.
 checkout_build_repos
 --------------------
 
-Checks out out a code and config repository and sets them up for building, by creating a properties file to point the code at the config.
+Checks out a code and config repository and sets them up for building, by creating a properties file to point the code at the config.
 
 *Usage*
 * Create your virtual environment
