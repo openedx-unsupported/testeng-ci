@@ -14,9 +14,12 @@ from mobile_app.exceptions import (
     MissingEnvironmentVariable
 )
 
+from mobile_app.path_constants import (
+    CONFIG_FILE
+)
+
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-CONFIG_FILE = "CONFIGURATION"
 EXPECTED_ENVIRONMENT_VARIABLES = [
     "CONFIG_REPO",
     "CONFIG_PATH",
