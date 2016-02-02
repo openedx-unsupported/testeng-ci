@@ -1,4 +1,3 @@
--r jenkins/requirements.txt
 -r aws/requirements.txt
 -r mobile_app/requirements.txt
 -r release/tests/requirements.txt
@@ -8,6 +7,7 @@ ddt==0.8.0
 nose==1.3.4
 pep8==1.5.7
 pylint==1.4.3
+requests==2.5.3
 mock==1.0.1
 moto==0.4.2
 testfixtures==4.1.2

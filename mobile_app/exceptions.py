@@ -27,7 +27,25 @@ class BranchAlreadyExists(Exception):
         self.branch_name = branch_name
         super(BranchAlreadyExists, self).__init__()
 
-    def __str__(self, branch_name):
+    def __str__(self):
         return "Branch already exists: {branch}".format(
-            branch=branch_name
+            branch=self.branch_name
+        )
+
+
+# Upload build
+
+
+class UploadFailure(Exception):
+    """
+    Indicates that a build failed to upload
+    """
+    def __init__(self, response):
+        self.response = response
+        super(UploadFailure, self).__init__()
+
+    def __str__(self):
+        return "Upload Failed. HTTP {code}. data:{data}".format(
+            code=self.response.status_code,
+            data=self.response.text
         )
