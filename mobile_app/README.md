@@ -3,20 +3,25 @@ Mobile Apps
 
 Tools contained here are used for working with the mobile-apps.
 
+
+Setup
+-----
+To run any of these scripts, you will first need to:
+* Create your virtual environment
+* ``pip install -r testeng-ci/requirements.txt``
+
 The following scripts constitute a build pipeline for the edX mobile apps.
 
 make_build
 ----------------
 This contains code to generate a new environment and command line for the
-``trigger_build`` task (see below) by asking the user to enter that information
-manually.  It is meant to stand in for a task runner like Jenkins when doing
-local testing. Once the user has entered all the relevant information, it
-invokes ``trigger_build`` with those values.
+``trigger_build`` task (see below) by asking the user to enter that
+information manually.  It is meant to stand in for a task runner like Jenkins
+when doing local testing. Once the user has entered all the relevant
+information, it invokes ``trigger_build`` with those values.
 
 *Usage*
 
-* Create your virtual environment
-* ``pip install -r mobile_app/requirements.txt``
 * Call script as a python module, e.g.
 
 	`python -m mobile_app.make_build`
@@ -38,8 +43,6 @@ build machine with access to that environment.
 
 *Usage*
 
-* Create your virtual environment
-* ``pip install -r mobile_app/requirements.txt``
 * Export the necessary environment variables. There's a list inside the script.
 * Call script as a python module, e.g.
 
@@ -58,8 +61,6 @@ creating a properties file to point the code at the config. This is meant to
 run on a CI machine before the build step.
 
 *Usage*
-* Create your virtual environment
-* ``pip install -r mobile_app/requirements.txt``
 * Create a file called ``CONFIGURATION``. See ``trigger_build`` for more information on the format.
 * Call script as a python module, e.g.
 
@@ -72,8 +73,6 @@ upload_build
 Uploads a built app for distribution + archiving. Currently builds go to HockeyApp. This is meant to run on a CI machine after the build step.
 
 *Usage*
-* Create your virtual environment
-* ``pip install -r mobile_app/requirements.txt``
 * Build your app somewhere
 * Export the necessary environment variables. There's a list inside the script.
 * Call script as a python module, e.g.

@@ -13,7 +13,7 @@ This script will:
 *Usage*
 
 * create your virtual environment
-* pip install -r release/requirements.txt
+* pip install -r testeng-ci/requirements.txt
 * Call script as a python module, e.g.
 
 	`python -m release.create_candidate_pr --org MyGithubOrg --repo my-repo`
