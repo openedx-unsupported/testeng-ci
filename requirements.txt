@@ -1,0 +1,4 @@
+-r aws/requirements.txt
+-r mobile_app/requirements.txt
+
+requests==2.5.3
