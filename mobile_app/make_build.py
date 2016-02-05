@@ -5,8 +5,12 @@ testing or when one is not available.
 """
 
 from collections import namedtuple
+import git
 import logging
+import os
+import shutil
 import sys
+import tempfile
 import uuid
 
 from mobile_app import trigger_build
@@ -56,7 +60,8 @@ def fresh_branch_name():
     return "build-%s" % uuid.uuid4()
 
 
-def collect_params():
+# pylint: disable=dangerous-default-value
+def collect_params(questions=QUESTIONS):
     """
     Asks the user to provide values for a series of variables that can be used
     as input to the trigger_build script
@@ -67,7 +72,7 @@ def collect_params():
     """
     environ = {}
     args = []
-    for question in QUESTIONS:
+    for question in questions:
         value = raw_input(question.prompt + ": ")
         if question.kind is "environ":
             environ[question.key] = value
@@ -80,10 +85,36 @@ def collect_params():
     return (args, environ)
 
 
+def make_build(code_repo, trigger_repo):
+    """
+    Checks out the trigger repo then makes a new
+    build with remaining arguments supplied by the user
+    """
+    trigger_path_container = tempfile.mkdtemp()
+    # Filter to the questions we're not prepopulating
+    questions = [
+        question for question in QUESTIONS if
+        question.key != 'CODE_REPO' and
+        question.key != '--trigger-repo-path'
+    ]
+
+    try:
+        (args, environ) = collect_params(questions)
+
+        environ["CODE_REPO"] = code_repo
+
+        trigger_path = os.path.join(trigger_path_container, "trigger.git")
+        git.Repo.clone_from(trigger_repo, to_path=trigger_path)
+
+        args.extend(["--trigger-repo-path", trigger_path])
+        trigger_build.run_trigger_build(args, environ)
+    finally:
+        shutil.rmtree(trigger_path_container)
+
 if __name__ == "__main__":
     logging.basicConfig(
         format='%(asctime)s [%(levelname)s] %(message)s',
-        stream=sys.stdout
+        stream=sys.stdout,
+        level=logging.INFO
     )
-    logger.setLevel(logging.INFO)
-    trigger_build.run_trigger_build(*collect_params())
+    trigger_build.run_trigger_build(*collect_params(QUESTIONS))

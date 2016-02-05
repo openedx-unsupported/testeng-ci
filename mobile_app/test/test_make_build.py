@@ -1,4 +1,9 @@
+"""
+Test cases for make build script
+"""
 from collections import namedtuple
+import git
+from mobile_app.test import utils
 from unittest import TestCase
 
 from mock import patch
@@ -9,11 +14,9 @@ else:
     import builtins  # pylint: disable=import-error
 
 from mobile_app import make_build
-
+from mobile_app import trigger_build
 
 Input = namedtuple("Input", ["key", "value"])  # pylint: disable=invalid-name
-
-
 INPUTS = [
     Input(key="CODE_REPO", value="git://code-repo.git"),
     Input(key="CODE_REVISION", value="code-branch"),
@@ -30,18 +33,45 @@ class MakeBuildTestCase(TestCase):
     Tests for script that asks user for environment variables
     """
 
-    @patch.object(
-        builtins,
-        'raw_input',
-        side_effect=VALUES
-    )
-    def test_envs_extracted(self, _):
+    def test_envs_extracted(self):
         """
         Tests that all the arguments we pass in end up in the environment for
         building. Or are passed as part of the argument list
         """
-        (args, env) = make_build.collect_params()
+
+        with patch.object(builtins, 'raw_input', side_effect=VALUES):
+            (args, env) = make_build.collect_params()
         for item in INPUTS:
             if item.key:
                 self.assertEqual(env[item.key], item.value)
         self.assertTrue("../build-repo" in args)
+
+    def test_passed_params(self):
+        """
+        Test that when we pass in explicit parameters to make_build
+        they properly end up in the params list
+        """
+
+        path = utils.make_test_repo()
+
+        def verify_params(args, environ):
+            # pylint: disable=missing-docstring
+            self.assertEqual(environ["CODE_REPO"], "fake-code-repo.git")
+            index = args.index("--trigger-repo-path")
+
+            repo = git.Repo(args[index + 1])
+            self.assertEqual(repo.remotes.origin.url, path)
+
+        entries = [
+            item.value for item in INPUTS if
+            item.key != 'CODE_REPO' and
+            item.key != '--trigger-repo-path'
+        ]
+
+        with patch.object(builtins, 'raw_input', side_effect=entries):
+            with patch.object(
+                trigger_build,
+                'run_trigger_build',
+                side_effect=verify_params
+            ):
+                make_build.make_build("fake-code-repo.git", path)
