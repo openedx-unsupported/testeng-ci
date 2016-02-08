@@ -16,8 +16,8 @@ def make_android_build():
     additional questions
     """
     make_build(
-        "https://github.com/edx/edx-app-android",
-        "https://github.com/edx/edx-app-build-android"
+        "git@github.com:edx/edx-app-android.git",
+        "git@github.com:edx/edx-app-build-android.git"
     )
 
 if __name__ == "__main__":

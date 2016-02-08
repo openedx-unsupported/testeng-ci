@@ -16,8 +16,8 @@ def make_ios_build():
     additional questions
     """
     make_build(
-        "https://github.com/edx/edx-app-ios",
-        "https://github.com/edx/edx-app-build-ios"
+        "git@github.com:edx/edx-app-ios.git"
+        "git@github.com:edx/edx-app-build-ios.git"
     )
 
 if __name__ == "__main__":
