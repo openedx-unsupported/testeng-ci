@@ -16,7 +16,7 @@ def make_ios_build():
     additional questions
     """
     make_build(
-        "git@github.com:edx/edx-app-ios.git"
+        "git@github.com:edx/edx-app-ios.git",
         "git@github.com:edx/edx-app-build-ios.git"
     )
 
