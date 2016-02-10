@@ -1,5 +1,6 @@
 """
-Invoke this script to kick off a new android build
+Invoke this script to kick off a new android build. The user will provide
+any further necessary information at the command line.
 """
 
 import logging
