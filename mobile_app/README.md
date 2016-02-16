@@ -12,6 +12,24 @@ To run any of these scripts, you will first need to:
 
 The following scripts constitute a build pipeline for the edX mobile apps.
 
+make_android_build
+------------------
+Invokes ``make_build``, filling in parameters specific to the edx android app.
+
+* Call script as a python module, e.g.
+
+	`python -m mobile_app.make_android_build`
+
+make_ios_build
+------------------
+Invokes ``make_build``, filling in parameters specific to the edx ios app.
+
+* Call script as a python module, e.g.
+
+	`python -m mobile_app.make_ios_build`
+
+
+
 make_build
 ----------------
 This contains code to generate a new environment and command line for the
