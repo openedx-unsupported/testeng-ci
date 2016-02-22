@@ -28,6 +28,10 @@ EXPECTED_ENVIRONMENT_VARIABLES = [
     "CODE_REVISION",
 ]
 
+OPTIONAL_ENVIRONMENT_VARIABLES = [
+    "DISTRIBUTION"
+]
+
 
 def _build_parser():
     """
@@ -79,6 +83,11 @@ def run_trigger_build(raw_args, environ):
             items[variable] = environ[variable]
         except KeyError:
             raise MissingEnvironmentVariable(variable)
+
+    for variable in OPTIONAL_ENVIRONMENT_VARIABLES:
+        value = environ.get(variable, None)
+        if value:
+            items[variable] = value
 
     with file(config_path, "w") as config_file:
         json.dump(items, config_file, indent=4, sort_keys=True)

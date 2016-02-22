@@ -85,23 +85,31 @@ def collect_params(questions=QUESTIONS):
     return (args, environ)
 
 
-def make_build(code_repo, trigger_repo):
+def make_build(trigger_repo, overrides={}):
     """
     Checks out the trigger repo then makes a new
     build with remaining arguments supplied by the user
+
+    Arguments:
+        trigger_repo (string): A path to a git repo whose commits
+            will trigger a new build
+        overrides (dict): Seed values for the environment. The user
+            will not be queried for keys already in this, allowing
+            the caller to provide hard coded answers for certain cases
+            such as specifying a particular source code repo
     """
     trigger_path_container = tempfile.mkdtemp()
     # Filter to the questions we're not prepopulating
     questions = [
         question for question in QUESTIONS if
-        question.key != 'CODE_REPO' and
-        question.key != '--trigger-repo-path'
+        question.key not in overrides and
+        question.key != "--trigger-repo-path"
     ]
 
     try:
         (args, environ) = collect_params(questions)
-
-        environ["CODE_REPO"] = code_repo
+        for (key, value) in overrides.items():
+            environ[key] = value
 
         trigger_path = os.path.join(trigger_path_container, "trigger.git")
         git.Repo.clone_from(trigger_repo, to_path=trigger_path)
