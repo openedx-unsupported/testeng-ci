@@ -106,7 +106,7 @@ for rep in repos:
     print "total: " + str(total_count), "started: " + str(started_count)
 
 print '--------'
-print "overall total: " + str(main_count)
-print "overall started: " + str(main_started_count)
-print "overall queued: " + str(main_count - main_started_count)
+print "overall_total=" + str(main_count)
+print "overall_started=" + str(main_started_count)
+print "overall_queued=" + str(main_count - main_started_count)
 
