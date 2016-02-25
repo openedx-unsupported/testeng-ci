@@ -63,8 +63,7 @@ def checkout_repos(build_environment_path, environ, base_path):
         origin_branch = repo.remotes.origin.refs[revision]
         # need to create a local tracking branch of the remote
         # so we can check it out properly
-        repo.create_head(revision)
-        repo.refs[revision].set_tracking_branch(origin_branch)
+        repo.create_head(revision, origin_branch)
         repo.refs[revision].checkout()
         logger.info("switching to branch %s", revision)
 

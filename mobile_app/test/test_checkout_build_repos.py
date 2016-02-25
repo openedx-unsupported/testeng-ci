@@ -41,6 +41,22 @@ class CheckoutBuildReposTestCase(TestCase):
             branch_name = "test-branch-%s" % name
             repo.create_head(branch_name)
 
+            # Add some data to make sure our branch is different from master
+            repo.refs[branch_name].checkout()
+            stub_file_path = os.path.join(repo_path, "on-branch")
+            with open(stub_file_path, "w") as stub:
+                stub.write("test data")
+            repo.index.add([stub_file_path])
+            repo.index.commit("Commit stub file")
+
+            # Now add something to master so they've properly diverged
+            repo.refs.master.checkout()
+            stub_file_path = os.path.join(repo_path, "on-master")
+            with open(stub_file_path, "w") as stub:
+                stub.write("test data")
+            repo.index.add([stub_file_path])
+            repo.index.commit("Commit stub file")
+
     def test_repos_checked_out(self):
         """
         Tests that we properly cloned the code and config repos
@@ -72,6 +88,16 @@ class CheckoutBuildReposTestCase(TestCase):
         self.assertEqual(
             config_repo.active_branch.name,
             "test-branch-config"
+        )
+
+        # And that branch is at the tip
+        self.assertEqual(
+            config_repo.active_branch.commit,
+            config_repo.remotes.origin.refs["test-branch-config"].commit
+        )
+        self.assertEqual(
+            code_repo.active_branch.commit,
+            code_repo.remotes.origin.refs["test-branch-code"].commit
         )
 
     def test_properties_content(self):
