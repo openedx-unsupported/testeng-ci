@@ -74,4 +74,6 @@ class MakeBuildTestCase(TestCase):
                 'run_trigger_build',
                 side_effect=verify_params
             ):
-                make_build.make_build("fake-code-repo.git", path)
+                make_build.make_build(path, {
+                    "CODE_REPO": "fake-code-repo.git"
+                })

@@ -2,7 +2,6 @@
 Uploads an app build. Presently it only uploads to hockey app"
 """
 
-from collections import namedtuple
 import logging
 import os
 import requests
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 UPLOAD_URL = "https://rink.hockeyapp.net/api/2/apps/upload"
 
 
-class HockeyTokenAuth(object):
+class HockeyTokenAuth(object):  # pylint: disable=too-few-public-methods
     """
     Authorization method for requests library supporting HockeyApp tokens
     """
