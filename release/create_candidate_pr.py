@@ -12,6 +12,7 @@ the most recent commit to master that passed all the tests
 from __future__ import print_function
 
 import argparse
+import datetime
 import logging
 import sys
 
@@ -20,6 +21,16 @@ from release.github_api import GithubApi, RequestFailed
 from release import utils
 
 logger = logging.getLogger(__name__)
+
+
+def valid_date(s):
+    """Convert a string into a date, for argument parsing."""
+    # from: http://stackoverflow.com/a/25470943/14343
+    try:
+        return datetime.datetime.strptime(s, "%Y-%m-%d")
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(s)
+        raise argparse.ArgumentTypeError(msg)
 
 
 def _build_parser():
@@ -39,7 +50,7 @@ def _build_parser():
 
     result.add_argument(
         '--release-date',
-        nargs=1,
+        type=valid_date,
         default=expected_date,
         help="""
         Specify a date that the release branch is expected to be deployed.
