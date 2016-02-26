@@ -49,6 +49,7 @@ def run_upload_build(environ):
     auth = HockeyTokenAuth(token)
     params = {
         "commit_sha": commit_sha,
+        "status": 2  # release too
     }
 
     files = {
