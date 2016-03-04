@@ -2,6 +2,7 @@
 -r aws/requirements.txt
 -r mobile_app/requirements.txt
 -r release/tests/requirements.txt
+-r travis/requirements.txt
 
 coverage==3.7.1
 ddt==0.8.0
