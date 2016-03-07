@@ -22,6 +22,7 @@ def get_repos(org):
     Returns list of active repos in a given org.
     """
     repo_list = []
+
     # Note: One call is needed if org has <= 100 active repos.
     # If org has > 100, this code will need to be modified
     #  to include 'offset' requests
@@ -56,34 +57,45 @@ def get_active_builds(org, repo):
     return active_build_list
 
 
-# @property
-# def build_id(build_item):
-#
-#     return build_item['id']
-#
-
-def get_jobs(build_id):
+def get_active_jobs(build_id):
     """
     Get the jobs for a build
     return: list of dicts
     """
+    jobs = []
     req = requests.get(
         BASE_URL + 'v3/build/{build_id}/jobs'.format(build_id=build_id)
     )
-    return req['jobs']
+    job_resp = req.json()
+    for job in job_resp['jobs']:
+        if job['state'] not in ["passed", "failed"]:
+            jobs.append(job)
+    return jobs
 
 
-# @property
-# def job_state(job):
-#     """
-#     possible states:
-#     * received
-#     * queued
-#     * created
-#     * is there a started?
-#     """
-#
-#     return job['state']
+def active_job_counts(jobs):
+    """
+    Returns counts of total jobs, and
+    total running jobs for a given list
+
+    This method assumes it has a received
+    a list of active jobs.
+
+    Possible job states observed:
+     * received
+     * queued
+     * created
+     * passed, failed
+     * started
+
+    """
+    job_count = len(jobs)
+    started_jobs_count = 0
+    for job in jobs:
+        if job['state'] == 'started':
+            started_jobs_count += 1
+
+    return job_count, started_jobs_count
 
 
 def repo_active_build_count(builds):
@@ -103,24 +115,6 @@ def repo_active_build_count(builds):
 
     return build_count, started_count
 
-
-def repo_active_job_count(active_builds):
-    """
-    Returns count of active jobs associated with builds in a
-    given repo.
-    """
-    job_count = 0
-    started_job_count = 0
-    for build in active_builds:
-        if build['stage'] != 'finished':
-            jobs = get_jobs(build['id'])
-            for job in jobs:
-                if job['state'] != 'finished':
-                    job_count += 1
-                    if job['state'] != 'queued':
-                        started_job_count += 1
-
-    return job_count, started_job_count
 
 
 def main(raw_args):
@@ -164,7 +158,41 @@ def main(raw_args):
 
     # Set logging level
     logging.getLogger(__name__).setLevel(args.log_level.upper())
-    get_build_counts(org=args.org)
+    if args.task_class.upper() == 'JOB':
+        get_job_counts(org=args.org)
+    else:
+        get_build_counts(org=args.org)
+
+
+def get_job_counts(org):
+    """
+    Total job counts (active and total) for
+    an org
+    """
+    total_job_count = 0
+    total_started_job_count = 0
+
+    repos = get_repos(org)
+    for repo in repos:
+        repo_builds = get_active_builds(org, repo)
+        repo_jobs = 0
+        repo_started_jobs = 0
+        for build in repo_builds:
+            build_jobs = get_active_jobs(build['id'])
+            total, started = active_job_counts(build_jobs)
+            total_job_count += total
+            total_started_job_count += started
+            repo_jobs += total
+            repo_started_jobs += started
+        logger.debug("----> " + repo)
+        debug_msg = "total jobs: {total}, started jobs: {started}".format(
+            total=repo_jobs,
+            started=repo_started_jobs
+        )
+        logger.debug(debug_msg)
+    logger.debug('--------')
+    logger.info('overall_jobs_total=' + str(total_job_count))
+    logger.info('overall_jobs_started=' + str(total_started_job_count))
 
 
 def get_build_counts(org):
