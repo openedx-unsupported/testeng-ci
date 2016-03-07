@@ -266,12 +266,11 @@ class TestTravisBuildInfoMain(TestCase):
         )
         self.mock_jobs = patch(
             'travis.build_info.get_active_jobs',
-            return_value=
-                [
-                    {"id": 1, "state": "passed"},
-                    {"id": 2, "state": "passed"},
-                    {"id": 3, "state": "failed"}
-                ]
+            return_value=[
+                {"id": 1, "state": "passed"},
+                {"id": 2, "state": "passed"},
+                {"id": 3, "state": "failed"}
+            ]
 
         )
 
@@ -327,11 +326,13 @@ class TestTravisBuildInfoMain(TestCase):
             '--log-level', 'debug',
             '--task-class', 'job'
         ]
+
         with LogCapture() as l:
             main(args)
             l.check(
                 ('travis.build_info', 'DEBUG', '----> bar'),
-                ('travis.build_info', 'DEBUG', 'total jobs: 3, started jobs: 0'),
+                ('travis.build_info', 'DEBUG',
+                 'total jobs: 3, started jobs: 0'),
                 ('travis.build_info', 'DEBUG', '--------'),
                 ('travis.build_info', 'INFO', 'overall_jobs_total=3'),
                 ('travis.build_info', 'INFO', 'overall_jobs_started=0')

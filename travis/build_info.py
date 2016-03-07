@@ -81,7 +81,7 @@ def active_job_counts(jobs):
     This method assumes it has a received
     a list of active jobs.
 
-    Possible job states observed:
+    Possible job states:
      * received
      * queued
      * created
@@ -105,6 +105,12 @@ def repo_active_build_count(builds):
 
     This method assumes it has received a list
     of active builds.
+
+    Possible build states:
+    * created
+    * started
+    * finished
+
     """
     build_count = 0
     started_count = 0
@@ -114,54 +120,6 @@ def repo_active_build_count(builds):
             started_count += 1
 
     return build_count, started_count
-
-
-
-def main(raw_args):
-    """
-    Parse args and execute the script according to those args
-    """
-    desc = (
-        "Obtain information on active/waiting Travis builds."
-    )
-    parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument(
-        '--org', '-o',
-        dest='org',
-        help='Travis org',
-        required=True
-        )
-    parser.add_argument(
-        '--task-class',  # this is not doing anything for now.
-        dest='task_class',
-        help="Select build or job. A build is composed of one or many jobs.",
-        choices=[
-            'BUILD', 'build',
-            'JOB', 'job',
-        ],
-        default="BUILD",
-    )
-    parser.add_argument(
-        '--log-level',
-        dest='log_level',
-        help="set logging level",
-        choices=[
-            'DEBUG', 'debug',
-            'INFO', 'info',
-            'WARNING', 'warning',
-            'ERROR', 'error',
-            'CRITICAL', 'critical',
-        ],
-        default="INFO",
-    )
-    args = parser.parse_args(raw_args)
-
-    # Set logging level
-    logging.getLogger(__name__).setLevel(args.log_level.upper())
-    if args.task_class.upper() == 'JOB':
-        get_job_counts(org=args.org)
-    else:
-        get_build_counts(org=args.org)
 
 
 def get_job_counts(org):
@@ -226,6 +184,52 @@ def get_build_counts(org):
         "overall_queued=" + str(org_build_count - org_build_started_count)
     )
 
+
+def main(raw_args):
+    """
+    Parse args and execute the script according to those args
+    """
+    desc = (
+        "Obtain information on active/waiting Travis builds."
+    )
+    parser = argparse.ArgumentParser(description=desc)
+    parser.add_argument(
+        '--org', '-o',
+        dest='org',
+        help='Travis org',
+        required=True
+        )
+    parser.add_argument(
+        '--task-class',  # this is not doing anything for now.
+        dest='task_class',
+        help="Select build or job. A build is composed of one or many jobs.",
+        choices=[
+            'BUILD', 'build',
+            'JOB', 'job',
+        ],
+        default="BUILD",
+    )
+    parser.add_argument(
+        '--log-level',
+        dest='log_level',
+        help="set logging level",
+        choices=[
+            'DEBUG', 'debug',
+            'INFO', 'info',
+            'WARNING', 'warning',
+            'ERROR', 'error',
+            'CRITICAL', 'critical',
+        ],
+        default="INFO",
+    )
+    args = parser.parse_args(raw_args)
+
+    # Set logging level
+    logging.getLogger(__name__).setLevel(args.log_level.upper())
+    if args.task_class.upper() == 'JOB':
+        get_job_counts(org=args.org)
+    else:
+        get_build_counts(org=args.org)
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s')
