@@ -12,7 +12,7 @@ import requests
 import sys
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 BASE_URL = 'https://api.travis-ci.org/'
 

@@ -10,6 +10,7 @@ install:
   - pip install -r test-requirements.txt
 script:
   - pep8 .
+  - pylint travis/
   - nosetests jenkins -v --with-coverage --cover-package=jenkins
   - nosetests aws -v --with-coverage --cover-package=aws
   - nosetests release -v --with-coverage --cover-package=release
