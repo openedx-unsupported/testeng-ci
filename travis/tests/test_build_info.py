@@ -1,20 +1,22 @@
 """
 Tests for testeng-ci/travis/build_info
 """
-from mock import patch, mock_open, Mock
+from mock import patch
 from testfixtures import LogCapture
 from unittest import TestCase
 
 import httpretty
+import requests
 
-from travis.build_info import *
-
-# Ensure we're properly handling python2 vs 3
-from sys import version_info
-if version_info.major == 2:
-    import __builtin__ as builtins  # pylint: disable=import-error
-else:
-    import builtins  # pylint: disable=import-error
+from travis.build_info import (
+    get_repos,
+    get_active_jobs,
+    get_active_builds,
+    BASE_URL,
+    main,
+    active_job_counts,
+    repo_active_build_count
+)
 
 
 class TestTravisBuildRepoInfo(TestCase):
@@ -23,6 +25,7 @@ class TestTravisBuildRepoInfo(TestCase):
     """
 
     def setUp(self):
+        super(TestTravisBuildRepoInfo, self).setUp()
         self.response_body = """{
           "@type": "repositories",
           "repositories": [
@@ -74,6 +77,7 @@ class TestTravisActiveBuildInfo(TestCase):
     """
 
     def setUp(self):
+        super(TestTravisActiveBuildInfo, self).setUp()
         self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
 
     @httpretty.activate
@@ -148,6 +152,7 @@ class TestTravisBuildInfoJobs(TestCase):
     """
 
     def setUp(self):
+        super(TestTravisBuildInfoJobs, self).setUp()
         self.url_endpoint = BASE_URL + 'v3/build/11122/jobs'
 
     @httpretty.activate
@@ -217,6 +222,7 @@ class TestTravisBuildInfoJobs(TestCase):
             {"id": 1, "state": "started"},
             ]
         job_count, started_jobs_count = active_job_counts(jobs_list)
+        self.assertEqual(2, job_count)
         self.assertEqual(1, started_jobs_count)
 
     def test_active_job_counts_various(self):
@@ -226,6 +232,7 @@ class TestTravisBuildInfoJobs(TestCase):
             {"id": 1, "state": "received"},
             ]
         job_count, started_jobs_count = active_job_counts(jobs_list)
+        self.assertEqual(3, job_count)
         self.assertEqual(0, started_jobs_count)
 
     def test_active_job_counts_mult(self):
@@ -235,19 +242,8 @@ class TestTravisBuildInfoJobs(TestCase):
             {"id": 1, "state": "started"},
             ]
         job_count, started_jobs_count = active_job_counts(jobs_list)
+        self.assertEqual(3, job_count)
         self.assertEqual(2, started_jobs_count)
-
-
-class TestTravisBuildInfoJobCounts(TestCase):
-    """
-    Test Job counts based on active builds
-    """
-
-    def setUp(self):
-        pass
-
-    def test_jobs_foo(self):
-        pass
 
 
 class TestTravisBuildInfoMain(TestCase):
@@ -256,6 +252,7 @@ class TestTravisBuildInfoMain(TestCase):
     """
 
     def setUp(self):
+        super(TestTravisBuildInfoMain, self).setUp()
         self.org = 'foo'
         self.mock_repos = patch(
             'travis.build_info.get_repos', return_value=['bar']
@@ -283,9 +280,9 @@ class TestTravisBuildInfoMain(TestCase):
         args = [
             '--org', self.org
         ]
-        with LogCapture() as l:
+        with LogCapture() as log_capture:
             main(args)
-            l.check(
+            log_capture.check(
                 ('travis.build_info', 'INFO', 'overall_total=1'),
                 ('travis.build_info', 'INFO', 'overall_started=1'),
                 ('travis.build_info', 'INFO', 'overall_queued=0')
@@ -296,9 +293,9 @@ class TestTravisBuildInfoMain(TestCase):
             '--org', self.org,
             '--task-class', 'build'
         ]
-        with LogCapture() as l:
+        with LogCapture() as log_capture:
             main(args)
-            l.check(
+            log_capture.check(
                 ('travis.build_info', 'INFO', 'overall_total=1'),
                 ('travis.build_info', 'INFO', 'overall_started=1'),
                 ('travis.build_info', 'INFO', 'overall_queued=0')
@@ -309,9 +306,9 @@ class TestTravisBuildInfoMain(TestCase):
             '--org', self.org,
             '--log-level', 'debug'
         ]
-        with LogCapture() as l:
+        with LogCapture() as log_capture:
             main(args)
-            l.check(
+            log_capture.check(
                 ('travis.build_info', 'DEBUG', '--->bar'),
                 ('travis.build_info', 'DEBUG', 'total: 1, started: 1'),
                 ('travis.build_info', 'DEBUG', '--------'),
@@ -327,9 +324,9 @@ class TestTravisBuildInfoMain(TestCase):
             '--task-class', 'job'
         ]
 
-        with LogCapture() as l:
+        with LogCapture() as log_capture:
             main(args)
-            l.check(
+            log_capture.check(
                 ('travis.build_info', 'DEBUG', '----> bar'),
                 ('travis.build_info', 'DEBUG',
                  'total jobs: 3, started jobs: 0'),
