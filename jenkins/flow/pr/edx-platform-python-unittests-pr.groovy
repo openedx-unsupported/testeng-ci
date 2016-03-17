@@ -16,6 +16,10 @@ guard{
         toolbox.slurpArtifacts(lms_unit_2)
       },
       {
+        lms_unit_3 = build('edx-platform-test-subset', sha1: sha1, SHARD: "3", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number)
+        toolbox.slurpArtifacts(lms_unit_3)
+      },
+      {
         cms_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit", PARENT_BUILD: "PR Build #" + build.number)
         toolbox.slurpArtifacts(cms_unit)
       },
@@ -28,6 +32,7 @@ guard{
     check_coverage = (
       lms_unit_1.result.toString() == 'SUCCESS' &&
       lms_unit_2.result.toString() == 'SUCCESS' &&
+      lms_unit_3.result.toString() == 'SUCCESS' &&
       cms_unit.result.toString() == 'SUCCESS' &&
       commonlib_unit.result.toString() == 'SUCCESS')
 
@@ -36,7 +41,8 @@ guard{
                             UNIT_BUILD_NUM_1: commonlib_unit.number,
                             UNIT_BUILD_NUM_2: lms_unit_1.number,
                             UNIT_BUILD_NUM_3: lms_unit_2.number,
-                            UNIT_BUILD_NUM_4: cms_unit.number,
+                            UNIT_BUILD_NUM_4: lms_unit_3.number,
+                            UNIT_BUILD_NUM_5: cms_unit.number,
                             sha1: sha1,
                             PARENT_BUILD: "PR Build #" + build.number,
                             CI_BRANCH: branch,
