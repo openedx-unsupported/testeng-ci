@@ -26,10 +26,9 @@ def make_ios_build():
         options["CONFIG_REPO"] = "https://github.com/edx/edx-mobile-config"
         options["CONFIG_PATH"] = "prod"
         options["DISTRIBUTION"] = "release"
+        logger.info("Using 'edx-mobile-config/prod' for config")
     else:
         options["DISTRIBUTION"] = "enterprise"
-
-    logger.info("Using 'edx-mobile-config/prod' for config")
 
     make_build(
         "git@github.com:edx/edx-app-build-ios.git",

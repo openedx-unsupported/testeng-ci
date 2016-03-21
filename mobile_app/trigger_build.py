@@ -98,7 +98,7 @@ def run_trigger_build(raw_args, environ):
     origin.pull()
 
     try:
-        _ = repo.heads[args.branch_name]
+        repo.heads[args.branch_name]
         raise BranchAlreadyExists(args.branch_name)
     except IndexError:
         pass
@@ -107,7 +107,7 @@ def run_trigger_build(raw_args, environ):
     branch.checkout()
     repo.index.add([config_path])
     repo.index.commit("Automated commit")
-    origin.push()
+    origin.push(args.branch_name)
 
 if __name__ == "__main__":
     logging.basicConfig(
