@@ -95,7 +95,15 @@ def run_trigger_build(raw_args, environ):
     # commit and push
     repo = git.Repo(repo_path)
     origin = repo.remote()
-    origin.pull()
+
+    # pull to ensure our branch is up to date
+    try:
+        origin.pull()
+    except git.exc.GitCommandError:
+        # If pull fails we're probably on a detached branch like jenkins gives
+        # us. That means that pulling won't do anything anyway, so just ignore
+        # it
+        pass
 
     try:
         repo.heads[args.branch_name]
