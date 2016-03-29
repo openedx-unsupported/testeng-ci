@@ -58,6 +58,7 @@ class UploadBuildTestCase(TestCase):
             # pylint: disable=missing-docstring
             data = kwargs['data']
             self.assertEqual(data['commit_sha'], self.code_sha)
+            self.assertEqual(data['notes'], "Example note")
 
             mock_request = Mock()
             mock_request.headers = {}
@@ -76,5 +77,6 @@ class UploadBuildTestCase(TestCase):
             upload_build.run_upload_build({
                 "CODE_SHA": self.code_sha,
                 "HOCKEY_APP_TOKEN": self.hockey_app_token,
-                "BINARY_PATH": self.binary_path
+                "BINARY_PATH": self.binary_path,
+                "BUILD_NOTES": "Example note"
             })

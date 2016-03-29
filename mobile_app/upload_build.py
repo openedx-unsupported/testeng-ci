@@ -49,8 +49,12 @@ def run_upload_build(environ):
     auth = HockeyTokenAuth(token)
     params = {
         "commit_sha": commit_sha,
-        "status": 2  # release too
+        "status": 2,  # publish build
     }
+
+    notes = environ.get("BUILD_NOTES", None)
+    if notes:
+        params["notes"] = notes
 
     files = {
         "ipa": (os.path.split(binary_path)[1], binary_data)
