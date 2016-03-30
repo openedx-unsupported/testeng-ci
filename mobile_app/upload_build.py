@@ -3,9 +3,12 @@ Uploads an app build. Presently it only uploads to hockey app"
 """
 
 import logging
+import json
 import os
 import requests
 import sys
+
+from mobile_app.path_constants import CONFIG_FILE
 
 from mobile_app.exceptions import (
     MissingEnvironmentVariable,
@@ -29,14 +32,15 @@ class HockeyTokenAuth(object):  # pylint: disable=too-few-public-methods
         return request
 
 
-def run_upload_build(environ):
+def run_upload_build(config, environ):
     """
     Uploads a build to Hockey App
 
     Arguments
-        params (dict): Arguments to the upload request. Will be passed
-            as form encoding fields
+        config (dict): Settings from the build's CONFIGURATION file
+        environ (dict): Settings from the surrounding OS environment
     """
+
     try:
         token = environ["HOCKEY_APP_TOKEN"]
         commit_sha = environ["CODE_SHA"]
@@ -52,7 +56,7 @@ def run_upload_build(environ):
         "status": 2,  # publish build
     }
 
-    notes = environ.get("BUILD_NOTES", None)
+    notes = config.get("BUILD_NOTES", None)
     if notes:
         params["notes"] = notes
 
@@ -71,4 +75,6 @@ if __name__ == "__main__":
         stream=sys.stdout
     )
     logger.setLevel(logging.INFO)
-    run_upload_build(os.environ)
+    with open(CONFIG_FILE) as config_file:
+        config = json.load(config_file)
+    run_upload_build(config, os.environ)

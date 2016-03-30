@@ -32,7 +32,7 @@ class UploadBuildTestCase(TestCase):
         it fails
         """
         with self.assertRaises(MissingEnvironmentVariable):
-            upload_build.run_upload_build({})
+            upload_build.run_upload_build({}, {})
 
     @patch('requests.post')
     @patch.object(builtins, 'open', new=mock_open(read_data='abc123'))
@@ -42,7 +42,7 @@ class UploadBuildTestCase(TestCase):
         """
         request_mock.status_code = 401
         with self.assertRaises(UploadFailure):
-            upload_build.run_upload_build({
+            upload_build.run_upload_build({}, {
                 "CODE_SHA": self.code_sha,
                 "HOCKEY_APP_TOKEN": self.hockey_app_token,
                 "BINARY_PATH": self.binary_path
@@ -74,9 +74,11 @@ class UploadBuildTestCase(TestCase):
             return mock_response
 
         with patch('requests.post', side_effect=verify_request):
-            upload_build.run_upload_build({
-                "CODE_SHA": self.code_sha,
-                "HOCKEY_APP_TOKEN": self.hockey_app_token,
-                "BINARY_PATH": self.binary_path,
-                "BUILD_NOTES": "Example note"
-            })
+            upload_build.run_upload_build(
+                {"BUILD_NOTES": "Example note"},
+                {
+                    "CODE_SHA": self.code_sha,
+                    "HOCKEY_APP_TOKEN": self.hockey_app_token,
+                    "BINARY_PATH": self.binary_path,
+                }
+            )
