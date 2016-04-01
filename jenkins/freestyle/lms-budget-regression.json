@@ -1,10 +1,10 @@
 {
   "rules": {
-	"default": 77,
-	"spof": -1,
+  	"default": 77,
 	"criticalpath": -1,
-	"cssnumreq": 83,
-	"jsnumreq": 39,
+	"spof": -1,
+	"cssnumreq": 79,
+	"jsnumreq": 35,
 	"requests": 50,
 	"ycompress": -1,
 	"yminify": -1,
@@ -15,6 +15,8 @@
 	"avoidfont": 89,
 	"expiresmod": 66,
 	"longexpirehead": 69,
+	"inlinecsswhenfewrequest": 59,
+	"textcontent": 11,
 	"thirdpartyversions": 89
   }
 }
