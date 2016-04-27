@@ -44,6 +44,10 @@ try{
         toolbox.slurpArtifacts(lms_unit_3)
       },
       {
+        lms_unit_4 = build('edx-platform-test-subset', sha1: sha1, SHARD: "4", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
+        toolbox.slurpArtifacts(lms_unit_4)
+      },
+      {
         cms_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit", PARENT_BUILD: "master #" + build.number)
         toolbox.slurpArtifacts(cms_unit)
       },
@@ -57,6 +61,7 @@ try{
       lms_unit_1.result.toString() == 'SUCCESS' &&
       lms_unit_2.result.toString() == 'SUCCESS' &&
       lms_unit_3.result.toString() == 'SUCCESS' &&
+      lms_unit_4.result.toString() == 'SUCCESS' &&
       cms_unit.result.toString() == 'SUCCESS' &&
       commonlib_unit.result.toString() == 'SUCCESS')
 
@@ -66,7 +71,8 @@ try{
                             UNIT_BUILD_NUM_2: lms_unit_1.number,
                             UNIT_BUILD_NUM_3: lms_unit_2.number,
                             UNIT_BUILD_NUM_4: lms_unit_3.number,
-                            UNIT_BUILD_NUM_5: cms_unit.number,
+                            UNIT_BUILD_NUM_5: lms_unit_4.number,
+                            UNIT_BUILD_NUM_6: cms_unit.number,
                             sha1: sha1,
                             PARENT_BUILD: "master #" + build.number,
                             CI_BRANCH: "master"
