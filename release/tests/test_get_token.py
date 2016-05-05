@@ -60,6 +60,15 @@ class GetTokenTestCase(TestCase):
             token = get_token.get_token()
             self.assertEqual(token, 'abc123')
 
+    @patch.object(builtins, 'open', new=mock_open(read_data=' abc123     '))
+    @patch.object(get_token, 'validate_token', new=Mock())
+    def test_token_with_whitespace(self):
+        """
+        Tests that tokens surrounded in whitespace characters
+        """
+        token = get_token.get_token()
+        self.assertEqual(token, 'abc123')
+
     @patch('os.getenv', return_value='abc123')
     @patch('sys.exit', new=Mock(side_effect=Aborted))
     def test_validation_fails_unauth(self, _):

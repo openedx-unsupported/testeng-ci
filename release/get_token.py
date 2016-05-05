@@ -94,7 +94,7 @@ def validate_token(token):
         logger.info("Authenticated {user}".format(user=user['login']))
     except RequestFailed as exception:
         logger.error(
-            "Couldn't authenticated on Github. Error: {error}".format(
+            "Couldn't authenticate on Github. Error: {error}".format(
                 error=exception
             )
         )
@@ -114,6 +114,6 @@ def get_token():
         string: The loaded token
 
     """
-    token = _load_token()
+    token = _load_token().strip()
     validate_token(token)
     return token
