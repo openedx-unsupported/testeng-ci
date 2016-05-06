@@ -64,7 +64,7 @@ class GetTokenTestCase(TestCase):
     @patch.object(get_token, 'validate_token', new=Mock())
     def test_token_with_whitespace(self):
         """
-        Tests that tokens surrounded in whitespace characters
+        Tests that whitespace characters are trimmed from tokens
         """
         token = get_token.get_token()
         self.assertEqual(token, 'abc123')

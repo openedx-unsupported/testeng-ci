@@ -108,7 +108,7 @@ def get_token():
 
     Loads the user's github token if available and it is valid.
     If they don't have a saved token, it will prompt them to create one
-    and enter it.
+    and enter it. Any whitespace will be removed from tokens.
 
     Returns:
         string: The loaded token
