@@ -8,9 +8,9 @@ import os
 import shutil
 import tempfile
 
-from mobile_app import checkout_build_repos
-from mobile_app.test import utils
-from mobile_app.path_constants import (
+from .. import checkout_build_repos
+from ..test import utils
+from ..path_constants import (
     CODE_CHECKOUT_DIRECTORY,
     CONFIG_CHECKOUT_DIRECTORY,
     PROPERTIES_FILE

@@ -8,9 +8,9 @@ import os
 import requests
 import sys
 
-from mobile_app.path_constants import CONFIG_FILE
+from .path_constants import CONFIG_FILE
 
-from mobile_app.exceptions import (
+from .exceptions import (
     MissingEnvironmentVariable,
     UploadFailure
 )

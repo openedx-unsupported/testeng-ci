@@ -13,7 +13,7 @@ import sys
 import tempfile
 import uuid
 
-from mobile_app import trigger_build
+from . import trigger_build
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

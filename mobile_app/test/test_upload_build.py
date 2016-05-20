@@ -12,8 +12,8 @@ if version_info.major == 2:
 else:
     import builtins  # pylint: disable=import-error
 
-from mobile_app import upload_build
-from mobile_app.exceptions import MissingEnvironmentVariable, UploadFailure
+from .. import upload_build
+from .. import exceptions
 
 
 class UploadBuildTestCase(TestCase):
@@ -31,7 +31,7 @@ class UploadBuildTestCase(TestCase):
         Tests that if we start the task with missing environment variables
         it fails
         """
-        with self.assertRaises(MissingEnvironmentVariable):
+        with self.assertRaises(exceptions.MissingEnvironmentVariable):
             upload_build.run_upload_build({}, {})
 
     @patch('requests.post')
@@ -41,7 +41,7 @@ class UploadBuildTestCase(TestCase):
         Tests that if the upload fails we raise an appropriate exception
         """
         request_mock.status_code = 401
-        with self.assertRaises(UploadFailure):
+        with self.assertRaises(exceptions.UploadFailure):
             upload_build.run_upload_build({}, {
                 "CODE_SHA": self.code_sha,
                 "HOCKEY_APP_TOKEN": self.hockey_app_token,

@@ -9,12 +9,12 @@ import json
 import os
 import sys
 
-from mobile_app.exceptions import (
+from .exceptions import (
     BranchAlreadyExists,
     MissingEnvironmentVariable
 )
 
-from mobile_app.path_constants import (
+from .path_constants import (
     CONFIG_FILE
 )
 

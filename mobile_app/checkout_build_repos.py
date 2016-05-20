@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 
-from mobile_app.path_constants import (
+from .path_constants import (
     CODE_CHECKOUT_DIRECTORY,
     CONFIG_CHECKOUT_DIRECTORY,
     CONFIG_FILE,

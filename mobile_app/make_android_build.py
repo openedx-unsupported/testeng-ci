@@ -6,7 +6,7 @@ any further necessary information at the command line.
 import logging
 import sys
 
-from mobile_app.make_build import make_build
+from .make_build import make_build
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

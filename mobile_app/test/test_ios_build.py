@@ -12,7 +12,7 @@ else:
 
 from unittest import TestCase
 
-from mobile_app import make_ios_build
+from .. import make_ios_build
 
 
 class MakeIOSBuildTestCase(TestCase):

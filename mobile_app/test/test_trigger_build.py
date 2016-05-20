@@ -9,10 +9,10 @@ import os
 import shutil
 from unittest import TestCase
 
-from mobile_app import trigger_build
-from mobile_app import path_constants
-from mobile_app import exceptions
-from mobile_app.test import utils
+from .. import trigger_build
+from .. import path_constants
+from .. import exceptions
+from . import utils
 
 TEST_BRANCH = "test-branch"
 

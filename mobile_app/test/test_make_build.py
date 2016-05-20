@@ -3,7 +3,6 @@ Test cases for make build script
 """
 from collections import namedtuple
 import git
-from mobile_app.test import utils
 from unittest import TestCase
 
 from mock import patch
@@ -13,8 +12,9 @@ if version_info.major == 2:
 else:
     import builtins  # pylint: disable=import-error
 
-from mobile_app import make_build
-from mobile_app import trigger_build
+from . import utils
+from .. import make_build
+from .. import trigger_build
 
 Input = namedtuple("Input", ["key", "value"])  # pylint: disable=invalid-name
 INPUTS = [
