@@ -6,13 +6,11 @@ branches:
       - master
 python:
   - "2.7"
+env:
+  - PACKAGES_STRING="jenkins,aws,release,mobile_app,travis"
 install:
   - pip install -r test-requirements.txt
 script:
   - pep8 .
   - pylint travis/
-  - nosetests jenkins -v --with-coverage --cover-package=jenkins
-  - nosetests aws -v --with-coverage --cover-package=aws
-  - nosetests release -v --with-coverage --cover-package=release
-  - nosetests mobile_app -v --with-coverage --cover-package=mobile_app
-  - nosetests travis -v --with-coverage --cover-package=travis
+  - nosetests -v --with-coverage --cover-package=$PACKAGES_STRING
