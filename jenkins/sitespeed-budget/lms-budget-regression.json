@@ -4,7 +4,7 @@
 	"criticalpath": -1,
 	"spof": -1,
 	"cssnumreq": 79,
-	"jsnumreq": 35,
+	"jsnumreq": 31,
 	"requests": 50,
 	"ycompress": -1,
 	"yminify": -1,
