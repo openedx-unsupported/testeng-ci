@@ -1,13 +1,14 @@
 """
 Tests for trigger app build script
 """
-
-import git
 import json
-from mock import Mock, patch
 import os
 import shutil
-from unittest import TestCase
+from StringIO import StringIO
+from unittest import TestCase, skip
+
+import git
+from mock import Mock, patch
 
 from .. import trigger_build
 from .. import path_constants
@@ -43,14 +44,15 @@ class TriggerBuildTestCase(TestCase):
         """
         shutil.rmtree(self.repo_path)
 
-    @patch('sys.exit', new=Mock(side_effect=Aborted))
-    def test_missing_arguments(self):
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_missing_arguments(self, _mock_stdout):
         """
         Tests that the command quits when not given
         enough arguments
         """
-        with self.assertRaises(Aborted):
+        with self.assertRaises(SystemExit) as context_manager:
             trigger_build.run_trigger_build([], {})
+        self.assertEqual(context_manager.exception.code, 2)
 
     @patch('git.Remote.pull')
     def test_branch_already_exists(self, _):
