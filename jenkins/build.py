@@ -4,7 +4,7 @@ A class for working with the build info returned from the jenkins job API
 import logging
 
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Build(dict):
@@ -15,7 +15,6 @@ class Build(dict):
         build (dict): build data from Jenkins
     """
     def __init__(self, build):
-        super(Build, self).__init__()
         self.isbuilding = build.get('building')
 
         author = None
@@ -24,14 +23,13 @@ class Build(dict):
         if actions:
             action_parameters = actions[0].get('parameters')
             if action_parameters:
-                for param in action_parameters:
-                    if param.get('name') == u'ghprbActualCommitAuthorEmail':
-                        author = param.get('value')
-                    if param.get('name') == u'ghprbPullId':
-                        pr_id = param.get('value')
+                for p in action_parameters:
+                    if p.get('name') == u'ghprbActualCommitAuthorEmail':
+                        author = p.get('value')
+                    if p.get('name') == u'ghprbPullId':
+                        pr_id = p.get('value')
             else:
-
-                LOGGER.debug(
+                logger.debug(
                     "Couldn't find build parameters for build #{}".format(
                         build.get('number')
                     )

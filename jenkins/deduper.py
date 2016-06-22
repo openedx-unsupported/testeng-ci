@@ -10,17 +10,17 @@ import argparse
 import logging
 import sys
 
-from jenkins.job import JenkinsJob
-from jenkins.build import Build
+from job import JenkinsJob
+from build import Build
 
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-class GhprbOutdatedBuildAborter(object):
+class GhprbOutdatedBuildAborter:
 
     """
-    A class for programmatically finding and aborting outdated
+    A class for programatically finding and aborting outdated
     jenkins builds that were started using the GHPRB plugin.
 
     :Args:
@@ -32,7 +32,7 @@ class GhprbOutdatedBuildAborter(object):
         self.one_per_author = one_per_author
 
     @staticmethod
-    def _aborted_description(current_build_id, pull_request):
+    def _aborted_description(current_build_id, pr):
         """
         :Args:
             current_build_id: the id of the most recently started
@@ -43,7 +43,7 @@ class GhprbOutdatedBuildAborter(object):
         """
         return ("[PR #{}] Build automatically aborted because"
                 " there is a newer build for the same PR. See build"
-                " #{}.".format(pull_request, current_build_id))
+                " #{}.".format(pr, current_build_id))
 
     def abort_duplicate_builds(self):
         """
@@ -75,14 +75,14 @@ class GhprbOutdatedBuildAborter(object):
         """
         build_data = defaultdict(list)
 
-        for bld in data['builds']:
-            build = Build(bld)
+        for b in data['builds']:
+            build = Build(b)
             if build.isbuilding:
-                build_data[build.pr_id].append(bld)
+                build_data[build.pr_id].append(b)
 
         return build_data
 
-    def stop_all_but_most_recent(self, pull_request, builds):
+    def stop_all_but_most_recent(self, pr, builds):
         """
         Stop all the builds in the list but the most recently initiated.
 
@@ -103,9 +103,9 @@ class GhprbOutdatedBuildAborter(object):
             current_build_id = sorted_builds[0]['number']
 
             # Any other builds are assumed to be outdated
-            old_build_ids = [bld['number'] for bld in sorted_builds[1:]]
+            old_build_ids = [b['number'] for b in sorted_builds[1:]]
 
-            output.append("PR #{}:".format(pull_request))
+            output.append("PR #{}:".format(pr))
             output.append("\tNum running builds: {}".format(
                 len(sorted_builds)))
             output.append("\tCurrent build: {}".format(
@@ -113,14 +113,14 @@ class GhprbOutdatedBuildAborter(object):
             output.append("\tOutdated builds: {}".format(
                 old_build_ids))
 
-            desc = self._aborted_description(current_build_id, pull_request)
+            desc = self._aborted_description(current_build_id, pr)
 
-            for bld in old_build_ids:
+            for b in old_build_ids:
                 try:
-                    self.job.stop_build(bld)
-                    self.job.update_build_desc(bld, desc)
-                except Exception as err:  # pylint: disable=broad-except
-                    LOGGER.error(err.message)
+                    self.job.stop_build(b)
+                    self.job.update_build_desc(b, desc)
+                except Exception as e:
+                    logger.error(e.message)
         return output
 
     def stop_duplicates(self, build_data):
@@ -131,7 +131,7 @@ class GhprbOutdatedBuildAborter(object):
             build_data: the data returned by self.get_running_builds()
         """
         lines = []
-        for pull_request, builds in build_data.iteritems():
+        for pr, builds in build_data.iteritems():
             if self.one_per_author:
                 # Assemble a dict where the key is the author and the
                 # value is a list of that author's builds.
@@ -143,15 +143,12 @@ class GhprbOutdatedBuildAborter(object):
                 # Now for each author, stop all but the most
                 # recent build.
                 for build_list in pr_builds.itervalues():
-                    output = self.stop_all_but_most_recent(
-                        pull_request,
-                        build_list
-                    )
+                    output = self.stop_all_but_most_recent(pr, build_list)
                     if len(output) > 0:
                         lines.extend(output)
 
             else:
-                output = self.stop_all_but_most_recent(pull_request, builds)
+                output = self.stop_all_but_most_recent(pr, builds)
                 if len(output) > 0:
                     lines.extend(output)
 
@@ -160,15 +157,12 @@ class GhprbOutdatedBuildAborter(object):
                    "\n** Extra running builds found. **"
                    "\n---------------------------------\n")
             out += "\n".join(lines)
-            LOGGER.info(out)
+            logger.info(out)
         else:
-            LOGGER.info("No extra running builds found.")
+            logger.info("No extra running builds found.")
 
 
 def deduper_main(raw_args):
-    """
-    Main for the deduper script
-    """
     # Get args
     desc = "Programatically abort older, still-running builds for a PR."
     parser = argparse.ArgumentParser(description=desc)
