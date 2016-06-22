@@ -4,13 +4,13 @@ A class to interact with a jenkins job API
 import logging
 import requests
 
-from jenkins.helpers import append_url
+from helpers import append_url
 
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-class JenkinsJob(object):
+class JenkinsJob:
 
     """
     A class for interacting with the jenkins job API
@@ -22,7 +22,7 @@ class JenkinsJob(object):
     """
 
     logging.basicConfig(format='[%(levelname)s] %(message)s')
-    LOGGER = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
     logging.getLogger('requests').setLevel('ERROR')
 
     def __init__(self, job_url, username, token):
@@ -75,7 +75,7 @@ class JenkinsJob(object):
             },
         )
 
-        LOGGER.info("Updating description for build #{}. Response: {}".format(
+        logger.info("Updating description for build #{}. Response: {}".format(
             build_id, response.status_code))
 
         response.raise_for_status()
@@ -93,7 +93,7 @@ class JenkinsJob(object):
 
         response = requests.post(url, auth=self.auth)
 
-        LOGGER.info("Aborting build #{}. Response: {}".format(
+        logger.info("Aborting build #{}. Response: {}".format(
             build_id, response.status_code))
 
         response.raise_for_status()
