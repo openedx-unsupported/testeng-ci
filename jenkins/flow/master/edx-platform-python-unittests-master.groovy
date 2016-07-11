@@ -5,6 +5,8 @@ def toolbox = extension."build-flow-toolbox"
 def sha1 = build.environment.get("GIT_COMMIT")
 def jenkinsUrl = build.environment.get("JENKINS_URL")
 def jobUrl = jenkinsUrl + build.url
+def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
+def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 
 try{
   def statusJobParams = [
@@ -32,27 +34,27 @@ try{
   guard{
     unit = parallel(
       {
-        lms_unit_1 = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
+        lms_unit_1 = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
         toolbox.slurpArtifacts(lms_unit_1)
       },
       {
-        lms_unit_2 = build('edx-platform-test-subset', sha1: sha1, SHARD: "2", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
+        lms_unit_2 = build(subsetJob, sha1: sha1, SHARD: "2", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
         toolbox.slurpArtifacts(lms_unit_2)
       },
       {
-        lms_unit_3 = build('edx-platform-test-subset', sha1: sha1, SHARD: "3", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
+        lms_unit_3 = build(subsetJob, sha1: sha1, SHARD: "3", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
         toolbox.slurpArtifacts(lms_unit_3)
       },
       {
-        lms_unit_4 = build('edx-platform-test-subset', sha1: sha1, SHARD: "4", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
+        lms_unit_4 = build(subsetJob, sha1: sha1, SHARD: "4", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number)
         toolbox.slurpArtifacts(lms_unit_4)
       },
       {
-        cms_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit", PARENT_BUILD: "master #" + build.number)
+        cms_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit", PARENT_BUILD: "master #" + build.number)
         toolbox.slurpArtifacts(cms_unit)
       },
       {
-        commonlib_unit = build('edx-platform-test-subset', sha1: sha1, SHARD: "1", TEST_SUITE: "commonlib-unit", PARENT_BUILD: "master #" + build.number)
+        commonlib_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "commonlib-unit", PARENT_BUILD: "master #" + build.number)
         toolbox.slurpArtifacts(commonlib_unit)
       },
     )
@@ -82,7 +84,7 @@ try{
     }
   }rescue{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-    FilePath copyToDir = new FilePath(build.workspace, "edx-platform")
+    FilePath copyToDir = new FilePath(build.workspace, repoName)
     artifactsDir.copyRecursiveTo(copyToDir)
   }
 }
