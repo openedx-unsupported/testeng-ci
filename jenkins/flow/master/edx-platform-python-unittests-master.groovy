@@ -7,6 +7,7 @@ def jenkinsUrl = build.environment.get("JENKINS_URL")
 def jobUrl = jenkinsUrl + build.url
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
 def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
+def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
 
 try{
   def statusJobParams = [
@@ -68,7 +69,7 @@ try{
       commonlib_unit.result.toString() == 'SUCCESS')
 
     if (check_coverage){
-      unit_coverage = build('edx-platform-unit-coverage',
+      unit_coverage = build(coverageJob,
                             UNIT_BUILD_NUM_1: commonlib_unit.number,
                             UNIT_BUILD_NUM_2: lms_unit_1.number,
                             UNIT_BUILD_NUM_3: lms_unit_2.number,
