@@ -12,7 +12,7 @@ def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-co
 try{
   def statusJobParams = [
     new StringParameterValue("GITHUB_ORG", "edx"),
-    new StringParameterValue("GITHUB_REPO", "edx-platform"),
+    new StringParameterValue("GITHUB_REPO", repoName),
     new StringParameterValue("GIT_SHA", "${sha1}"),
     new StringParameterValue("BUILD_STATUS", "pending"),
     new StringParameterValue("TARGET_URL", jobUrl),
