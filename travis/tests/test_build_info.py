@@ -11,7 +11,7 @@ import requests
 from travis.build_info import (
     get_repos,
     get_active_jobs,
-    get_active_builds,
+    get_builds,
     BASE_URL,
     main,
     active_job_counts,
@@ -88,7 +88,7 @@ class TestTravisActiveBuildInfo(TestCase):
             body="""[{"id": 1, "state": "created"},
                 {"id": 2, "state": "started"}]""",
             )
-        builds = get_active_builds('foo', 'bar-repo')
+        builds = get_builds('foo', 'bar-repo')
         self.assertEqual(2, len(builds))
 
     @httpretty.activate
@@ -99,7 +99,7 @@ class TestTravisActiveBuildInfo(TestCase):
             body="""[{"id": 1, "state": "created"},
                 {"id": 2, "state": "finished"}]""",
             )
-        builds = get_active_builds('foo', 'bar-repo')
+        builds = get_builds('foo', 'bar-repo')
         self.assertEqual(1, len(builds))
 
     @httpretty.activate
@@ -110,7 +110,7 @@ class TestTravisActiveBuildInfo(TestCase):
             body="""[{"id": 1, "state": "finished"},
                 {"id": 2, "state": "finished"}]""",
             )
-        builds = get_active_builds('foo', 'bar-repo')
+        builds = get_builds('foo', 'bar-repo')
         self.assertEqual(0, len(builds))
 
     @httpretty.activate
@@ -121,7 +121,7 @@ class TestTravisActiveBuildInfo(TestCase):
             body="""[{"id": 1, "state": "started"},
                 {"id": 2, "state": "created"}]""",
             )
-        builds = get_active_builds('foo', 'bar-repo')
+        builds = get_builds('foo', 'bar-repo')
         total_count, started_count = repo_active_build_count(builds)
         self.assertEqual(2, total_count)
         self.assertEqual(1, started_count)
@@ -134,7 +134,7 @@ class TestTravisActiveBuildInfo(TestCase):
             body="""[{"id": 1, "state": "created"},
                 {"id": 2, "state": "created"}]""",
             )
-        builds = get_active_builds('foo', 'bar-repo')
+        builds = get_builds('foo', 'bar-repo')
         total_count, started_count = repo_active_build_count(builds)
         self.assertEqual(2, total_count)
         self.assertEqual(0, started_count)
@@ -144,6 +144,61 @@ class TestTravisActiveBuildInfo(TestCase):
         total_count, started_count = repo_active_build_count(builds)
         self.assertEqual(0, total_count)
         self.assertEqual(0, started_count)
+
+
+class TestTravisFinishedBuildInfo(TestCase):
+    """
+    Handle responses for queries on a given repo's builds
+    """
+
+    def setUp(self):
+        super(TestTravisFinishedBuildInfo, self).setUp()
+        self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
+
+    @httpretty.activate
+    def test_vanilla_finished_builds(self):
+        httpretty.register_uri(
+            httpretty.GET,
+            self.url_endpoint,
+            body="""[{"id": 1, "state": "finished"},
+                {"id": 2, "state": "finished"}]""",
+        )
+        builds = get_builds('foo', 'bar-repo', is_finished=True)
+        self.assertEqual(2, len(builds))
+
+    @httpretty.activate
+    def test_active_finished_mix(self):
+        httpretty.register_uri(
+            httpretty.GET,
+            self.url_endpoint,
+            body="""[{"id": 1, "state": "created"},
+                {"id": 2, "state": "finished"},
+                {"id": 3, "state": "started"}]""",
+        )
+        builds = get_builds('foo', 'bar-repo', is_finished=True)
+        self.assertEqual(1, len(builds))
+
+    @httpretty.activate
+    def test_all_finished(self):
+        httpretty.register_uri(
+            httpretty.GET,
+            self.url_endpoint,
+            body="""[{"id": 1, "state": "finished"},
+                {"id": 2, "state": "finished"}]""",
+        )
+        builds = get_builds('foo', 'bar-repo', is_finished=True)
+        self.assertEqual(2, len(builds))
+
+    @httpretty.activate
+    def test_all_active(self):
+        httpretty.register_uri(
+            httpretty.GET,
+            self.url_endpoint,
+            body="""[{"id": 1, "state": "started"},
+                {"id": 2, "state": "created"}]""",
+        )
+        builds = get_builds('foo', 'bar-repo', is_finished=True)
+        self.assertEqual(0, len(builds))
 
 
 class TestTravisBuildInfoJobs(TestCase):
@@ -258,7 +313,7 @@ class TestTravisBuildInfoMain(TestCase):
             'travis.build_info.get_repos', return_value=['bar']
         )
         self.mock_builds = patch(
-            'travis.build_info.get_active_builds',
+            'travis.build_info.get_builds',
             return_value=[{"id": 1, "state": "started"}]
         )
         self.mock_jobs = patch(

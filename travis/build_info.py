@@ -41,7 +41,7 @@ def get_repos(org):
     return repo_list
 
 
-def get_active_builds(org, repo):
+def get_builds(org, repo, is_finished=False):
     """
     Returns list of active builds for a given repo slug
     """
@@ -50,11 +50,16 @@ def get_active_builds(org, repo):
         BASE_URL + 'repos/{repo_slug}/builds'.format(repo_slug=repo_slug)
     )
     build_list = req.json()
-    active_build_list = []
+    selected_build_list = []
     for build in build_list:
-        if build.get('state') != 'finished':
-            active_build_list.append(build)
-    return active_build_list
+        if not is_finished:
+            if build.get('state') != 'finished':
+                selected_build_list.append(build)
+        else:
+            if build.get('state') == 'finished':
+                selected_build_list.append(build)
+
+    return selected_build_list
 
 
 def get_active_jobs(build_id):
@@ -132,7 +137,7 @@ def get_job_counts(org):
 
     repos = get_repos(org)
     for repo in repos:
-        repo_builds = get_active_builds(org, repo)
+        repo_builds = get_builds(org, repo)
         repo_jobs = 0
         repo_started_jobs = 0
         for build in repo_builds:
@@ -163,7 +168,7 @@ def get_build_counts(org):
     org_build_started_count = 0
 
     for repo in repos:
-        repo_builds = get_active_builds(org, repo)
+        repo_builds = get_builds(org, repo)
         logger.debug("--->" + repo)
 
         repo_build_total, num_started = repo_active_build_count(repo_builds)
