@@ -5,11 +5,14 @@ This only applies to travis instances that do not require
 authorization (e.g., travis-ci.org). Auth is a #TODO
 
 """
+from __future__ import division
 
 import argparse
 import logging
 import requests
 import sys
+
+from operator import itemgetter
 
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -41,7 +44,7 @@ def get_repos(org):
     return repo_list
 
 
-def get_active_builds(org, repo):
+def get_builds(org, repo, is_finished=False):
     """
     Returns list of active builds for a given repo slug
     """
@@ -50,11 +53,74 @@ def get_active_builds(org, repo):
         BASE_URL + 'repos/{repo_slug}/builds'.format(repo_slug=repo_slug)
     )
     build_list = req.json()
-    active_build_list = []
+    selected_build_list = []
     for build in build_list:
-        if build.get('state') != 'finished':
-            active_build_list.append(build)
-    return active_build_list
+        if not is_finished:
+            if build.get('state') != 'finished':
+                selected_build_list.append(build)
+        else:
+            if build.get('state') == 'finished':
+                selected_build_list.append(build)
+
+    return selected_build_list
+
+
+def get_last_n_successful_builds(org, repo, number):
+    """
+    Collects the specified number of previous successful builds
+     for a given repo
+    """
+    finished_builds = get_builds(org, repo, is_finished=True)
+    successful_builds = []
+    for build in finished_builds:
+        # if build passed, add it to our list
+        if build['result'] == 0:
+            successful_builds.append(build)
+
+    # sort in descending order
+    successful_builds = sorted(
+        successful_builds,
+        key=itemgetter('number'),
+        reverse=True
+    )
+    # if we can't get the specified number of builds, just return everything
+    if len(successful_builds) < number:
+        return successful_builds
+    else:
+        return successful_builds[:number]
+
+
+def get_average_build_duration(builds):
+    """
+    returns average build duration in minutes (a whole number)
+
+    """
+    durations = []
+    for build in builds:
+        durations.append(int(build['duration']))
+    return sum(durations) // len(builds) // 60  # python 3 division here
+
+
+def get_average_duration_org(org, num=5):
+    """
+    Returns dict of repos and average durations
+    num: dataset size from which to derive the
+    average (e.g., num=5 would be the average over the last 5 builds)
+    org: the github org
+    """
+    repos = get_repos(org)
+    avg_duration_org = []
+    for repo in repos:
+        builds = get_last_n_successful_builds(org, repo, num)
+        avg = get_average_build_duration(builds)
+        avg_duration_org.append({"repo": repo, "average duration": avg})
+    avg_duration_org = sorted(
+        avg_duration_org,
+        key=itemgetter("average duration"),
+        reverse=True
+    )
+    logger.info(avg_duration_org)
+    return avg_duration_org
 
 
 def get_active_jobs(build_id):
@@ -132,7 +198,7 @@ def get_job_counts(org):
 
     repos = get_repos(org)
     for repo in repos:
-        repo_builds = get_active_builds(org, repo)
+        repo_builds = get_builds(org, repo)
         repo_jobs = 0
         repo_started_jobs = 0
         for build in repo_builds:
@@ -163,7 +229,7 @@ def get_build_counts(org):
     org_build_started_count = 0
 
     for repo in repos:
-        repo_builds = get_active_builds(org, repo)
+        repo_builds = get_builds(org, repo)
         logger.debug("--->" + repo)
 
         repo_build_total, num_started = repo_active_build_count(repo_builds)
@@ -206,6 +272,7 @@ def main(raw_args):
         choices=[
             'BUILD', 'build',
             'JOB', 'job',
+            'DURATION', 'duration'
         ],
         default="BUILD",
     )
@@ -228,6 +295,8 @@ def main(raw_args):
     logging.getLogger(__name__).setLevel(args.log_level.upper())
     if args.task_class.upper() == 'JOB':
         get_job_counts(org=args.org)
+    elif args.task_class.upper() == 'DURATION':
+        get_average_duration_org(org=args.org)
     else:
         get_build_counts(org=args.org)
 
