@@ -10,7 +10,7 @@ This repo contains:
 	* Find all Travis builds on a given github org (like edx) and report on status + counts
 	* Clean up orphaned jenkins-worker nodes with whom we have lost contact
 	* build-flow scripts used in Jenkins edx-platform jobs
-	* sitespeed scripts and [budgets](jenkins/freestyle/sitespeed-budget)
+	* sitespeed scripts and [budgets](jenkins/sitespeed-budget)
 	* release infrastructure for mobile builds
 	
 * Job infrastructure for our Jenkins instance 
