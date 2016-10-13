@@ -5,7 +5,7 @@ import ddt
 import json
 import re
 import responses
-from responses import GET, POST  # pylint: disable=no-name-in-module
+from responses import GET, POST, DELETE  # pylint: disable=no-name-in-module
 from unittest import TestCase
 
 from release.tests.aborted import Aborted
@@ -62,6 +62,12 @@ ENDPOINTS = [
             'body': 'more text', 'head': 'branch_name',
             'base': 'base', 'title': 'some request'
         }
+    ),
+    EndpointInfo(
+        "https://api.github.com/repos/test-org/test-repo/git/refs/test-branch",
+        lambda api: api.delete_branch('test-branch'),
+        success=204,
+        method=DELETE
     ),
 ]
 
