@@ -22,6 +22,8 @@ from release import utils
 
 logger = logging.getLogger(__name__)
 
+RELEASE_CANDIDATE_BRANCH = "release-candidate"
+
 
 def valid_date(s):
     """Convert a string into a date, for argument parsing."""
@@ -113,7 +115,7 @@ def create_candidate_main(raw_args):
             "Couldn't find a recent commit without test failures. Aborting"
         )
 
-    branch_name = utils.rc_branch_name_for_date(args.release_date.date())
+    branch_name = RELEASE_CANDIDATE_BRANCH
 
     logger.info(
         "Branching {rc} off {sha}. ({msg})".format(
@@ -121,16 +123,19 @@ def create_candidate_main(raw_args):
         )
     )
     try:
+        github_api.delete_branch(branch_name)
         github_api.create_branch(branch_name, commit_hash)
     except RequestFailed:
-        logger.error("Unable to create branch. Aborting")
+        logger.error("Unable to recreate branch {branch_name}. Aborting"
+                     .format(branch_name=branch_name))
         raise
 
     logger.info(
         "Creating Pull Request for {rc} into release".format(rc=branch_name)
     )
     try:
-        request_title = "Release Candidate {rc}".format(rc=branch_name)
+        request_title = "Release Candidate {rc}"\
+            .format(rc=utils.rc_branch_name_for_date(args.release_date.date()))
         github_api.create_pull_request(branch_name, title=request_title)
     except RequestFailed:
         logger.error("Unable to create branch. Aborting")
