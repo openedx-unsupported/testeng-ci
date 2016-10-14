@@ -85,6 +85,14 @@ def _build_parser():
         """
     )
 
+    result.add_argument(
+        '--force-commit',
+        default=None,
+        help="""
+        Force the branch to be cut with SHA passed in via this argument.
+        """
+    )
+
     return result
 
 
@@ -96,24 +104,31 @@ def create_candidate_main(raw_args):
     token = get_token()
     github_api = GithubApi(args.org, args.repo, token)
 
-    logger.info("Fetching commits...")
-    try:
-        commit = utils.most_recent_good_commit(github_api)
-        commit_hash = commit['sha']
-        commit_message = commit['commit']['message']
-        message = utils.extract_message_summary(commit_message)
-        if args.find_commit:
-            logger.info(
-                "\n\thash: {commit_hash}\n\tcommit message: {message}".format(
-                    commit_hash=commit_hash,
-                    message=message
-                    )
-                )
-            return
-    except utils.NoValidCommitsError:
-        logger.error(
-            "Couldn't find a recent commit without test failures. Aborting"
+    if args.force_commit:
+        commit_hash = args.force_commit
+        message = "User overide SHA"
+    else:
+        logger.info("Fetching commits...")
+        try:
+            commit = utils.most_recent_good_commit(github_api)
+            commit_hash = commit['sha']
+            commit_message = commit['commit']['message']
+            message = utils.extract_message_summary(commit_message)
+
+        except utils.NoValidCommitsError:
+            logger.error(
+                "Couldn't find a recent commit without test failures. Aborting"
+            )
+
+    # Return early if we are only returning the commit hash to stdout
+    if args.find_commit:
+        logger.info(
+            "\n\thash: {commit_hash}\n\tcommit message: {message}".format(
+                commit_hash=commit_hash,
+                message=message
+            )
         )
+        return
 
     branch_name = RELEASE_CANDIDATE_BRANCH
 
@@ -124,6 +139,10 @@ def create_candidate_main(raw_args):
     )
     try:
         github_api.delete_branch(branch_name)
+    except RequestFailed:
+        logger.error("Unable to delete branch {branch_name}. Will attempt to recreate"
+                     .format(branch_name=branch_name))
+    try:
         github_api.create_branch(branch_name, commit_hash)
     except RequestFailed:
         logger.error("Unable to recreate branch {branch_name}. Aborting"
