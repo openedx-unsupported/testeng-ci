@@ -117,6 +117,22 @@ class GithubApi(object):
         """
         return self._request(path, 'POST', success_code=201, json=args)
 
+    def _delete(self, path):
+        """
+        Performs a network `DELETE` request, validating its success.
+
+        Arguments:
+            path (string): An api path. Does not need to include the the url
+                domain.
+
+        Returns:
+            json: The output of the endpoint as a json object.
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
+        return self._request(path, 'DELETE', success_code=204)
+
     def user(self):
         """
         Calls GitHub's '/user' endpoint.
@@ -159,6 +175,21 @@ class GithubApi(object):
         """
         path = "repos/{org}/{repo}/commits"
         return self._get(path)
+
+    def delete_branch(self, branch_name):
+        """
+        Call GitHub's delete ref (branch) API
+
+        Args:
+            branch_name (str): The name of the branch to delete
+
+        Returns:
+
+        Raises:
+            RequestFailed: If the response fails validation.
+        """
+        path = "repos/{{org}}/{{repo}}/git/refs/{ref}".format(ref=branch_name)
+        return self._delete(path)
 
     def create_branch(self, branch_name, sha):
         """
