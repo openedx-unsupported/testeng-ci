@@ -64,7 +64,7 @@ ENDPOINTS = [
         }
     ),
     EndpointInfo(
-        "https://api.github.com/repos/test-org/test-repo/git/refs/test-branch",
+        "https://api.github.com/repos/test-org/test-repo/git/refs/heads/test-branch",
         lambda api: api.delete_branch('test-branch'),
         success=204,
         method=DELETE
