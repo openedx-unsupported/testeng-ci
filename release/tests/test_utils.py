@@ -60,7 +60,7 @@ class ReleaseUtilsTestCase(TestCase):
         now = self.mock_now()
         date = utils.default_expected_release_date(now.weekday())
         self.assertEqual(date.weekday(), now.weekday())
-        self.assertTrue(now < date)
+        self.assertLess(now, date)
 
     def test_start_soon(self):
         """ Tests that the next day is within the next week """
@@ -68,7 +68,7 @@ class ReleaseUtilsTestCase(TestCase):
         date = utils.default_expected_release_date(now.weekday())
         self.assertEqual(date.weekday(), now.weekday())
         next_week = date + timedelta(weeks=1)
-        self.assertTrue(date < next_week)
+        self.assertLess(date, next_week)
 
     def test_no_parseable_commit_data(self):
         """

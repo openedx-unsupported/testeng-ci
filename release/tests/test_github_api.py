@@ -17,13 +17,12 @@ class EndpointInfo(object):
     """ Encapsulates the info we need to test an end point """
 
     def __init__(
-        self,
-        expected_url,
-        request_maker,
-        success=200,
-        method=GET,
-        request_body=None
-    ):  # pylint: disable=too-many-arguments
+            self,
+            expected_url,
+            request_maker,
+            success=200,
+            method=GET,
+            request_body=None):  # pylint: disable=too-many-arguments
         self.expected_url = expected_url
         self.request_maker = request_maker
         self.success = success
@@ -83,6 +82,7 @@ class GitHubApiTestCase(TestCase):
     def setUp(self):
         self.api = GithubApi("test-org", "test-repo", token="abc123")
         self.catch_all_re = re.compile(r'.*')
+        super(GitHubApiTestCase, self).setUp()
 
     def add_catch_all(self, rsps, method, status, body='{}'):
         """ Helper method for easily intercepting all network requests """
