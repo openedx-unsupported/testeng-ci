@@ -192,7 +192,8 @@ class GithubApi(object):
         Raises:
             RequestFailed: If the response fails validation.
         """
-        path = "repos/{{org}}/{{repo}}/git/refs/heads/{ref}".format(ref=branch_name)
+        path = "repos/{{org}}/{{repo}}/git/refs/heads/{ref}"\
+            .format(ref=branch_name)
         return self._delete(path)
 
     def create_branch(self, branch_name, sha):
