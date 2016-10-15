@@ -97,6 +97,16 @@ def _build_parser():
 
 
 def create_candidate_main(raw_args):
+    """
+    Create a release candidate for an edx release.
+
+    Args:
+        raw_args:
+
+    Returns:
+        None
+
+    """
     parser = _build_parser()
     args = parser.parse_args(raw_args)
 

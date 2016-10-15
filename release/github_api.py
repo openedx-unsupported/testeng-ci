@@ -217,12 +217,11 @@ class GithubApi(object):
         return self._post(path, payload)
 
     def create_pull_request(
-        self,
-        branch_name,
-        base="release",
-        title="",
-        body=""
-    ):
+            self,
+            branch_name,
+            base="release",
+            title="",
+            body=""):
         """ Creates a new pull request from a branch """
         path = "repos/{org}/{repo}/pulls"
         payload = {
