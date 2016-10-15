@@ -82,7 +82,11 @@ class GithubApi(object):
         )
         if response.status_code != success_code:
             raise RequestFailed(response)
-        return response.json()
+        # some response codes are not expected to have any content
+        if response.text:
+            return response.json()
+        else:
+            return
 
     def _get(self, path):
         """
@@ -188,7 +192,8 @@ class GithubApi(object):
         Raises:
             RequestFailed: If the response fails validation.
         """
-        path = "repos/{{org}}/{{repo}}/git/refs/{ref}".format(ref=branch_name)
+        path = "repos/{{org}}/{{repo}}/git/refs/heads/{ref}"\
+            .format(ref=branch_name)
         return self._delete(path)
 
     def create_branch(self, branch_name, sha):
@@ -212,12 +217,11 @@ class GithubApi(object):
         return self._post(path, payload)
 
     def create_pull_request(
-        self,
-        branch_name,
-        base="release",
-        title="",
-        body=""
-    ):
+            self,
+            branch_name,
+            base="release",
+            title="",
+            body=""):
         """ Creates a new pull request from a branch """
         path = "repos/{org}/{repo}/pulls"
         payload = {
