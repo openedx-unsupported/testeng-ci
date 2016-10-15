@@ -140,7 +140,8 @@ def create_candidate_main(raw_args):
     try:
         github_api.delete_branch(branch_name)
     except RequestFailed:
-        logger.error("Unable to delete branch {branch_name}. Will attempt to recreate"
+        logger.error("Unable to delete branch {branch_name}. " +
+                     "Will attempt to recreate"
                      .format(branch_name=branch_name))
     try:
         github_api.create_branch(branch_name, commit_hash)
