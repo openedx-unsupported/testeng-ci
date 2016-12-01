@@ -7,31 +7,32 @@ def branch = build.environment.get("ghprbSourceBranch")
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
 def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
+def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 
 guard{
     unit = parallel(
       {
-        lms_unit_1 = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number)
+        lms_unit_1 = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number, WORKER_LABEL: workerLabel)
         toolbox.slurpArtifacts(lms_unit_1)
       },
       {
-        lms_unit_2 = build(subsetJob, sha1: sha1, SHARD: "2", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number)
+        lms_unit_2 = build(subsetJob, sha1: sha1, SHARD: "2", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number, WORKER_LABEL: workerLabel)
         toolbox.slurpArtifacts(lms_unit_2)
       },
       {
-        lms_unit_3 = build(subsetJob, sha1: sha1, SHARD: "3", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number)
+        lms_unit_3 = build(subsetJob, sha1: sha1, SHARD: "3", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number, WORKER_LABEL: workerLabel)
         toolbox.slurpArtifacts(lms_unit_3)
       },
       {
-        lms_unit_4 = build(subsetJob, sha1: sha1, SHARD: "4", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number)
+        lms_unit_4 = build(subsetJob, sha1: sha1, SHARD: "4", TEST_SUITE: "lms-unit", PARENT_BUILD: "PR Build #" + build.number, WORKER_LABEL: workerLabel)
         toolbox.slurpArtifacts(lms_unit_4)
       },
       {
-        cms_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit", PARENT_BUILD: "PR Build #" + build.number)
+        cms_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit", PARENT_BUILD: "PR Build #" + build.number, WORKER_LABEL: workerLabel)
         toolbox.slurpArtifacts(cms_unit)
       },
       {
-        commonlib_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "commonlib-unit", PARENT_BUILD: "PR Build #" + build.number)
+        commonlib_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "commonlib-unit", PARENT_BUILD: "PR Build #" + build.number, WORKER_LABEL: workerLabel)
         toolbox.slurpArtifacts(commonlib_unit)
       },
     )
