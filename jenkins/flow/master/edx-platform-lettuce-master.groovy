@@ -7,6 +7,7 @@ def jenkinsUrl = build.environment.get("JENKINS_URL")
 def jobUrl = jenkinsUrl + build.url
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
 def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
+def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 
 try{
   def statusJobParams = [
@@ -31,11 +32,11 @@ try{
   guard{
     parallel(
         {
-          lettuce_lms = build(subsetJob, sha1: sha1, SHARD: "all", TEST_SUITE: "lms-acceptance", PARENT_BUILD: "master #" + build.number)
+          lettuce_lms = build(subsetJob, sha1: sha1, SHARD: "all", TEST_SUITE: "lms-acceptance", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
           toolbox.slurpArtifacts(lettuce_lms)
         },
         {
-          lettuce_cms = build(subsetJob, sha1: sha1, SHARD: "all", TEST_SUITE: "cms-acceptance", PARENT_BUILD: "master #" + build.number)
+          lettuce_cms = build(subsetJob, sha1: sha1, SHARD: "all", TEST_SUITE: "cms-acceptance", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
           toolbox.slurpArtifacts(lettuce_cms)
         },
     )
