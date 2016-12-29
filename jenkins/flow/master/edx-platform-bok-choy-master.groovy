@@ -35,7 +35,7 @@ try{
 } finally{
   guard{
     parallel(
-      (1..9).collect { index ->
+      (1..11).collect { index ->
         return {
           bokchoybuild = build(subsetJob, sha1: sha1, SHARD: index, TEST_SUITE: "bok-choy", ENV_VARS: params["ENV_VARS"], PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
           toolbox.slurpArtifacts(bokchoybuild)
