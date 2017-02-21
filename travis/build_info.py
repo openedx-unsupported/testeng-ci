@@ -48,6 +48,7 @@ def get_builds(org, repo, is_finished=False):
     """
     Returns list of active builds for a given repo slug
     """
+    logger.debug('getting builds for repo: ' + repo)
     repo_slug = '{org}/{repo}'.format(org=org, repo=repo)
     req = requests.get(
         BASE_URL + 'repos/{repo_slug}/builds'.format(repo_slug=repo_slug)
@@ -112,6 +113,7 @@ def get_average_duration_org(org, num=5):
     avg_duration_org = []
     for repo in repos:
         builds = get_last_n_successful_builds(org, repo, num)
+        logger.debug('getting average duration for: ' + repo)
         avg = get_average_build_duration(builds)
         avg_duration_org.append({"repo": repo, "average duration": avg})
     avg_duration_org = sorted(
