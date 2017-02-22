@@ -12,6 +12,9 @@ import logging
 import requests
 import sys
 
+from datetime import datetime
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from operator import itemgetter
 
 
@@ -44,10 +47,15 @@ def get_repos(org):
     return repo_list
 
 
-def get_builds(org, repo, is_finished=False):
+def get_builds(org, repo, is_finished=False, last_months=3):
     """
     Returns list of active builds for a given repo slug
+
+    is_finished: only return builds that have completed
+    last_months: only return builds completed within the last <value> months
     """
+    today = datetime.today()
+    oldest_date_allowed = today - relativedelta(months=last_months)
     logger.debug('getting builds for repo: ' + repo)
     repo_slug = '{org}/{repo}'.format(org=org, repo=repo)
     req = requests.get(
@@ -61,7 +69,9 @@ def get_builds(org, repo, is_finished=False):
                 selected_build_list.append(build)
         else:
             if build.get('state') == 'finished':
-                selected_build_list.append(build)
+                    build_time = parse(build.get('finished_at'), ignoretz=True)
+                    if build_time >= oldest_date_allowed:
+                        selected_build_list.append(build)
 
     return selected_build_list
 
@@ -97,6 +107,8 @@ def get_average_build_duration(builds):
 
     """
     durations = []
+    if len(builds) == 0:
+        return
     for build in builds:
         durations.append(int(build['duration']))
     return sum(durations) // len(builds) // 60  # python 3 division here
@@ -115,11 +127,11 @@ def get_average_duration_org(org, num=5):
         builds = get_last_n_successful_builds(org, repo, num)
         logger.debug('getting average duration for: ' + repo)
         avg = get_average_build_duration(builds)
-        avg_duration_org.append({"repo": repo, "average duration": avg})
+        if avg:
+            avg_duration_org.append({"repo": repo, "average duration": avg})
     avg_duration_org = sorted(
         avg_duration_org,
-        key=itemgetter("average duration"),
-        reverse=True
+        key=itemgetter("repo")
     )
     logger.info(avg_duration_org)
     return avg_duration_org
