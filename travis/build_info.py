@@ -69,9 +69,9 @@ def get_builds(org, repo, is_finished=False, last_months=3):
                 selected_build_list.append(build)
         else:
             if build.get('state') == 'finished':
-                    build_time = parse(build.get('finished_at'), ignoretz=True)
-                    if build_time >= oldest_date_allowed:
-                        selected_build_list.append(build)
+                build_time = parse(build.get('finished_at'), ignoretz=True)
+                if build_time >= oldest_date_allowed:
+                    selected_build_list.append(build)
 
     return selected_build_list
 

@@ -1,3 +1,6 @@
+"""
+Flask app that visualizes the build info, such as build durations
+"""
 # Import from our sibling directory
 from travis import build_info
 
@@ -8,7 +11,7 @@ import pygal
 from flask import Flask
 from pygal.style import DarkSolarizedStyle
 
-app = Flask(__name__)
+app = Flask(__name__)  # pylint: disable=invalid-name
 
 
 @app.route('/')

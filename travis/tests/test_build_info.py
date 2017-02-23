@@ -1,12 +1,15 @@
 """
 Tests for testeng-ci/travis/build_info
 """
+from dateutil.relativedelta import relativedelta
 from ddt import ddt, data
 from mock import patch
 from testfixtures import LogCapture
 from unittest import TestCase
 
+import datetime
 import httpretty
+import json
 import os
 import requests
 
@@ -158,59 +161,70 @@ class TestTravisFinishedBuildInfo(TestCase):
     def setUp(self):
         super(TestTravisFinishedBuildInfo, self).setUp()
         self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
+        self.recent_time = datetime.datetime.now() - relativedelta(months=1)
+        self.recent_timestamp = self.recent_time.isoformat()[:-7] + 'Z'
 
     @httpretty.activate
     def test_vanilla_finished_builds(self):
+        build_list = [{"id": 1, "state": "finished"},
+                      {"id": 2, "state": "finished"}]
+        _add_timestamps(build_list, self.recent_timestamp)
         httpretty.register_uri(
             httpretty.GET,
             self.url_endpoint,
-            body="""[{"id": 1, "state": "finished"},
-                {"id": 2, "state": "finished"}]""",
+            body=json.dumps(build_list)
         )
         builds = get_builds('foo', 'bar-repo', is_finished=True)
         self.assertEqual(2, len(builds))
 
     @httpretty.activate
     def test_active_finished_mix(self):
+        build_list = [{"id": 1, "state": "created"},
+                      {"id": 2, "state": "finished"},
+                      {"id": 3, "state": "started"}]
+        _add_timestamps(build_list, self.recent_timestamp)
         httpretty.register_uri(
             httpretty.GET,
             self.url_endpoint,
-            body="""[{"id": 1, "state": "created"},
-                {"id": 2, "state": "finished"},
-                {"id": 3, "state": "started"}]""",
+            body=json.dumps(build_list)
         )
         builds = get_builds('foo', 'bar-repo', is_finished=True)
         self.assertEqual(1, len(builds))
 
     @httpretty.activate
     def test_all_finished(self):
+        build_list = [{"id": 1, "state": "finished"},
+                      {"id": 2, "state": "finished"}]
+        _add_timestamps(build_list, self.recent_timestamp)
         httpretty.register_uri(
             httpretty.GET,
             self.url_endpoint,
-            body="""[{"id": 1, "state": "finished"},
-                {"id": 2, "state": "finished"}]""",
+            body=json.dumps(build_list)
         )
         builds = get_builds('foo', 'bar-repo', is_finished=True)
         self.assertEqual(2, len(builds))
 
     @httpretty.activate
     def test_all_finished_but_asking_for_active(self):
+        build_list = [{"id": 1, "state": "finished"},
+                      {"id": 2, "state": "finished"}]
+        _add_timestamps(build_list, self.recent_timestamp)
         httpretty.register_uri(
             httpretty.GET,
             self.url_endpoint,
-            body="""[{"id": 1, "state": "finished"},
-                {"id": 2, "state": "finished"}]""",
+            body=json.dumps(build_list)
         )
         builds = get_builds('foo', 'bar-repo')
         self.assertEqual(0, len(builds))
 
     @httpretty.activate
     def test_all_active(self):
+        build_list = [{"id": 1, "state": "started"},
+                      {"id": 2, "state": "created"}]
         httpretty.register_uri(
             httpretty.GET,
             self.url_endpoint,
-            body="""[{"id": 1, "state": "started"},
-                {"id": 2, "state": "created"}]""",
+            body=json.dumps(build_list)
         )
         builds = get_builds('foo', 'bar-repo')
         self.assertEqual(2, len(builds))
@@ -325,6 +339,8 @@ class TestTravisSuccessfulBuilds(TestCase):
     def setUp(self):
         super(TestTravisSuccessfulBuilds, self).setUp()
         self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
+        self.recent_time = datetime.datetime.now() - relativedelta(months=1)
+        self.recent_timestamp = self.recent_time.isoformat()[:-7] + 'Z'
 
     @data(
         {"requested": 5, "expected": 5},
@@ -333,12 +349,17 @@ class TestTravisSuccessfulBuilds(TestCase):
     )
     @httpretty.activate
     def test_successful_builds(self, test_data):
+        build_list = json.loads(
+            self._load_mock_builds_response_file(
+                "fixtures/builds_response.list"
+            )
+        )
+        _add_timestamps(build_list, self.recent_timestamp)
+
         httpretty.register_uri(
             httpretty.GET,
             self.url_endpoint,
-            body=self._load_mock_builds_response_file(
-                "fixtures/builds_response.list"
-            ),
+            body=json.dumps(build_list),
         )
 
         successful_builds = get_last_n_successful_builds(
@@ -500,3 +521,12 @@ class TestTravisBuildInfoMain(TestCase):
                 ('travis.build_info', 'INFO', 'overall_jobs_total=3'),
                 ('travis.build_info', 'INFO', 'overall_jobs_started=0')
             )
+
+
+def _add_timestamps(build_list, timestamp):
+    """
+    adds "finished_at" timestamp to builds that are done
+    """
+    for build in build_list:
+        if build["state"] == "finished":
+            build["finished_at"] = timestamp
