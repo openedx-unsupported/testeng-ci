@@ -1,4 +1,4 @@
--r ../travis/requirements.txt
+-r travis/requirements.txt
 
 Flask==0.12
 pygal==2.3.1
