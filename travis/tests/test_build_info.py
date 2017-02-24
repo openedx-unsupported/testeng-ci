@@ -161,8 +161,12 @@ class TestTravisFinishedBuildInfo(TestCase):
     def setUp(self):
         super(TestTravisFinishedBuildInfo, self).setUp()
         self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
+
+        # Set timestamps that follow the Travis string pattern (iso)
         self.recent_time = datetime.datetime.now() - relativedelta(months=1)
         self.recent_timestamp = self.recent_time.isoformat()[:-7] + 'Z'
+        self.old_time = datetime.datetime.now() - relativedelta(months=7)
+        self.old_timestamp = self.old_time.isoformat()[:-7] + 'Z'
 
     @httpretty.activate
     def test_vanilla_finished_builds(self):
@@ -203,6 +207,42 @@ class TestTravisFinishedBuildInfo(TestCase):
         )
         builds = get_builds('foo', 'bar-repo', is_finished=True)
         self.assertEqual(2, len(builds))
+
+    @httpretty.activate
+    def test_all_old(self):
+        build_list = [{"id": 1, "state": "finished"},
+                      {"id": 2, "state": "finished"}]
+        _add_timestamps(build_list, self.old_timestamp)
+        httpretty.register_uri(
+            httpretty.GET,
+            self.url_endpoint,
+            body=json.dumps(build_list)
+        )
+        builds = get_builds('foo', 'bar-repo', is_finished=True)
+        self.assertEqual(0, len(builds))
+
+    @httpretty.activate
+    def test_some_old_some_new(self):
+
+        # Create mocked response to include finished builds with old
+        # and new timestamps
+        build_list = [{"id": 1, "state": "finished"},
+                      {"id": 2, "state": "finished"},
+                      {"id": 3, "state": "finished"}]
+        _add_timestamps(build_list, self.recent_timestamp)
+        build_sublist_old = [{"id": 4, "state": "finished"},
+                             {"id": 5, "state": "finished"}]
+        _add_timestamps(build_sublist_old, self.old_timestamp)
+        for _build in build_sublist_old:
+            build_list.append(_build)
+
+        httpretty.register_uri(
+            httpretty.GET,
+            self.url_endpoint,
+            body=json.dumps(build_list)
+        )
+        builds = get_builds('foo', 'bar-repo', is_finished=True)
+        self.assertEqual(3, len(builds))
 
     @httpretty.activate
     def test_all_finished_but_asking_for_active(self):
