@@ -7,7 +7,7 @@ branches:
 python:
   - "2.7"
 env:
-  - PACKAGES_STRING="jenkins,aws,release,mobile_app,travis"
+  - PACKAGES_STRING="jenkins,aws,release,mobile_app,travis,lambdas"
 install:
   - pip install -r test-requirements.txt
 script:

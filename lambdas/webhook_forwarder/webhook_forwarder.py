@@ -1,5 +1,4 @@
 import json
-import base64
 import os
 
 import botocore.session
@@ -22,14 +21,14 @@ def lambda_handler(event, context):
         # push the lambda 'event' onto the kinesis stream
         output = kinesis.put_record(
             StreamName=stream_name,
-            Data=base64.b64encode(json.dumps(event)),
+            Data=json.dumps(event),
             PartitionKey=u'1'
         )
         logger.debug("Kinesis put_record response: {}".format(output))
         response = {
             'statusCode': 200,
             'headers': {'Content-Type': 'application/json'},
-            'body': 'Successfully forwarded webhook to Kinesis'
+            'body': output
         }
     except Exception as e:
         logger.error(e.message)
