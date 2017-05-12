@@ -4,6 +4,7 @@ import os
 import botocore.session
 
 import logging
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.info('Loading function')
@@ -25,17 +26,9 @@ def lambda_handler(event, context):
             PartitionKey=u'1'
         )
         logger.debug("Kinesis put_record response: {}".format(output))
-        response = {
-            'statusCode': 200,
-            'headers': {'Content-Type': 'application/json'},
-            'body': output
-        }
+        return output
+
     except Exception as e:
         logger.error(e.message)
-        response = {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json'},
-            'body':
-                'Unable to forward the webhook. Error: {}'.format(e.message)
-        }
-    return response
+        output = 'Unable to forward the webhook. Error: {}'.format(e.message)
+        raise StandardError(output)
