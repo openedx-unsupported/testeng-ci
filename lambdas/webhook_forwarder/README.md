@@ -11,6 +11,6 @@ Jenkins instance
 To zip and upload a new version, using the aws cli:
 ```
 zip webhook_forwarder.zip webhook_forwarder.py
-aws s3 cp webhook_forwarder.zip s3://edx-testeng-lambda-webhooks/
+aws s3 cp webhook_forwarder.zip s3://edx-tools-lambda-webhooks/
 rm webhook_forwarder.zip
 ```
