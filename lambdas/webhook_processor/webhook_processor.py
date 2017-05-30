@@ -2,6 +2,15 @@ import base64
 import json
 import logging
 import os
+import urllib
+from constants import (
+    EDX_PLATFORM_MASTER,
+    EDX_PLATFORM_PR,
+    EDX_PLATFORM_EUCALYPTUS_MASTER,
+    EDX_PLATFORM_EUCALYPTUS_PR,
+    EDX_PLATFORM_FICUS_MASTER,
+    EDX_PLATFORM_FICUS_PR
+)
 
 from botocore.vendored.requests import post
 
