@@ -38,10 +38,10 @@ Note the target (jenkins) URL is also configured in the terraform.tfvars file.
 You can use the aws-cli to troubleshoot the data that was
 put on the stream like this:
 
-SHARD_ITERATOR=$(aws kinesis get-shard-iterator \
+export SHARD_ITERATOR=$(aws kinesis get-shard-iterator \
    --shard-id shardId-000000000000 \
    --shard-iterator-type TRIM_HORIZON \
-   --stream-name gh_webhooks \
+   --stream-name edx-tools-gh-webhooks \
    --query 'ShardIterator')
 aws kinesis get-records --shard-iterator $SHARD_ITERATOR
 
