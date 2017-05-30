@@ -1,11 +1,10 @@
 import base64
 import json
+import logging
 import os
-import urllib
 
 from botocore.vendored.requests import post
 
-import logging
 logger = logging.getLogger()
 
 # First log the function load message, then change
@@ -76,7 +75,7 @@ def _send_message(url, payload, headers):
     """ Send the webhook to the endpoint via an HTTP POST.
     Args:
         url (str): Target URL for the POST request
-        payload (str): Payload string to send
+        payload (dict): Payload to send
         headers (dict): Dictionary of headers to send
     Returns:
         dict with k,v pairs for the original data, response,
@@ -88,7 +87,7 @@ def _send_message(url, payload, headers):
         'headers': headers
     }
     try:
-        response = post(url, data=payload, headers=headers, timeout=(3.05, 10))
+        response = post(url, json=payload, headers=headers, timeout=(3.05, 10))
         #  trigger the exception block for 4XX and 5XX responses
         response.raise_for_status()
         result['response'] = response
@@ -133,12 +132,12 @@ def lambda_handler(event, _context):
     urls = _get_target_urls()
     results = []
 
-    # Kinesis stream event format looks like this. Data is base64 encoded:
+    # Kinesis stream event format looks like this. data is base64 encoded:
     # {
     # "Records": [{
     #     "SequenceNumber": "n",
     #     "ApproximateArrivalTimestamp": N,
-    #     "Data": "<ABC>==",
+    #     "data": "<ABC>==",
     #     "PartitionKey": "1"}],
     # "NextShardIterator": "abc",
     # "MillisBehindLatest": 0
@@ -153,11 +152,16 @@ def lambda_handler(event, _context):
 
         # The header we send should include the original GitHub header,
         # and also is set to send the data in the format that Jenkins expects.
-        header = {'Content-Type': 'application/x-www-form-urlencoded'}
+        header = {'Content-Type': 'application/json'}
         headers = _add_gh_header(data_object, header)
+        logger.debug("headers are: '{}'".format(headers))
 
-        # Create the payload string for Jenkins
-        payload = 'payload={}'.format(urllib.quote_plus(data))
+        # Remove the header that we had stored in the data object.
+        data_object.pop('headers', None)
+
+        # We had stored the payload to send in the
+        # 'body' node of the data object.
+        payload = data_object.get('body')
         logger.debug("payload is: '{}'".format(payload))
 
         # Send it off!
