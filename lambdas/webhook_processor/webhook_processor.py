@@ -12,7 +12,7 @@ from constants import (
     EDX_PLATFORM_FICUS_PR
 )
 
-from botocore.vendored.requests import post
+from botocore.vendored.requests import post, get
 
 logger = logging.getLogger()
 
