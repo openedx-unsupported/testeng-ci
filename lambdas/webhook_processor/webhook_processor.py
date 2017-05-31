@@ -9,7 +9,10 @@ from constants import (
     EDX_PLATFORM_EUCALYPTUS_MASTER,
     EDX_PLATFORM_EUCALYPTUS_PR,
     EDX_PLATFORM_FICUS_MASTER,
-    EDX_PLATFORM_FICUS_PR
+    EDX_PLATFORM_FICUS_PR,
+    EDX_PLATFORM_PRIVATE_MASTER,
+    EDX_PLATFORM_PRIVATE_PR,
+    EDX_E2E_PR,
 )
 
 from botocore.vendored.requests import post, get
