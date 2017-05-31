@@ -74,6 +74,7 @@ def _get_jenkins_credentials():
 
     return jenkins_username, jenkins_token
 
+
 def _verify_data(data_string):
     """
     Verify that the data received is in the correct format
