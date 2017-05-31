@@ -62,6 +62,18 @@ def _get_num_retries():
     return num_retries
 
 
+def _get_jenkins_credentials():
+    jenkins_username = os.environ.get('JENKINS_USERNAME')
+    jenkins_token = os.environ.get('JENKINS_API_TOKEN')
+    
+    if not jenkins_url:
+        raise StandardError('Environment variable JENKINS_USERNAME was not set')
+
+    if not jenkins_token:
+        raise StandardError('Environment variable JENKINS_API_TOKEN was not set')
+
+    return jenkins_username, jenkins_token
+
 def _verify_data(data_string):
     """
     Verify that the data received is in the correct format
@@ -160,6 +172,10 @@ def _parse_hook_for_testing_info(data_string):
     Parse the webhook to find the commit sha,
     as well as the arguments needed to find the
     jobs_list.
+
+    Returns:
+        Tuple with commit sha and list of jobs that
+        should be triggered
     """
     repository = 'edx-e2e-tests'
     target = 'master'
@@ -219,13 +235,16 @@ def _get_jobs_list(repository, target, event_type, is_merge):
     return []
 
 
-def _all_tests_triggered(jobs_list, sha):
+def _all_tests_triggered(jenkins_url, jobs_list, sha):
     """
     Check to see if the sha has triggered each
     job in the jobs_list. Looks at both the queue
     as well as currently running builds
     """
-    queued_or_running = _get_queued_builds() + _get_running_builds()
+    jenkins_username, jenkins_token = _get_jenkins_credentials()
+
+    queued_or_running = _get_queued_builds(jenkins_url, jenkins_username, jenkins_token) +
+                        _get_running_builds(jenkins_url, jenkins_username, jenkins_token)
     return _builds_contain_tests(queued_or_running, sha, jobs_list)
 
 
@@ -251,6 +270,8 @@ def _parse_executables_for_builds(executable, build_status):
     """
     Parse executable to find the sha and job name of
     queued/running builds.
+    Return list of jobs with the sha that triggered
+    them
     """
     builds = []
     for action in executable['actions']:
@@ -271,7 +292,7 @@ def _parse_executables_for_builds(executable, build_status):
     return builds
 
 
-def _get_queued_builds():
+def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token):
     """
     Find all builds currently in the queue
     """
@@ -279,15 +300,15 @@ def _get_queued_builds():
     build_status = 'queued'
 
     # Use Jenkins REST API to get info on the queue
-    url = '%s/queue/api/json?depth=0' % (BUILD_JENKINS_URL)
-    response = get(url, auth=(JENKINS_USERNAME, BUILD_JENKINS_API_TOKEN)).json()
+    url = '%s/queue/api/json?depth=0' % (jenkins_url)
+    response = get(url, auth=(jenkins_username, jenkins_token)).json()
 
     # Find all builds in the queue and add them to a list
     [builds.extend(_parse_executables_for_builds(executable, build_status)) for executable in response['items']]
     return builds
 
 
-def _get_running_builds():
+def _get_running_builds(jenkins_url, jenkins_username, jenkins_token):
     """
     Find all builds that are currently running
     """
@@ -295,8 +316,8 @@ def _get_running_builds():
     build_status = 'running'
 
     # Use Jenkins API to get info on all workers
-    url = '%s/computer/api/json?depth=2' % (BUILD_JENKINS_URL)
-    response = get(url, auth=(JENKINS_USERNAME, BUILD_JENKINS_API_TOKEN)).json()
+    url = '%s/computer/api/json?depth=2' % (jenkins_url)
+    response = get(url, auth=(jenkins_username, jenkins_token)).json()
 
     # Find all builds being executed and add them to a list
     for worker in response['computer']:
@@ -350,12 +371,17 @@ def lambda_handler(event, _context):
         # That way we can process all records and urls.
         num_retries = _get_num_retries()
         for url in urls:
+            url_parsed = urlparse(url)
             # Check if url is a Jenkins instance
-            if urlparse(url).path contains 'ghprbhook':
+            if url_parsed.path contains 'ghprbhook':
+                jenkins_url = url_parsed.scheme + '://' + url_parsed.netloc
                 for attempt in range(0, num_retries):
+                    # get base url
+                    jenkins_url = urlparse(url).
                     # send message and check if jobs are triggered
                     result = _send_message(url, payload, headers)
                     sha, jobs_list = _parse_hook_for_testing_info(data_string)
+
                     if _all_tests_triggered(jobs_list, sha):
                         logger.info("All Jenkins jobs have been triggered for sha: '{}'".format(sha))
                         results.append(result)
