@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 from unittest import TestCase
@@ -5,8 +6,9 @@ from unittest import TestCase
 from botocore.vendored.requests import Response
 from mock import patch, Mock
 
-from ..webhook_processor import _verify_data, _add_gh_header, _get_target_urls
 from ..webhook_processor import _send_message, _process_results_for_failures
+from ..webhook_processor import _verify_data, _add_gh_header, _get_target_urls
+from ..webhook_processor import lambda_handler
 
 
 class WebhookProcessorTestCase(TestCase):
@@ -85,3 +87,46 @@ class WebhookProcessorRequestTestCase(TestCase):
             self.assertIsNone(response)
             exception = result.get('exception')
             self.assertEqual(exception.message, '500 Server Error: None')
+
+
+class LambdaHandlerTestCase(TestCase):
+    @patch('webhook_processor.webhook_processor._get_target_urls',
+           return_value=['http://www.example.com'])
+    @patch('webhook_processor.webhook_processor._send_message',
+           return_value={})
+    def test_lambda_handler(self, send_msg_mock, _url_mock):
+        data = {
+            'body': {
+                'zen': 'Non-blocking is better than blocking.',
+                'hook_id': 12341234,
+                'hook': {
+                    'type': 'Repository',
+                    'id': 98765432,
+                    'events': ['issue_comment', 'pull_request']
+                },
+                'repository': {'id': 12341234, 'name': 'foo'},
+                'sender': {'id': 12345678},
+            },
+            'headers': {'X-GitHub-Event': 'ping'}
+        }
+
+        event = {
+            'Records': [{
+                'kinesis': {
+                    'SequenceNumber': 'n',
+                    'ApproximateArrivalTimestamp': 12345,
+                    'data': base64.b64encode(json.dumps(data)),
+                    'PartitionKey': '1'
+                }
+            }],
+            'NextShardIterator': 'abc',
+            'MillisBehindLatest': 0
+        }
+
+        lambda_handler(event, None)
+        data.pop('headers')
+        send_msg_mock.assert_called_with(
+            'http://www.example.com',
+            data.get('body'),
+            {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
+        )
