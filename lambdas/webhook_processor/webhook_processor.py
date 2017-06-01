@@ -17,6 +17,7 @@ from constants import (
     EDX_E2E_PR,
 )
 
+import botocore.session
 from botocore.vendored.requests import post, get
 
 logger = logging.getLogger()
@@ -59,20 +60,27 @@ def _get_num_retries():
     num_retries = os.environ.get('NUM_RETRIES')
     if not isinstance(num_retries, int):
         raise StandardError('Environment variable NUM_RETRIES was not set to a valid integer')
+    
     return num_retries
 
 
-def _get_jenkins_credentials():
-    jenkins_username = os.environ.get('JENKINS_USERNAME')
-    jenkins_token = os.environ.get('JENKINS_API_TOKEN')
-    
-    if not jenkins_url:
-        raise StandardError('Environment variable JENKINS_USERNAME was not set')
+def _get_credentials_from_s3():
+    """
+    Get jenkins credentials from s3 bucket.
+    The bucket name should be an environment variable.
+    """
+    session = botocore.session.get_session()
+    client = session.create_client('s3')
 
-    if not jenkins_token:
-        raise StandardError('Environment variable JENKINS_API_TOKEN was not set')
+    bucket_name = os.environ.get('S3_CREDENTIALS_BUCKET')
 
-    return jenkins_username, jenkins_token
+    if not bucket_name:
+        raise StandardError('Environment variable S3_CREDENTIALS_BUCKET was not set')
+
+    creds_file = client.get_object(Bucket=bucket_name, Key='credentials.json')
+    creds_json = json.loads(creds_file['Body'].read())
+
+    return creds_json["username"], creds_json["api_token"]
 
 
 def _verify_data(data_string):
