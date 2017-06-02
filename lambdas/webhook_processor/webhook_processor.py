@@ -58,11 +58,14 @@ def _get_num_retries():
 
     Return a integer
     """
-    num_retries = os.environ.get('NUM_RETRIES')
-    if not isinstance(num_retries, int):
+    num_retries_string = os.environ.get('NUM_RETRIES')
+
+    try:
+        num_retries_int = int(num_retries_string)
+    except:
         raise StandardError('Environment variable NUM_RETRIES was not set to a valid integer')
     
-    return num_retries
+    return num_retries_int
 
 
 def _get_credentials_from_s3(jenkins_url):
