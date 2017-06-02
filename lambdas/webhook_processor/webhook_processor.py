@@ -258,7 +258,7 @@ def _all_tests_triggered(jenkins_url, sha, jobs_list):
     """
     jenkins_username, jenkins_token = _get_credentials_from_s3(jenkins_url)
 
-    queued_or_running = _get_queued_builds(jenkins_url, jenkins_username, jenkins_token) +
+    queued_or_running = _get_queued_builds(jenkins_url, jenkins_username, jenkins_token) + \
                         _get_running_builds(jenkins_url, jenkins_username, jenkins_token)
 
     return _builds_contain_tests(queued_or_running, sha, jobs_list)
