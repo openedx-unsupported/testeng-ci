@@ -32,6 +32,6 @@ EDX_E2E_PR = [
 # Create dictionary to find the proper credentials file name in S3 based on the Jenkins url.
 # These files must exist in the S3 bucket specified in the webhook-processor environment variable.
 JENKINS_S3_OBJECTS = {
-    "https://build.testeng.edx.org": "builds_credentials",
-    "https://test-jenkins.testeng.edx.org": "tools_credentials"
+    "https://build.testeng.edx.org": "tools_build_credentials",
+    "https://test-jenkins.testeng.edx.org": "tools_test_credentials"
 }
