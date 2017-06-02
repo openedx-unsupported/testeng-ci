@@ -15,6 +15,7 @@ from constants import (
     EDX_PLATFORM_PRIVATE_MASTER,
     EDX_PLATFORM_PRIVATE_PR,
     EDX_E2E_PR,
+    JENKINS_S3_OBJECTS
 )
 
 import botocore.session
@@ -64,7 +65,7 @@ def _get_num_retries():
     return num_retries
 
 
-def _get_credentials_from_s3():
+def _get_credentials_from_s3(jenkins_url):
     """
     Get jenkins credentials from s3 bucket.
     The bucket name should be an environment variable.
@@ -77,7 +78,9 @@ def _get_credentials_from_s3():
     if not bucket_name:
         raise StandardError('Environment variable S3_CREDENTIALS_BUCKET was not set')
 
-    creds_file = client.get_object(Bucket=bucket_name, Key='credentials.json')
+    file_name = JENKINS_S3_OBJECTS[jenkins_url] + '.json'
+
+    creds_file = client.get_object(Bucket=bucket_name, Key=file_name)
     creds_json = json.loads(creds_file['Body'].read())
 
     return creds_json["username"], creds_json["api_token"]
@@ -244,16 +247,17 @@ def _get_jobs_list(repository, target, event_type, is_merge):
     return []
 
 
-def _all_tests_triggered(jenkins_url, jobs_list, sha):
+def _all_tests_triggered(jenkins_url, sha, jobs_list):
     """
     Check to see if the sha has triggered each
     job in the jobs_list. Looks at both the queue
     as well as currently running builds
     """
-    jenkins_username, jenkins_token = _get_jenkins_credentials()
+    jenkins_username, jenkins_token = _get_credentials_from_s3(jenkins_url)
 
     queued_or_running = _get_queued_builds(jenkins_url, jenkins_username, jenkins_token) +
                         _get_running_builds(jenkins_url, jenkins_username, jenkins_token)
+
     return _builds_contain_tests(queued_or_running, sha, jobs_list)
 
 
@@ -381,26 +385,34 @@ def lambda_handler(event, _context):
         num_retries = _get_num_retries()
         for url in urls:
             url_parsed = urlparse(url)
-            # Check if url is a Jenkins instance
-            if url_parsed.path contains 'ghprbhook':
-                jenkins_url = url_parsed.scheme + '://' + url_parsed.netloc
+            base_url = url_parsed.scheme + '://' + url_parsed.netloc
+
+            # Check if base_url is in the JENKINS_S3_OBJECTS
+            if base_url in JENKINS_S3_OBJECTS:
+                # get commit sha, and list of expected jobs
+                sha, jobs_list = _parse_hook_for_testing_info(data_string)
                 for attempt in range(0, num_retries):
-                    # get base url
-                    jenkins_url = urlparse(url).
                     # send message and check if jobs are triggered
                     result = _send_message(url, payload, headers)
-                    sha, jobs_list = _parse_hook_for_testing_info(data_string)
-
-                    if _all_tests_triggered(jobs_list, sha):
-                        logger.info("All Jenkins jobs have been triggered for sha: '{}'".format(sha))
-                        results.append(result)
-                    else:
-                        logger.info("The following Jenkins jobs were not triggered: '{}'".format(jobs_list))
-                        if attempt == num_retries - 1:
-                            # additional action for failures here
+                    # if jobs should be running, ensure they have been triggered
+                    if jobs_list:
+                        # create a temp list so items can be removed when met
+                        temp_jobs_list = jobs_list
+                        logger.info("Checking if Jenkins jobs have been triggered...")
+                        if _all_tests_triggered(base_url, sha, temp_jobs_list):
+                            logger.info("All Jenkins jobs have been triggered for sha: '{}'".format(sha))
                             results.append(result)
+                            break
                         else:
-                            logger.info("Resending webhook...")
+                            logger.info("The following Jenkins jobs were not triggered: '{}'".format(temp_jobs_list))
+                            if attempt == num_retries - 1:
+                                # additional action for failures here
+                                results.append(result)
+                            else:
+                                logger.info("Resending webhook...")
+                    else:
+                        logger.info("No Jenkins Jobs expected for this sha.")
+                        break
             else:
                 results.append(_send_message(url, payload, headers))
 

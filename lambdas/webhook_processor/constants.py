@@ -1,3 +1,5 @@
+# Create constants that hold lists of jobs. These will be used when querying the Jenkins
+# API to ensure all expected jobs have been triggered.
 EDX_PLATFORM_BASE_TESTS = [
     "-accessibility-",
     "-bok-choy-",
@@ -26,3 +28,10 @@ EDX_E2E_PR = [
     "microsites-staging-tests-pr",
     "edx-e2e-tests-pr"
 ]
+
+# Create dictionary to find the proper credentials file name in S3 based on the Jenkins url.
+# These files must exist in the S3 bucket specified in the webhook-processor environment variable.
+JENKINS_S3_OBJECTS = {
+    "https://build.testeng.edx.org": "builds_credentials",
+    "https://test-jenkins.testeng.edx.org": "tools_credentials"
+}
