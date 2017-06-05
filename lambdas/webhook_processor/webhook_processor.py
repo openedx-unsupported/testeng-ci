@@ -188,7 +188,7 @@ def _process_results_for_failures(results):
     return results_count
 
 
-def _parse_hook_for_testing_info(data_string):
+def _parse_hook_for_testing_info(payload):
     """
     Parse the webhook to find the commit sha,
     as well as the arguments needed to find the
@@ -196,29 +196,25 @@ def _parse_hook_for_testing_info(data_string):
 
     Returns:
         Tuple with commit sha and list of jobs that
-        should be triggered
+        should be triggered. If the event type is not
+        pull_request, return empty values
     """
-    repository = 'edx-e2e-tests'
-    target = 'master'
-    event_type = 'pull_request'
-    sha = "bd6106be30c9f72fb0353028cbd189c476a7c7c6"
     is_merge = False
-    # data_object = json.loads(data_string)
-    # is_merge = False
 
-    # event_type = headers.get('X-GitHub-Event')
-    # if event_type == 'pull_request':
-    #     repository = data_object['pull_request']['head']['repo']['name']
-    #     target = data_object['pull_request']['head']['ref']
-    #     if data_object['action'] == 'opened':
-    #         sha = data_object['pull_request']['head']['sha']
-    #     elif data_object['action'] == 'closed':
-    #         sha = data_object['merge_commit_sha']
-    #         if sha != 'null':
-    #             is_merge = True
-    #             return sha, []
-
-    return sha, _get_jobs_list(repository, target, event_type, is_merge)
+    event_type = headers.get('X-GitHub-Event')
+    if event_type == 'pull_request':
+        repository = payload['pull_request']['head']['repo']['name']
+        target = payload['pull_request']['head']['ref']
+        if payload['action'] == 'opened':
+            sha = payload['pull_request']['head']['sha']
+        elif payload['action'] == 'closed':
+            sha = payload['pull_request']['merge_commit_sha']
+            if sha != 'null':
+                is_merge = True
+                return sha, []
+    else:
+        # unsupported event type, return None for both values
+        return sha, _get_jobs_list(repository, target, event_type, is_merge)
 
 
 def _get_jobs_list(repository, target, event_type, is_merge):
@@ -337,7 +333,7 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token):
     builds = []
     build_status = 'running'
 
-    # Use Jenkins API to get info on all workers
+    # Use Jenkins REST API to get info on all workers
     url = '%s/computer/api/json?depth=2' % (jenkins_url)
     response = get(url, auth=(jenkins_username, jenkins_token)).json()
 
@@ -387,32 +383,40 @@ def lambda_handler(event, _context):
         payload = data_object.get('body')
         logger.debug("payload is: '{}'".format(payload))
 
-        # Send it off!
-        # Save up the results for later processing rather than letting
-        # the errors get raised.
-        # That way we can process all records and urls.
+        # Get the sha and jobs list (if applicable), as well as
+        # the max number of retries for sending the hook.
+        sha, jobs_list = _parse_hook_for_testing_info(payload)
         num_retries = _get_num_retries()
-        for url in urls:
-            url_parsed = urlparse(url)
-            base_url = url_parsed.scheme + '://' + url_parsed.netloc
 
-            # Check if base_url is in the JENKINS_S3_OBJECTS
-            if base_url in JENKINS_S3_OBJECTS:
-                # get commit sha, and list of expected jobs
-                sha, jobs_list = _parse_hook_for_testing_info(data_string)
-                for attempt in range(0, num_retries):
-                    # send message and check if jobs are triggered
-                    result = _send_message(url, payload, headers)
-                    # if jobs should be running, ensure they have been triggered
+        # Send it off!
+        # If the url is a known jenkins instance (in constants.py),
+        # check to make sure all jobs have been triggered. If they
+        # haven't, retry up to "num_retries" times.
+        # Save up the final results for later processing rather than
+        # letting the errors get raised.
+        # That way we can process all records and urls.
+        for attempt in range(0, num_retries):
+            url_iterator = 0
+            while url_iterator < len(urls):
+                url_parsed = urlparse(urls[url_iterator])
+                base_url = url_parsed.scheme + '://' + url_parsed.netloc
+
+                # send the message!
+                result = _send_message(url, payload, headers)
+
+                # Check if base_url is in JENKINS_S3_OBJECTS
+                if base_url in JENKINS_S3_OBJECTS:
                     if jobs_list:
-                        # create a temp list so items can be removed when met
+                        # create temp jobs list so items can be removed when met
                         temp_jobs_list = jobs_list
                         logger.info("Checking if Jenkins jobs have been triggered...")
                         if _all_tests_triggered(base_url, sha, temp_jobs_list):
                             logger.info("All Jenkins jobs have been triggered for sha: '{}'".format(sha))
                             results.append(result)
-                            break
+                            # url satisifed, delete from list
+                            del urls[url_iterator]
                         else:
+                            url_iterator += 1
                             logger.info("The following Jenkins jobs were not triggered: '{}'".format(temp_jobs_list))
                             if attempt == num_retries - 1:
                                 # additional action for failures here
@@ -421,9 +425,15 @@ def lambda_handler(event, _context):
                                 logger.info("Resending webhook...")
                     else:
                         logger.info("No Jenkins Jobs expected for this sha.")
-                        break
-            else:
-                results.append(_send_message(url, payload, headers))
+                        # no jobs expected, delete from list
+                        del urls[url_iterator]
+                else:
+                    logger.info("No Jenkins Jobs expected for this sha.")
+                    # not a jenkins url, delete from list
+                    del urls[url_iterator]
+            if not len(urls):
+                # if there are no more urls that need jenkins jobs triggered, break
+                break
 
     results_count = _process_results_for_failures(results)
 
