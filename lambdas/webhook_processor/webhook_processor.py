@@ -71,7 +71,14 @@ def _get_num_retries():
 def _get_credentials_from_s3(jenkins_url):
     """
     Get jenkins credentials from s3 bucket.
-    The bucket name should be an environment variable.
+    The bucket name should be an environment variable, and the
+    object name should be specified in a dict (with the
+    Jenkins url as the key) in the constants.py file.
+    The expected object is a JSON file formatted as:
+    {
+        "username": "sampleusername",
+        "api_token": "sampletoken"
+    }
     """
     session = botocore.session.get_session()
     client = session.create_client('s3')
@@ -84,9 +91,9 @@ def _get_credentials_from_s3(jenkins_url):
     file_name = JENKINS_S3_OBJECTS[jenkins_url] + '.json'
 
     creds_file = client.get_object(Bucket=bucket_name, Key=file_name)
-    creds_json = json.loads(creds_file['Body'].read())
+    creds = json.loads(creds_file['Body'].read())
 
-    return creds_json["username"], creds_json["api_token"]
+    return creds["username"], creds["api_token"]
 
 
 def _verify_data(data_string):
