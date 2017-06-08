@@ -276,10 +276,10 @@ def _get_jobs_list(repository, target, event_type, is_merge):
                 jobs_list = EDX_PLATFORM_PRIVATE_MASTER
             else:
                 jobs_list = EDX_PLATFORM_PRIVATE_PR
-    elif repository == 'edx-e2e-tests':
-        if event_type == 'pull_request':
-            if not is_merge:
-                jobs_list = EDX_E2E_PR
+    # elif repository == 'edx-e2e-tests':
+    #     if event_type == 'pull_request':
+    #         if not is_merge:
+    #             jobs_list = EDX_E2E_PR
 
     return jobs_list
 
