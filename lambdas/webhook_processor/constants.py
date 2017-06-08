@@ -63,6 +63,6 @@ FICUS_BRANCH = "open-release/ficus.master"
 # These files must exist in the S3 bucket specified in
 # the webhook-processor environment variable.
 JENKINS_S3_OBJECTS = {
-    "https://build.testeng.edx.org": "testeng_jenkins_credentials",
-    "https://test-jenkins.testeng.edx.org": "testeng_jenkins_credentials"
+    "https://build.testeng.edx.org": "edx_tools_core_jenkins_credentials",
+    "https://test-jenkins.testeng.edx.org": "edx_tools_core_jenkins_credentials"
 }

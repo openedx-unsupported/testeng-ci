@@ -69,9 +69,6 @@ def _get_credentials_from_s3(jenkins_url):
         "api_token": "sampletoken"
     }
     """
-    session = botocore.session.get_session()
-    client = session.create_client('s3')
-
     bucket_name = os.environ.get('S3_CREDENTIALS_BUCKET')
 
     if not bucket_name:
@@ -79,7 +76,15 @@ def _get_credentials_from_s3(jenkins_url):
             'Environment variable S3_CREDENTIALS_BUCKET was not set'
         )
 
-    file_name = JENKINS_S3_OBJECTS[jenkins_url] + '.json'
+    session = botocore.session.get_session()
+    client = session.create_client('s3')
+
+    try:
+        file_name = JENKINS_S3_OBJECTS[jenkins_url] + '.json'
+    except:
+        raise StandardError(
+            'Jenkins url not found in JENKINS_S3_OBJECTS'
+        )
 
     creds_file = client.get_object(Bucket=bucket_name, Key=file_name)
     creds = json.loads(creds_file['Body'].read())
@@ -212,7 +217,8 @@ def _parse_hook_for_testing_info(payload, event_type):
                 # no jobs will be triggered
                 ignore = True
         else:
-            # PR was either opened or "synchronized"
+            # PR was either "opened" or "synchronized" which is
+            # when a new commit is pushed to the PR
             sha = payload['pull_request']['head']['sha']
     else:
         # unsupported event type, return None for both values
@@ -222,7 +228,7 @@ def _parse_hook_for_testing_info(payload, event_type):
     # otherwise, return sha, jobs_list
     if ignore:
         # we don't care about these so assign None, None
-        sha, jobs_list = (None, None)
+        return (None, None)
     else:
         # find the jobs list for this hook
         jobs_list = _get_jobs_list(repository, target, event_type, is_merge)
