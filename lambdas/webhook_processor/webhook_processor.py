@@ -89,6 +89,12 @@ def _get_credentials_from_s3(jenkins_url):
     creds_file = client.get_object(Bucket=bucket_name, Key=file_name)
     creds = json.loads(creds_file['Body'].read())
 
+    if not creds.get("username") or not creds.get("api_token"):
+        raise StandardError(
+            'Credentials file needs both a '
+            'username and api_token attribute'
+        )
+
     return creds["username"], creds["api_token"]
 
 
@@ -203,12 +209,17 @@ def _parse_hook_for_testing_info(payload, event_type):
 
         # check if the base branch is an openedx release branch
         base_ref = payload['pull_request']['base']['ref']
-        if base_ref == EUCALYTPUS_BRANCH:
+        if re.match('^((?!open-release\/).)*$', base_ref):
+            # if the base_ref does not include open-release/
+            # the master jobs will be kicked off
+            target = "master"
+        elif base_ref == EUCALYTPUS_BRANCH:
             target = "eucalyptus"
         elif base_ref == FICUS_BRANCH:
             target = "ficus"
         else:
-            target = "master"
+            # no jobs are expected by ghprb in this case
+            ignore = True
 
         if payload['action'] == 'closed':
             sha = payload['pull_request']['merge_commit_sha']
@@ -358,7 +369,7 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token):
         response = get(
             url,
             auth=(jenkins_username, jenkins_token),
-            timeout=3
+            timeout=(3.05, 10)
         )
         response_json = response.json()
 
@@ -385,7 +396,7 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token):
         response = get(
             url,
             auth=(jenkins_username, jenkins_token),
-            timeout=6
+            timeout=(3.05, 10)
         )
         response_json = response.json()
 
