@@ -11,7 +11,7 @@ terraform apply --target aws_s3_bucket.edx-testeng-lambda-webhook
 
 To zip and upload a new version, using the aws cli:
 ```
-zip webhook_processor.zip webhook_processor.py
+zip webhook_processor.zip webhook_processor.py constants.py
 aws s3 cp webhook_processor.zip s3://edx-tools-lambda-webhooks/
 rm webhook_processor.zip
 ```
