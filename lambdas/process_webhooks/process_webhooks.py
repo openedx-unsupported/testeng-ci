@@ -3,6 +3,7 @@ import json
 import logging
 import os
 
+import boto3
 from botocore.vendored.requests import post
 
 logger = logging.getLogger()
@@ -29,38 +30,37 @@ def _get_target_urls():
     """
     url = os.environ.get('TARGET_URLS')
     if not url:
-        raise StandardError('Environment variable TARGET_URLS was not set')
+        raise StandardError(
+            "Environment variable TARGET_URLS was not set"
+        )
 
     return url.split(',')
 
 
-def _verify_data(data_string):
+def _get_target_queue():
     """
-    Verify that the data received is in the correct format
-    Raise an error if not.
-    Return the data as a python object.
+    Get the target SQS name for the processed hooks from the
+    OS environment variable.
+
+    Return the name of the queue
     """
-    try:
-        data_object = json.loads(data_string)
+    queue_name = os.environ.get('TARGET_QUEUE')
+    if not queue_name:
+        raise StandardError(
+            "Environment variable TARGET_QUEUE was not set"
+        )
 
-    except ValueError as _exc:
-        msg = 'Cannot decode {} into a JSON object'.format(data_string)
-        raise ValueError(msg)
-
-    except Exception as exc:
-        raise exc
-
-    return data_object
+    return queue_name
 
 
-def _add_gh_header(data_object, headers):
+def _add_gh_header(event, headers):
     """
     Get the X-GitHub-Event header from the original request
     data, add this to the headers, and return the results.
 
     Raise an error if the GitHub event header is not found.
     """
-    gh_headers = data_object.get('headers')
+    gh_headers = event.get('headers')
     gh_event = gh_headers.get('X-GitHub-Event')
     if not gh_event:
         msg = 'X-GitHub-Event header was not found in {}'.format(gh_headers)
@@ -69,6 +69,15 @@ def _add_gh_header(data_object, headers):
     logger.debug('GitHub event was: {}'.format(gh_event))
     headers['X-GitHub-Event'] = gh_event
     return headers
+
+
+def _is_from_queue(event):
+    """
+    Check to see if this webhook is being sent from the SQS queue.
+    This is important to avoid duplicating the hook in the queue
+    in the event of a failure.
+    """
+    return event.get('from_queue') == "True"
 
 
 def _send_message(url, payload, headers):
@@ -97,6 +106,24 @@ def _send_message(url, payload, headers):
         result['exception'] = exc
 
     return result
+
+
+def _send_to_queue(event, queue_name):
+    """
+    Send the webhook to the SQS queue.
+    """
+    try:
+        sqs = boto3.resource('sqs')
+        queue = sqs.get_queue_by_name(QueueName=queue_name)
+    except:
+        raise StandardError("Unable to find the target queue")
+
+    try:
+        response = queue.send_message(MessageBody=json.dumps(event))
+    except:
+        raise StandardError("The message could not be sent to queue")
+
+    return response
 
 
 def _process_results_for_failures(results):
@@ -128,40 +155,31 @@ def _process_results_for_failures(results):
 
 
 def lambda_handler(event, _context):
+    # Determine if this message is coming from the queue
+    from_queue = _is_from_queue(event)
 
-    urls = _get_target_urls()
-    results = []
+    # The header we send should include the original GitHub header,
+    # and also is set to send the data in the format that Jenkins expects.
+    header = {'Content-Type': 'application/json'}
 
-    # Kinesis stream event format looks like this. data is base64 encoded:
-    # {
-    # "Records": [{
-    #     "SequenceNumber": "n",
-    #     "ApproximateArrivalTimestamp": N,
-    #     "data": "<ABC>==",
-    #     "PartitionKey": "1"}],
-    # "NextShardIterator": "abc",
-    # "MillisBehindLatest": 0
-    # }
-    for record in event['Records']:
-        k_data = record['kinesis']['data']
-        data = base64.b64decode(k_data)
-        logger.debug("Decoded payload: '{}'".format(data))
+    # Add the headers from the event
+    headers = _add_gh_header(event, header)
+    logger.debug("headers are: '{}'".format(headers))
 
-        # Verify that the data received and decoded is in the expected format.
-        data_object = _verify_data(data)
+    # Get the state of the spigot from the api variable
+    spigot_state = event.get('spigot_state')
+    logger.info(
+        "spigot_state is set to: {}'.format(spigot_state)"
+    )
 
-        # The header we send should include the original GitHub header,
-        # and also is set to send the data in the format that Jenkins expects.
-        header = {'Content-Type': 'application/json'}
-        headers = _add_gh_header(data_object, header)
-        logger.debug("headers are: '{}'".format(headers))
-
-        # Remove the header that we had stored in the data object.
-        data_object.pop('headers', None)
+    if spigot_state == "ON":
+        # Get the url(s) that the webhook will be sent to
+        urls = _get_target_urls()
+        results = []
 
         # We had stored the payload to send in the
         # 'body' node of the data object.
-        payload = data_object.get('body')
+        payload = event.get('body')
         logger.debug("payload is: '{}'".format(payload))
 
         # Send it off!
@@ -171,9 +189,34 @@ def lambda_handler(event, _context):
         for url in urls:
             results.append(_send_message(url, payload, headers))
 
-    results_count = _process_results_for_failures(results)
+        results_count = _process_results_for_failures(results)
 
-    if results_count.get('failure'):
-        raise StandardError(results_count)
+        if results_count.get('failure'):
+            if not from_queue:
+                # The transmission was a failure, if it's not
+                # already in the queue, add it.
+                queue_name = _get_target_queue()
+                _response = _send_to_queue(event, queue_name)
+            raise StandardError(results_count)
 
-    return results_count
+        return results_count
+    elif spigot_state == "OFF":
+        # Since the spigot is off, send the event
+        # to SQS for future processing. However,
+        # if the message is already in the queue do
+        # nothing.
+        if from_queue:
+            raise StandardError(
+                "The spigot is OFF. No messages should be "
+                "sent from the queue."
+            )
+        else:
+            queue_name = _get_target_queue()
+            response = _send_to_queue(event, queue_name)
+            return response
+    else:
+        raise StandardError(
+            "API Gateway stage variable spigot_state "
+            "was not correctly set. Should be ON or OFF, "
+            "was: {}".format(spigot_state)
+        )
