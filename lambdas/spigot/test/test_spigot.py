@@ -6,22 +6,12 @@ from unittest import TestCase
 from botocore.vendored.requests import Response
 from mock import patch, Mock
 
-from ..webhook_processor import _send_message, _process_results_for_failures
-from ..webhook_processor import _verify_data, _add_gh_header, _get_target_urls
-from ..webhook_processor import lambda_handler
+from ..spigot import _send_message, _process_results_for_failures
+from ..spigot import _add_gh_header, _get_target_urls, _get_target_queue
+from ..spigot import _get_state_from_s3, lambda_handler
 
 
-class WebhookProcessorTestCase(TestCase):
-    def test_verify_data(self):
-        test_data = {'foo': 'bar'}
-        verified_data = _verify_data(json.dumps(test_data))
-        self.assertEqual(verified_data, test_data)
-
-    def test_verify_data_exception(self):
-        test_data = 'foo'
-        with self.assertRaises(ValueError):
-            _verify_data(test_data)
-
+class SpigotTestCase(TestCase):
     def test_add_gh_header(self):
         gh_header = {'X-GitHub-Event': 'push'}
         test_data = {'headers': gh_header}
@@ -48,6 +38,11 @@ class WebhookProcessorTestCase(TestCase):
         self.assertEqual(urls, ['http://www.a.com/foo',
                                 'http://www.b.com/bar'])
 
+    @patch.dict(os.environ, {'TARGET_QUEUE': 'queue_name'})
+    def test_get_target_queue(self):
+        queue = _get_target_queue()
+        self.assertEqual(queue, 'queue_name')
+
     def test_process_results_for_failures(self):
         data = [
             {'response': Mock()},
@@ -67,7 +62,7 @@ class WebhookProcessorRequestTestCase(TestCase):
 
     def test_send_message_success(self):
         with patch(
-            'webhook_processor.webhook_processor.post',
+            'spigot.spigot.post',
             return_value=self.mock_response(200)
         ):
             result = _send_message('http://www.example.com', None, None)
@@ -79,7 +74,7 @@ class WebhookProcessorRequestTestCase(TestCase):
 
     def test_send_message_error(self):
         with patch(
-            'webhook_processor.webhook_processor.post',
+            'spigot.spigot.post',
             return_value=self.mock_response(500)
         ):
             result = _send_message('http://www.example.com', None, None)
@@ -90,12 +85,16 @@ class WebhookProcessorRequestTestCase(TestCase):
 
 
 class LambdaHandlerTestCase(TestCase):
-    @patch('webhook_processor.webhook_processor._get_target_urls',
+    @patch('spigot.spigot._get_state_from_s3',
+           return_value='ON')
+    @patch('spigot.spigot._get_target_urls',
            return_value=['http://www.example.com'])
-    @patch('webhook_processor.webhook_processor._send_message',
+    @patch('spigot.spigot._send_message',
            return_value={})
-    def test_lambda_handler(self, send_msg_mock, _url_mock):
-        data = {
+    def test_lambda_handler_spigot_ON(
+        self, send_msg_mock, _url_mock, state_mock
+    ):
+        event = {
             'body': {
                 'zen': 'Non-blocking is better than blocking.',
                 'hook_id': 12341234,
@@ -110,23 +109,45 @@ class LambdaHandlerTestCase(TestCase):
             'headers': {'X-GitHub-Event': 'ping'}
         }
 
+        lambda_handler(event, None)
+        event.pop('headers')
+        send_msg_mock.assert_called_with(
+            'http://www.example.com',
+            event.get('body'),
+            {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
+        )
+
+    @patch('spigot.spigot._send_to_queue',
+           return_value={})
+    @patch('spigot.spigot._get_target_queue',
+           return_value='queue_name')
+    @patch('spigot.spigot._get_state_from_s3',
+           return_value='OFF')
+    @patch('spigot.spigot._get_target_urls',
+           return_value=['http://www.example.com'])
+    @patch('spigot.spigot._send_message',
+           return_value={})
+    def test_lambda_handler_spigot_OFF(
+        self, send_msg_mock, _url_mock,
+        state_mock, queue_mock, send_queue_mock
+    ):
         event = {
-            'Records': [{
-                'kinesis': {
-                    'SequenceNumber': 'n',
-                    'ApproximateArrivalTimestamp': 12345,
-                    'data': base64.b64encode(json.dumps(data)),
-                    'PartitionKey': '1'
-                }
-            }],
-            'NextShardIterator': 'abc',
-            'MillisBehindLatest': 0
+            'body': {
+                'zen': 'Non-blocking is better than blocking.',
+                'hook_id': 12341234,
+                'hook': {
+                    'type': 'Repository',
+                    'id': 98765432,
+                    'events': ['issue_comment', 'pull_request']
+                },
+                'repository': {'id': 12341234, 'name': 'foo'},
+                'sender': {'id': 12345678},
+            },
+            'headers': {'X-GitHub-Event': 'ping'}
         }
 
         lambda_handler(event, None)
-        data.pop('headers')
-        send_msg_mock.assert_called_with(
-            'http://www.example.com',
-            data.get('body'),
-            {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
+        send_queue_mock.assert_called_with(
+            event,
+            'queue_name'
         )
