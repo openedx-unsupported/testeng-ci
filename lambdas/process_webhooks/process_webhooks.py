@@ -21,12 +21,13 @@ if not isinstance(numeric_level, int):
 logger.setLevel(numeric_level)
 
 
-def _get_target_url():
+def _get_target_url(headers):
     """
-    Get the target URL for the processed hooks from a comma delimited
-    list of URL, set in an OS environment variable.
+    Get the target URL for the processed hooks from the
+    OS environment variable. Based on the GitHub event,
+    add the proper endpoint.
 
-    Return the target URL
+    Return the target URL with the appropriate endpoint
     """
     url = os.environ.get('TARGET_URL')
     if not url:
@@ -34,7 +35,18 @@ def _get_target_url():
             "Environment variable TARGET_URL was not set"
         )
 
-    return url
+    event_type = headers.get('X-GitHub-Event')
+
+    if event_type in ["issue_comment", "pull_request"]:
+        endpoint = "ghprbhook/"
+    elif event_type == "push":
+        endpoint = "github-webhook/"
+    else:
+        raise StandardError(
+            "This webhook has an unsupported GitHub event type."
+        )
+
+    return url + "/" + endpoint
 
 
 def _get_target_queue():
@@ -133,7 +145,7 @@ def lambda_handler(event, _context):
 
     if spigot_state == "ON":
         # Get the url that the webhook will be sent to
-        url = _get_target_url()
+        url = _get_target_url(headers)
 
         # We had stored the payload to send in the
         # 'body' node of the data object.
