@@ -12,6 +12,29 @@ from ..process_webhooks import lambda_handler, _is_from_queue
 
 
 class ProcessWebhooksTestCase(TestCase):
+    headers = {
+        'Content-Type': 'application/json',
+        'X-GitHub-Event': ''
+    }
+
+    @patch.dict(os.environ, {'TARGET_URL': 'http://www.example.com'})
+    def test_get_target_url_pr(self):
+        self.headers['X-GitHub-Event'] = 'pull_request'
+        url = _get_target_url(self.headers)
+        self.assertEqual(url, 'http://www.example.com/ghprbhook/')
+
+    @patch.dict(os.environ, {'TARGET_URL': 'http://www.example.com'})
+    def test_get_target_url_comment(self):
+        self.headers['X-GitHub-Event'] = 'issue_comment'
+        url = _get_target_url(self.headers)
+        self.assertEqual(url, 'http://www.example.com/ghprbhook/')
+
+    @patch.dict(os.environ, {'TARGET_URL': 'http://www.example.com'})
+    def test_get_target_url_push(self):
+        self.headers['X-GitHub-Event'] = 'push'
+        url = _get_target_url(self.headers)
+        self.assertEqual(url, 'http://www.example.com/github-webhook/')
+
     def test_add_gh_header(self):
         gh_header = {'X-GitHub-Event': 'push'}
         test_data = {'headers': gh_header}
@@ -23,11 +46,6 @@ class ProcessWebhooksTestCase(TestCase):
         test_data = {'headers': gh_header}
         with self.assertRaises(ValueError):
             _add_gh_header(test_data, {})
-
-    @patch.dict(os.environ, {'TARGET_URL': 'http://www.example.com/webhooks'})
-    def test_get_target_url(self):
-        url = _get_target_url()
-        self.assertEqual(url, 'http://www.example.com/webhooks')
 
     @patch.dict(os.environ, {'TARGET_QUEUE': 'queue_name'})
     def test_get_target_queue(self):
@@ -93,20 +111,20 @@ class LambdaHandlerTestCase(TestCase):
     }
 
     @patch('process_webhooks.process_webhooks._get_target_url',
-           return_value='http://www.example.com')
+           return_value='http://www.example.com/endpoint/')
     @patch('process_webhooks.process_webhooks._send_message',
            return_value={})
     def test_lambda_handler_to_target(self, send_msg_mock, _url_mock):
         self.event['spigot_state'] = 'ON'
         lambda_handler(self.event, None)
         send_msg_mock.assert_called_with(
-            'http://www.example.com',
+            'http://www.example.com/endpoint/',
             self.event.get('body'),
             {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
         )
 
     @patch('process_webhooks.process_webhooks._get_target_url',
-           return_value='http://www.example.com')
+           return_value='http://www.example.com/endpoint/')
     @patch('process_webhooks.process_webhooks._send_message',
            side_effect=StandardError("Error!"))
     @patch('process_webhooks.process_webhooks._is_from_queue',
@@ -124,7 +142,7 @@ class LambdaHandlerTestCase(TestCase):
             lambda_handler(self.event, None)
 
         send_msg_mock.assert_called_with(
-            'http://www.example.com',
+            'http://www.example.com/endpoint/',
             self.event.get('body'),
             {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
         )
