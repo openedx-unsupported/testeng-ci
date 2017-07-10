@@ -21,20 +21,20 @@ if not isinstance(numeric_level, int):
 logger.setLevel(numeric_level)
 
 
-def _get_target_urls():
+def _get_target_url():
     """
-    Get the target URLs for the processed hooks from a comma delimited
-    list of URLs, set in an OS environment variable.
+    Get the target URL for the processed hooks from a comma delimited
+    list of URL, set in an OS environment variable.
 
-    Return a list of target URLs
+    Return the target URL
     """
-    url = os.environ.get('TARGET_URLS')
+    url = os.environ.get('TARGET_URL')
     if not url:
         raise StandardError(
-            "Environment variable TARGET_URLS was not set"
+            "Environment variable TARGET_URL was not set"
         )
 
-    return url.split(',')
+    return url
 
 
 def _get_target_queue():
@@ -87,25 +87,12 @@ def _send_message(url, payload, headers):
         payload (dict): Payload to send
         headers (dict): Dictionary of headers to send
     Returns:
-        dict with k,v pairs for the original data, response,
-        and exception, as applicable.
+        The response from the HTTP POST
     """
-    result = {
-        'url': url,
-        'payload': payload,
-        'headers': headers
-    }
-    try:
-        response = post(url, json=payload, headers=headers, timeout=(3.05, 10))
-        #  trigger the exception block for 4XX and 5XX responses
-        response.raise_for_status()
-        result['response'] = response
-
-    # Catch the errors because you may have another URL or record to process
-    except Exception as exc:
-        result['exception'] = exc
-
-    return result
+    response = post(url, json=payload, headers=headers, timeout=(3.05, 30))
+    # Trigger the exception block for 4XX and 5XX responses
+    response.raise_for_status()
+    return response
 
 
 def _send_to_queue(event, queue_name):
@@ -126,34 +113,6 @@ def _send_to_queue(event, queue_name):
     return response
 
 
-def _process_results_for_failures(results):
-    """ Process the results of the HTTP requests and log any errors.
-    Args:
-        results (list): List of results from the attempted HTTP POSTs
-    Returns:
-        Dict with the count of successes and failures
-    """
-    results_count = {'success': 0, 'failure': 0}
-
-    for result in results:
-        base_msg = "URL: {url}, HEADERS: {headers}, PAYLOAD: {payload}".format(
-            url=result.get('url'),
-            headers=result.get('headers'),
-            payload=result.get('payload')
-        )
-        exc = result.get('exception')
-        if exc:
-            results_count['failure'] = results_count.get('failure') + 1
-            msg = "Could not forward webhook. {} EXCEPTION: {}".format(
-                base_msg, exc)
-            logger.error(msg)
-        else:
-            results_count['success'] = results_count.get('success') + 1
-            logger.debug("Successfully processed webhook. {}".format(base_msg))
-
-    return results_count
-
-
 def lambda_handler(event, _context):
     # Determine if this message is coming from the queue
     from_queue = _is_from_queue(event)
@@ -169,13 +128,12 @@ def lambda_handler(event, _context):
     # Get the state of the spigot from the api variable
     spigot_state = event.get('spigot_state')
     logger.info(
-        "spigot_state is set to: {}'.format(spigot_state)"
+        "spigot_state is set to: {}".format(spigot_state)
     )
 
     if spigot_state == "ON":
-        # Get the url(s) that the webhook will be sent to
-        urls = _get_target_urls()
-        results = []
+        # Get the url that the webhook will be sent to
+        url = _get_target_url()
 
         # We had stored the payload to send in the
         # 'body' node of the data object.
@@ -183,23 +141,22 @@ def lambda_handler(event, _context):
         logger.debug("payload is: '{}'".format(payload))
 
         # Send it off!
-        # Save up the results for later processing rather than letting
-        # the errors get raised.
-        # That way we can process all records and urls.
-        for url in urls:
-            results.append(_send_message(url, payload, headers))
-
-        results_count = _process_results_for_failures(results)
-
-        if results_count.get('failure'):
+        try:
+            _result = _send_message(url, payload, headers)
+        except:
             if not from_queue:
                 # The transmission was a failure, if it's not
                 # already in the queue, add it.
                 queue_name = _get_target_queue()
                 _response = _send_to_queue(event, queue_name)
-            raise StandardError(results_count)
+            raise StandardError(
+                "There was an error sending the message "
+                "to the url: {}".format(url)
+            )
 
-        return results_count
+        return (
+            "Webhook successfully sent to url: {}".format(url)
+        )
     elif spigot_state == "OFF":
         # Since the spigot is off, send the event
         # to SQS for future processing. However,
@@ -212,8 +169,11 @@ def lambda_handler(event, _context):
             )
         else:
             queue_name = _get_target_queue()
-            response = _send_to_queue(event, queue_name)
-            return response
+            _response = _send_to_queue(event, queue_name)
+
+            return (
+                "Webhook successfully sent to queue: {}".format(queue_name)
+            )
     else:
         raise StandardError(
             "API Gateway stage variable spigot_state "

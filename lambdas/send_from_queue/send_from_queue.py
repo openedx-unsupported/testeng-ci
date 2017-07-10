@@ -213,7 +213,7 @@ def lambda_handler(event, _context):
                 api_url_query,
                 json=payload,
                 headers=headers,
-                timeout=(3.05, 10)
+                timeout=(3.05, 30)
             )
 
             # If there was a problem, raise an error
