@@ -37,6 +37,10 @@ def _get_target_url(headers):
 
     event_type = headers.get('X-GitHub-Event')
 
+    # Based on the X-Github-Evenet header, determine the
+    # proper endpoint for the target url.
+    # PR's and Issue Comments use the ghprb Jenkins plugin
+    # Pushes use the Github Jenkins plugin
     if event_type in ["issue_comment", "pull_request"]:
         endpoint = "ghprbhook/"
     elif event_type == "push":
