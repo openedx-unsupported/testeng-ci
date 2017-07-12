@@ -17,7 +17,7 @@ try{
     new StringParameterValue("BUILD_STATUS", "pending"),
     new StringParameterValue("TARGET_URL", jobUrl),
     new StringParameterValue("DESCRIPTION", "Pending"),
-    new StringParameterValue("CONTEXT", "jenkins/lettuce"),
+    new StringParameterValue("CONTEXT", "jenkins/ginkgo/lettuce"),
   ]
 
   def statusJob = Hudson.instance.getJob('github-build-status')
