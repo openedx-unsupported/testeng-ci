@@ -180,10 +180,10 @@ def _parse_hook_for_testing_info(payload, event_type):
         # Find the jobs list for this hook
         jobs_list = _get_jobs_list(repository, target, event_type)
 
-    return sha, jobs_list
+    return sha, jobs_list, target
 
 
-def _parse_executables_for_builds(executable, build_status, event_type):
+def _parse_executables_for_builds(executable, build_status, event_type, target):
     """
     Parse executable to find the sha and job name of
     queued/running builds.
@@ -215,13 +215,22 @@ def _parse_executables_for_builds(executable, build_status, event_type):
                         })
     elif event_type == "push":
         if build_status == 'running':
+            # Based on the branch that is being merged into
+            # (master or one of the RELEASE_BRANCHES) find the sha
+            # and job being executed.
+            if target == "master":
+                target_branch = "origin/master"
+            else:
+                try:
+                    target_branch = "refs/remotes/origin/%s" (JOBS_DICT[target])
+                except:
+                    logger.error('Invalid target. Should either be master or '
+                        'an Open-Edx release branch. Got {}'.format(target_branch))
+
             for action in executable['actions']:
                 if 'buildsByBranchName' in action:
-                    # Based on the branch that is being merged into
-                    # (master or one of the RELEASE_BRANCHES) find the sha
-                    # and job being executed.
-                    if action.get('buildsByBranchName').get('origin/master'):
-                        sha = action['buildsByBranchName']['origin/master']['revision']['SHA1']
+                    if action.get('buildsByBranchName').get(target_branch):
+                        sha = action['buildsByBranchName'][target_branch]['revision']['SHA1']
                         url = executable['url']
                         m = re.search(
                             r'/job/([^/]+)/.*',
@@ -256,7 +265,7 @@ def _parse_executables_for_builds(executable, build_status, event_type):
     return builds
 
 
-def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type):
+def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type, target):
     """
     Find all builds currently in the queue
     """
@@ -275,7 +284,7 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type)
         response_json = response.json()
 
         # Find all builds in the queue and add them to a list
-        [builds.extend(_parse_executables_for_builds(executable, build_status, event_type))
+        [builds.extend(_parse_executables_for_builds(executable, build_status, event_type, target))
          for executable in response_json['items']]
     except:
         logger.warning('Timed out while trying to access the queue.')
@@ -283,7 +292,7 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type)
     return builds
 
 
-def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type):
+def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type, target):
     """
     Find all builds that are currently running
     """
@@ -307,7 +316,7 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type
                 executable = executor['currentExecutable']
                 if executable:
                     builds.extend(
-                        _parse_executables_for_builds(executable, build_status, event_type)
+                        _parse_executables_for_builds(executable, build_status, event_type, target)
                     )
     except:
         logger.warning('Timed out while trying to access the running builds.')
@@ -315,7 +324,7 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type
     return builds
 
 
-def _get_all_triggered_builds(jenkins_url, sha, jobs_list, event_type):
+def _get_all_triggered_builds(jenkins_url, sha, jobs_list, event_type, target):
     """
     Check to see if the sha has triggered each
     job in the jobs_list. Looks at both the queue
@@ -324,10 +333,10 @@ def _get_all_triggered_builds(jenkins_url, sha, jobs_list, event_type):
     jenkins_username, jenkins_token = _get_credentials_from_s3(jenkins_url)
 
     queued = _get_queued_builds(
-        jenkins_url, jenkins_username, jenkins_token, event_type
+        jenkins_url, jenkins_username, jenkins_token, event_type, target
     )
     running = _get_running_builds(
-        jenkins_url, jenkins_username, jenkins_token, event_type
+        jenkins_url, jenkins_username, jenkins_token, event_type, target
     )
     queued_or_running = queued + running
 
@@ -487,7 +496,7 @@ def lambda_handler(event, _context):
 
         # Get the commit sha and list of expected jobs to be executed
         # from this webhook.
-        sha, jobs_list = _parse_hook_for_testing_info(payload, event_type)
+        sha, jobs_list, target = _parse_hook_for_testing_info(payload, event_type)
         # If there is no jobs_list then no Jenkins jobs are expected
         if not jobs_list:
             return (
@@ -499,7 +508,8 @@ def lambda_handler(event, _context):
             url,
             sha,
             jobs_list,
-            event_type
+            event_type,
+            target
         )
 
         # Check if this hook has already successfully triggered some jobs.
