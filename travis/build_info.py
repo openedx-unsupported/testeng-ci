@@ -9,10 +9,9 @@ from __future__ import division
 
 import argparse
 import logging
-import requests
 import sys
-
 from operator import itemgetter
+import requests
 
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -87,8 +86,8 @@ def get_last_n_successful_builds(org, repo, number):
     # if we can't get the specified number of builds, just return everything
     if len(successful_builds) < number:
         return successful_builds
-    else:
-        return successful_builds[:number]
+
+    return successful_builds[:number]
 
 
 def get_average_build_duration(builds):
