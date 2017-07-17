@@ -192,6 +192,8 @@ def _parse_executables_for_builds(executable, build_status, event_type):
     """
     builds = []
     if event_type == "pull_request":
+        # All PR jobs show the sha that triggered them inside its
+        # parameters.
         for action in executable['actions']:
             if 'parameters' in action:
                 for param in action['parameters']:
@@ -212,10 +214,13 @@ def _parse_executables_for_builds(executable, build_status, event_type):
                             'sha': sha
                         })
     elif event_type == "push":
-        for action in executable['actions']:
-            if 'buildsByBranchName' in action:
-                if action.get('buildsByBranchName').get('origin/master'):
-                    if build_status == 'running':
+        if build_status == 'running':
+            for action in executable['actions']:
+                if 'buildsByBranchName' in action:
+                    # Based on the branch that is being merged into
+                    # (master or one of the RELEASE_BRANCHES) find the sha
+                    # and job being executed.
+                    if action.get('buildsByBranchName').get('origin/master'):
                         sha = action['buildsByBranchName']['origin/master']['revision']['SHA1']
                         url = executable['url']
                         m = re.search(
@@ -227,6 +232,27 @@ def _parse_executables_for_builds(executable, build_status, event_type):
                             'job_name': job_name,
                             'sha': sha
                         })
+        if build_status == 'queued':
+            # For queued master builds, the only way to find out if a sha has executed
+            # a build is to find queued subsets, look at the sha1 parameter, and the
+            # upstream project associated with it.
+            job_name = sha = None
+            for action in executable['actions']:
+                if 'parameters' in action:
+                    for param in action['parameters']:
+                        if (param['name'] == 'sha1'):
+                            sha = param['value']
+                            job_name = executable['task']['name']
+                if 'causes' in action:
+                    for cause in action['causes']:
+                        job_name = cause[upstreamProject]
+            # If both values exist for this executable, save the pair as a build.
+            if job_name and sha:
+                builds.append({
+                    'job_name': job_name,
+                    'sha': sha
+                })
+
     return builds
 
 
