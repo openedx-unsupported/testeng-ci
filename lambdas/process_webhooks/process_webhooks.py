@@ -142,7 +142,7 @@ def _parse_hook_for_testing_info(payload, event_type):
     ignore = False
 
     if event_type == 'pull_request':
-        if payload['action'] not 'closed':
+        if payload['action'] != 'closed':
             # PR was either "opened" or "synchronized" which is
             # when a new commit is pushed to the PR
             repository = payload['pull_request']['base']['repo']['name']
