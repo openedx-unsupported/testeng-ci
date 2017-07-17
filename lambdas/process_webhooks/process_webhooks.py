@@ -7,7 +7,7 @@ from six.moves.urllib.parse import urlparse
 from constants import *
 
 import boto3
-from botocore.vendored.requests import post
+from botocore.vendored.requests import post, get
 
 logger = logging.getLogger()
 
@@ -125,11 +125,6 @@ def _get_jobs_list(repository, target, event_type):
             jobs_list = JOBS_DICT['EDX_PLATFORM_PRIVATE_MASTER']
         elif event_type == 'pull_request':
             jobs_list = JOBS_DICT['EDX_PLATFORM_PRIVATE_PR']
-    elif repository == 'edx-e2e-tests':
-        if event_type == 'push':
-            jobs_list = JOBS_DICT['EDX_E2E_MASTER']
-        elif event_type == 'pull_request':
-            jobs_list = JOBS_DICT['EDX_E2E_PR']
 
     return jobs_list
 
@@ -497,6 +492,7 @@ def lambda_handler(event, _context):
         # Get the commit sha and list of expected jobs to be executed
         # from this webhook.
         sha, jobs_list, target = _parse_hook_for_testing_info(payload, event_type)
+
         # If there is no jobs_list then no Jenkins jobs are expected
         if not jobs_list:
             return (
