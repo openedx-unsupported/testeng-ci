@@ -239,7 +239,7 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, s
                             'job_name': job_name,
                             'sha': sha
                         })
-    if build_status == 'queued':
+    elif build_status == 'queued':
         # For queued master builds, the only way to find out if a sha has executed
         # a build is to find queued subsets, look at the sha1 parameter, and the
         # upstream project associated with it.
@@ -259,7 +259,6 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, s
                 'job_name': job_name,
                 'sha': sha
             })
-
     return builds
 
 

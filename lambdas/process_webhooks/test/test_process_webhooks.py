@@ -279,7 +279,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(sha, None)
         self.assertEqual(target, None)
 
-    def test_parse_executable_pr(self):
+    def test_parse_executable_pr_running(self):
         data = {
             'actions': [{
                 'parameters': [{
@@ -288,17 +288,41 @@ class JenkinsApiTestCase(TestCase):
                 }]
             }],
            'url': 'https://build.testeng.edx.org'
-                   '/job/edx-platform-bokchoy-pr/1234'
+                   '/job/edx-platform-bok-choy-pr/1234'
         }
         build_status = 'running'
         event_type = 'pull_request'
 
         expected_response = [{
-            "job_name": "edx-platform-bokchoy-pr", "sha": "12345"
+            "job_name": "edx-platform-bok-choy-pr", "sha": "12345"
         }]
         actual_response = _parse_executable_for_builds(
             data, build_status, event_type, 'master', '12345'
         )
+        self.assertEqual(expected_response, actual_response)
+
+    def test_parse_executable_pr_queued(self):
+        data = {
+            'actions': [{
+                'parameters': [{
+                    'name': 'sha1',
+                    'value': '12345'
+                }]
+            }],
+           'task': {
+                'name': 'edx-platform-bok-choy-pr'
+           }
+        }
+        build_status = 'queued'
+        event_type = 'pull_request'
+
+        expected_response = [{
+            "job_name": "edx-platform-bok-choy-pr", "sha": "12345"
+        }]
+        actual_response = _parse_executable_for_builds(
+            data, build_status, event_type, 'master', '12345'
+        )
+        print actual_response
         self.assertEqual(expected_response, actual_response)
 
 
