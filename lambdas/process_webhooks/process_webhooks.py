@@ -181,7 +181,7 @@ def _parse_hook_for_testing_info(payload, event_type):
     return sha, jobs_list, target
 
 
-def _parse_executable_for_builds(executable, build_status, event_type, target, sha):
+def _parse_executable_for_builds(executable, build_status, event_type, target, hook_sha):
     """
     Parse executable to find the sha and job name of
     queued/running builds.
@@ -207,10 +207,11 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, s
                                 urlparse(url).path
                             )
                             job_name = m.group(1)
-                        builds.append({
-                            'job_name': job_name,
-                            'sha': sha
-                        })
+                        if sha == hook_sha:
+                            builds.append({
+                                'job_name': job_name,
+                                'sha': sha
+                            })
     elif event_type == "push":
         if build_status == 'running':
             # Based on the branch that is being merged into
@@ -238,30 +239,30 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, s
                             urlparse(url).path
                         )
                         job_name = m.group(1)
-                        builds.append({
-                            'job_name': job_name,
-                            'sha': sha
-                        })
-    elif build_status == 'queued':
-        # For queued master builds, the only way to find out if a sha has executed
-        # a build is to find queued subsets, look at the sha1 parameter, and the
-        # upstream project associated with it.
-        job_name = sha = None
-        for action in executable['actions']:
-            if 'parameters' in action:
-                for param in action['parameters']:
-                    if (param['name'] == 'sha1'):
-                        sha = param['value']
-                        job_name = executable['task']['name']
-            if 'causes' in action:
-                for cause in action['causes']:
-                    job_name = cause[upstreamProject]
-        # If both values exist for this executable, save the pair as a build.
-        if job_name and sha:
-            builds.append({
-                'job_name': job_name,
-                'sha': sha
-            })
+                        if sha == hook_sha:
+                            builds.append({
+                                'job_name': job_name,
+                                'sha': sha
+                            })
+        elif build_status == 'queued':
+            # For queued master builds, the only way to find out if a sha has executed
+            # a build is to find queued subsets, look at the sha1 parameter, and the
+            # upstream project associated with it.
+            job_name = sha = None
+            for action in executable['actions']:
+                if 'parameters' in action:
+                    for param in action['parameters']:
+                        if (param['name'] == 'sha1'):
+                            sha = param['value']
+                if 'causes' in action:
+                    for cause in action['causes']:
+                        job_name = cause['upstreamProject']
+            # If both values exist for this executable, save the pair as a build.
+            if job_name and sha == hook_sha:
+                builds.append({
+                    'job_name': job_name,
+                    'sha': sha
+                })
 
     return builds
 

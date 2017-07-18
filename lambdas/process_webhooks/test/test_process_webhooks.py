@@ -292,14 +292,19 @@ class JenkinsApiTestCase(TestCase):
         }
         build_status = "running"
         event_type = "pull_request"
+        target = "master"
 
         expected_response = [{
             "job_name": "edx-platform-bok-choy-pr", "sha": "12345"
         }]
         actual_response = _parse_executable_for_builds(
-            data, build_status, event_type, "master", "12345"
+            data, build_status, event_type, target, "12345"
         )
         self.assertEqual(expected_response, actual_response)
+        empty_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, ""
+        )
+        self.assertEqual(empty_response, [])
 
     def test_parse_executable_pr_queued(self):
         data = {
@@ -315,15 +320,18 @@ class JenkinsApiTestCase(TestCase):
         }
         build_status = "queued"
         event_type = "pull_request"
-
+        target = "master"
         expected_response = [{
             "job_name": "edx-platform-bok-choy-pr", "sha": "12345"
         }]
         actual_response = _parse_executable_for_builds(
-            data, build_status, event_type, "master", "12345"
+            data, build_status, event_type, target, "12345"
         )
-        print actual_response
         self.assertEqual(expected_response, actual_response)
+        empty_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, ""
+        )
+        self.assertEqual(empty_response, [])
 
     def test_parse_executable_push_running(self):
         data = {
@@ -343,6 +351,95 @@ class JenkinsApiTestCase(TestCase):
         event_type = "push"
         target = "master"
 
+        expected_response = [{
+            "job_name": "edx-platform-bok-choy-pr", "sha": "12345"
+        }]
+        actual_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, "12345"
+        )
+        self.assertEqual(expected_response, actual_response)
+        empty_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, ""
+        )
+        self.assertEqual(empty_response, [])
+
+    def test_parse_executable_push_running_ficus(self):
+        data = {
+            "actions": [{
+                "buildsByBranchName" : {
+                    "refs/heads/open-release/ficus.master" : {
+                        "buildNumber" : 40034,
+                        "revision" : {
+                            "SHA1" : "12345",
+                        }
+                    }
+                }
+            }],
+            "url": "https://build.testeng.edx.org/job/ficus-bok-choy-pr/4/"
+        }
+        build_status = "running"
+        event_type = "push"
+        target = "ficus"
+
+        expected_response = [{
+            "job_name": "ficus-bok-choy-pr", "sha": "12345"
+        }]
+        actual_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, "12345"
+        )
+        self.assertEqual(expected_response, actual_response)
+        empty_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, ""
+        )
+        self.assertEqual(empty_response, [])
+
+    def test_parse_executable_push_running_ginkgo(self):
+        data = {
+            "actions": [{
+                "buildsByBranchName" : {
+                    "refs/heads/open-release/ginkgo.master" : {
+                        "buildNumber" : 40034,
+                        "revision" : {
+                            "SHA1" : "12345",
+                        }
+                    }
+                }
+            }],
+            "url": "https://build.testeng.edx.org/job/ginkgo-bok-choy-pr/4/"
+        }
+        build_status = "running"
+        event_type = "push"
+        target = "ginkgo"
+
+        expected_response = [{
+            "job_name": "ginkgo-bok-choy-pr", "sha": "12345"
+        }]
+        actual_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, "12345"
+        )
+        self.assertEqual(expected_response, actual_response)
+        empty_response = _parse_executable_for_builds(
+            data, build_status, event_type, target, ""
+        )
+        self.assertEqual(empty_response, [])
+
+    def test_parse_executable_push_queued(self):
+        data = {
+            'actions': [{
+                'parameters': [{
+                    'name': 'sha1',
+                    'value': '12345'
+                }],
+                },
+                {
+                "causes": [{
+                    "upstreamProject" : "edx-platform-bok-choy-pr"
+                }]
+            }]
+        }
+        build_status = "queued"
+        event_type = "push"
+        target = "ginkgo"
         expected_response = [{
             "job_name": "edx-platform-bok-choy-pr", "sha": "12345"
         }]
