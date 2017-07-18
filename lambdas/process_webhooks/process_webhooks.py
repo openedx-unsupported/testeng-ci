@@ -235,7 +235,8 @@ def _parse_executable_for_builds(
             for action in executable['actions']:
                 if 'buildsByBranchName' in action:
                     if action.get('buildsByBranchName').get(target_branch):
-                        sha = action['buildsByBranchName'][target_branch]['revision']['SHA1']
+                        sha = action['buildsByBranchName'][target_branch] \
+                            ['revision']['SHA1']
                         url = executable['url']
                         m = re.search(
                             r'/job/([^/]+)/.*',
@@ -293,8 +294,12 @@ def _get_queued_builds(
         response_json = response.json()
 
         # Find all builds in the queue and add them to a list
-        [builds.extend(_parse_executable_for_builds(executable, build_status, event_type, target, sha))
-         for executable in response_json['items']]
+        for executable in response_json['items']:
+            builds.extend(
+                _parse_executable_for_builds(
+                    executable, build_status, event_type, target, sha
+                )
+            )
     except:
         logger.warning('Timed out while trying to access the queue.')
 

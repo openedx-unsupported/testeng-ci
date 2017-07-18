@@ -249,7 +249,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(target, "master")
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
-            return_value={})
+           return_value={})
     def test_parse_hook_push_ficus(self, _jobs_list_mock):
         payload = push_event.get("body")
         payload["ref"] = "refs/heads/open-release/ficus.master"
@@ -259,7 +259,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(target, "ficus")
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
-            return_value={})
+           return_value={})
     def test_parse_hook_push_ficus(self, _jobs_list_mock):
         payload = push_event.get("body")
         payload["ref"] = "refs/heads/open-release/ginkgo.master"
@@ -279,7 +279,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(target, "master")
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
-            return_value={})
+           return_value={})
     def test_parse_hook_pr_ficus(self, _jobs_list_mock):
         payload = pr_event.get("body")
         payload["pull_request"]["base"]["ref"] = \
@@ -290,7 +290,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(target, "ficus")
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
-        return_value={})
+           return_value={})
     def test_parse_hook_pr_ficus(self, _jobs_list_mock):
         payload = pr_event.get("body")
         payload["pull_request"]["base"]["ref"] = \
