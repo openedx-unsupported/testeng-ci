@@ -106,33 +106,62 @@ class ProcessWebhooksRequestTestCase(TestCase):
 
 
 class LambdaHandlerTestCase(TestCase):
-    event = {
-        'spigot_state': '',
-        'body': {
-            'zen': 'Non-blocking is better than blocking.',
-            'hook_id': 12341234,
-            'hook': {
-                'type': 'Repository',
-                'id': 98765432,
-                'events': ['issue_comment', 'pull_request']
+    ping_event = {
+        "spigot_state": "",
+        "body": {
+            "zen": "Non-blocking is better than blocking.",
+            "hook_id": 12341234,
+            "hook": {
+                "type": "Repository",
+                "id": 98765432,
+                "events": ["issue_comment", "pull_request"]
             },
-            'repository': {'id': 12341234, 'name': 'foo'},
-            'sender': {'id': 12345678},
+            "repository": {"id": 12341234, "name": "foo"},
+            "sender": {"id": 12345678},
         },
-        'headers': {'X-GitHub-Event': 'ping'}
+        "headers": {"X-GitHub-Event": "ping"}
+    }
+
+    push_event = {
+        "spigot_state": "",
+        "body": {
+            "ref": "",
+            "commits": [
+                {
+                "id": "2899e87215f3686c2e6ebb10d60c68ed215f182a"
+                }
+            ],
+            "head_commit": {
+                "id": "2899e87215f3686c2e6ebb10d60c68ed215f182a"
+            },
+            "repository": {
+                "id": 86592256,
+                "name": "",
+            },
+            "pusher": {
+                "name": "michaelyoungstrom",
+                "email": "myoungstrom@edx.org"
+            },
+            "sender": {
+                "login": "michaelyoungstrom"
+            }
+        },
+        "headers": {"X-GitHub-Event": "push"}
     }
 
     @patch('process_webhooks.process_webhooks._get_target_url',
            return_value='http://www.example.com/endpoint/')
     @patch('process_webhooks.process_webhooks._send_message',
            return_value={})
-    def test_lambda_handler_to_target(self, send_msg_mock, _url_mock):
-        self.event['spigot_state'] = 'ON'
-        lambda_handler(self.event, None)
+    @patch('process_webhooks.process_webhooks._parse_hook_for_testing_info',
+           return_value=(None, None, []))
+    def test_lambda_handler_to_target(self, _parse_hook_mock, send_msg_mock, _url_mock):
+        self.push_event['spigot_state'] = 'ON'
+        lambda_handler(self.push_event, None)
         send_msg_mock.assert_called_with(
             'http://www.example.com/endpoint/',
-            self.event.get('body'),
-            {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
+            self.push_event.get('body'),
+            {'Content-Type': 'application/json', 'X-GitHub-Event': u'push'}
         )
 
     @patch('process_webhooks.process_webhooks._get_target_url',
@@ -149,17 +178,17 @@ class LambdaHandlerTestCase(TestCase):
         self, send_queue_mock, _queue_mock,
         _from_queue_mock, send_msg_mock, _url_mock
     ):
-        self.event['spigot_state'] = 'ON'
+        self.push_event['spigot_state'] = 'ON'
         with self.assertRaises(StandardError):
-            lambda_handler(self.event, None)
+            lambda_handler(self.push_event, None)
 
         send_msg_mock.assert_called_with(
             'http://www.example.com/endpoint/',
-            self.event.get('body'),
-            {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
+            self.push_event.get('body'),
+            {'Content-Type': 'application/json', 'X-GitHub-Event': u'push'}
         )
         send_queue_mock.assert_called_with(
-            self.event,
+            self.push_event,
             'queue_name'
         )
 
@@ -168,8 +197,8 @@ class LambdaHandlerTestCase(TestCase):
     @patch('process_webhooks.process_webhooks._send_message',
            return_value={})
     def test_lambda_handler_ping(self, send_msg_mock, _url_mock):
-        self.event['spigot_state'] = 'ON'
-        lambda_handler(self.event, None)
+        self.ping_event['spigot_state'] = 'ON'
+        lambda_handler(self.ping_event, None)
         assert not send_msg_mock.called
 
     @patch('process_webhooks.process_webhooks._get_target_queue',
@@ -181,10 +210,10 @@ class LambdaHandlerTestCase(TestCase):
     def test_lambda_handler_to_queue(
         self, send_queue_mock, _from_queue_mock, _queue_mock
     ):
-        self.event['spigot_state'] = 'OFF'
-        lambda_handler(self.event, None)
+        self.push_event['spigot_state'] = 'OFF'
+        lambda_handler(self.push_event, None)
         send_queue_mock.assert_called_with(
-            self.event,
+            self.push_event,
             'queue_name'
         )
 
@@ -197,7 +226,7 @@ class LambdaHandlerTestCase(TestCase):
     def test_lambda_handler_to_queue_from_queue(
         self, send_queue_mock, _from_queue_mock, _queue_mock
     ):
-        self.event['spigot_state'] = 'OFF'
+        self.push_event['spigot_state'] = 'OFF'
         with self.assertRaises(StandardError):
-            lambda_handler(self.event, None)
+            lambda_handler(self.push_event, None)
         assert not send_queue_mock.called

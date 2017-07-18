@@ -158,7 +158,7 @@ def _parse_hook_for_testing_info(payload, event_type):
 
     # Find the target based on the base_ref
     if not ignore:
-        if ref == "refs/heads/master":
+        if ref == "refs/heads/origin/master":
             target = "master"
         elif ref in RELEASE_BRANCHES:
             # find the target from constants.py
