@@ -10,8 +10,10 @@ from ..process_webhooks import _send_message, _add_gh_header
 from ..process_webhooks import _get_target_url, _get_target_queue
 from ..process_webhooks import lambda_handler, _is_from_queue
 from ..process_webhooks import _get_jobs_list, _parse_hook_for_testing_info
-from ..process_webhooks import _parse_executable_for_builds, _get_running_builds
-from ..process_webhooks import _get_triggered_jobs_from_list, _all_jobs_triggered
+from ..process_webhooks import _parse_executable_for_builds
+from ..process_webhooks import _get_running_builds
+from ..process_webhooks import _get_triggered_jobs_from_list
+from ..process_webhooks import _all_jobs_triggered
 
 from ..constants import *
 
@@ -37,7 +39,7 @@ push_event = {
         "ref": "",
         "commits": [
             {
-            "id": "2899e87215f3686c2e6ebb10d60c68ed215f182a"
+                "id": "2899e87215f3686c2e6ebb10d60c68ed215f182a"
             }
         ],
         "head_commit": {
@@ -91,6 +93,7 @@ pr_event = {
     },
     "headers": {"X-GitHub-Event": "pull_request"}
 }
+
 
 class ProcessWebhooksTestCase(TestCase):
     headers = {
@@ -171,9 +174,13 @@ class JenkinsApiTestCase(TestCase):
         event_push = "push"
         event_pull = "pull_request"
         jobs_list_push = _get_jobs_list(repository, target, event_push)
-        self.assertEqual(jobs_list_push, JOBS_DICT["EDX_PLATFORM_MASTER"])
+        self.assertEqual(
+            jobs_list_push, JOBS_DICT["EDX_PLATFORM_MASTER"]
+        )
         jobs_list_pr = _get_jobs_list(repository, target, event_pull)
-        self.assertEqual(jobs_list_pr, JOBS_DICT["EDX_PLATFORM_PR"])
+        self.assertEqual(
+            jobs_list_pr, JOBS_DICT["EDX_PLATFORM_PR"]
+        )
 
     def test_get_jobs_list_master_private(self):
         repository = "edx-platform-private"
@@ -181,9 +188,13 @@ class JenkinsApiTestCase(TestCase):
         event_push = "push"
         event_pull = "pull_request"
         jobs_list_push = _get_jobs_list(repository, target, event_push)
-        self.assertEqual(jobs_list_push, JOBS_DICT["EDX_PLATFORM_PRIVATE_MASTER"])
+        self.assertEqual(
+            jobs_list_push, JOBS_DICT["EDX_PLATFORM_PRIVATE_MASTER"]
+        )
         jobs_list_pr = _get_jobs_list(repository, target, event_pull)
-        self.assertEqual(jobs_list_pr, JOBS_DICT["EDX_PLATFORM_PRIVATE_PR"])
+        self.assertEqual(
+            jobs_list_pr, JOBS_DICT["EDX_PLATFORM_PRIVATE_PR"]
+        )
 
     def test_get_jobs_list_ficus(self):
         repository = "edx-platform"
@@ -191,9 +202,13 @@ class JenkinsApiTestCase(TestCase):
         event_push = "push"
         event_pull = "pull_request"
         jobs_list_push = _get_jobs_list(repository, target, event_push)
-        self.assertEqual(jobs_list_push, JOBS_DICT["EDX_PLATFORM_FICUS_MASTER"])
+        self.assertEqual(
+            jobs_list_push, JOBS_DICT["EDX_PLATFORM_FICUS_MASTER"]
+        )
         jobs_list_pr = _get_jobs_list(repository, target, event_pull)
-        self.assertEqual(jobs_list_pr, JOBS_DICT["EDX_PLATFORM_FICUS_PR"])
+        self.assertEqual(
+            jobs_list_pr, JOBS_DICT["EDX_PLATFORM_FICUS_PR"]
+        )
 
     def test_get_jobs_list_ginkgo(self):
         repository = "edx-platform"
@@ -201,9 +216,13 @@ class JenkinsApiTestCase(TestCase):
         event_push = "push"
         event_pull = "pull_request"
         jobs_list_push = _get_jobs_list(repository, target, event_push)
-        self.assertEqual(jobs_list_push, JOBS_DICT["EDX_PLATFORM_GINKGO_MASTER"])
+        self.assertEqual(
+            jobs_list_push, JOBS_DICT["EDX_PLATFORM_GINKGO_MASTER"]
+        )
         jobs_list_pr = _get_jobs_list(repository, target, event_pull)
-        self.assertEqual(jobs_list_pr, JOBS_DICT["EDX_PLATFORM_GINKGO_PR"])
+        self.assertEqual(
+            jobs_list_pr, JOBS_DICT["EDX_PLATFORM_GINKGO_PR"]
+        )
 
     def test_get_jobs_list_foo(self):
         repository = "foo"
@@ -211,9 +230,13 @@ class JenkinsApiTestCase(TestCase):
         event_push = "push"
         event_pull = "pull_request"
         jobs_list_push = _get_jobs_list(repository, target, event_push)
-        self.assertEqual(jobs_list_push, [])
+        self.assertEqual(
+            jobs_list_push, []
+        )
         jobs_list_pr = _get_jobs_list(repository, target, event_pull)
-        self.assertEqual(jobs_list_pr, [])
+        self.assertEqual(
+            jobs_list_pr, []
+        )
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
            return_value={})
@@ -226,7 +249,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(target, "master")
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
-        return_value={})
+            return_value={})
     def test_parse_hook_push_ficus(self, _jobs_list_mock):
         payload = push_event.get("body")
         payload["ref"] = "refs/heads/open-release/ficus.master"
@@ -236,7 +259,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(target, "ficus")
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
-        return_value={})
+            return_value={})
     def test_parse_hook_push_ficus(self, _jobs_list_mock):
         payload = push_event.get("body")
         payload["ref"] = "refs/heads/open-release/ginkgo.master"
@@ -256,7 +279,7 @@ class JenkinsApiTestCase(TestCase):
         self.assertEqual(target, "master")
 
     @patch("process_webhooks.process_webhooks._get_jobs_list",
-        return_value={})
+            return_value={})
     def test_parse_hook_pr_ficus(self, _jobs_list_mock):
         payload = pr_event.get("body")
         payload["pull_request"]["base"]["ref"] = \
@@ -290,8 +313,8 @@ class JenkinsApiTestCase(TestCase):
                     "value": "12345"
                 }]
             }],
-           "url": "https://build.testeng.edx.org"
-                  "/job/edx-platform-bok-choy-pr/1234"
+            "url": "https://build.testeng.edx.org"
+                   "/job/edx-platform-bok-choy-pr/1234"
         }
         build_status = "running"
         event_type = "pull_request"
@@ -319,7 +342,7 @@ class JenkinsApiTestCase(TestCase):
             }],
             "task": {
                 "name": "edx-platform-bok-choy-pr"
-           }
+            }
         }
         build_status = "queued"
         event_type = "pull_request"

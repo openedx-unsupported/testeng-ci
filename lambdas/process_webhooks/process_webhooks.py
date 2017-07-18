@@ -181,7 +181,9 @@ def _parse_hook_for_testing_info(payload, event_type):
     return sha, jobs_list, target
 
 
-def _parse_executable_for_builds(executable, build_status, event_type, target, hook_sha):
+def _parse_executable_for_builds(
+    executable, build_status, event_type, target, hook_sha
+):
     """
     Parse executable to find the sha and job name of
     queued/running builds.
@@ -227,7 +229,8 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, h
 
             if not target_branch:
                 logger.error('Invalid target. Should either be master or '
-                    'an Open-Edx release branch. Got {}'.format(target_branch))
+                             'an Open-Edx release branch.'
+                             'Got {}'.format(target_branch))
 
             for action in executable['actions']:
                 if 'buildsByBranchName' in action:
@@ -245,9 +248,10 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, h
                                 'sha': sha
                             })
         elif build_status == 'queued':
-            # For queued master builds, the only way to find out if a sha has executed
-            # a build is to find queued subsets, look at the sha1 parameter, and the
-            # upstream project associated with it.
+            # For queued master builds, the only way to find out
+            # if a sha has executed a build is to find queued subsets,
+            # look at the sha1 parameter, and the upstream
+            # project associated with it.
             job_name = sha = None
             for action in executable['actions']:
                 if 'parameters' in action:
@@ -257,7 +261,8 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, h
                 if 'causes' in action:
                     for cause in action['causes']:
                         job_name = cause['upstreamProject']
-            # If both values exist for this executable, save the pair as a build.
+            # If both values exist for this executable,
+            # save the pair as a build.
             if job_name and sha == hook_sha:
                 builds.append({
                     'job_name': job_name,
@@ -267,7 +272,9 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, h
     return builds
 
 
-def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type, target, sha):
+def _get_queued_builds(
+    jenkins_url, jenkins_username, jenkins_token, event_type, target, sha
+):
     """
     Find all builds currently in the queue
     """
@@ -294,7 +301,9 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type,
     return builds
 
 
-def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type, target, sha):
+def _get_running_builds(
+    jenkins_url, jenkins_username, jenkins_token, event_type, target, sha
+):
     """
     Find all builds that are currently running
     """
@@ -318,7 +327,9 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type
                 executable = executor['currentExecutable']
                 if executable:
                     builds.extend(
-                        _parse_executable_for_builds(executable, build_status, event_type, target, sha)
+                        _parse_executable_for_builds(
+                            executable, build_status, event_type, target, sha
+                        )
                     )
     except:
         logger.warning('Timed out while trying to access the running builds.')
@@ -498,7 +509,9 @@ def lambda_handler(event, _context):
 
         # Get the commit sha and list of expected jobs to be executed
         # from this webhook.
-        sha, jobs_list, target = _parse_hook_for_testing_info(payload, event_type)
+        sha, jobs_list, target = _parse_hook_for_testing_info(
+            payload, event_type
+        )
 
         # If there is no jobs_list then no Jenkins jobs are expected
         if not jobs_list:
@@ -515,7 +528,7 @@ def lambda_handler(event, _context):
         # If so, its possible that the jobs have finished executing since
         # the hooks first transmission.
         if event.get('already_triggered'):
-            already_triggered_builds= event.get('already_triggered')
+            already_triggered_builds = event.get('already_triggered')
             logger.info(
                 'The following jobs have been previously '
                 'triggered: {}'.format(already_triggered_builds)
