@@ -181,86 +181,32 @@ def _parse_hook_for_testing_info(payload, event_type):
     return sha, jobs_list, target
 
 
-def _parse_executables_for_builds(executable, build_status, event_type, target):
+def _parse_executable_for_builds(executable):
     """
     Parse executable to find the sha and job name of
     queued/running builds.
-    Return list of jobs with the sha that triggered
-    them
+    The best way to simplify this to find builds for each possible
+    scenario (running/queued and pull_request/push) look for
+    the subsets of each job, and find the sha1 parameter and
+    upstream project associated with it.
     """
-    builds = []
-    if event_type == "pull_request":
-        # All PR jobs show the sha that triggered them inside its
-        # parameters.
-        for action in executable['actions']:
-            if 'parameters' in action:
-                for param in action['parameters']:
-                    if (param['name'] == 'sha1' or
-                            param['name'] == 'ghprbActualCommit'):
-                        sha = param['value']
-                        if build_status == 'queued':
-                            job_name = executable['task']['name']
-                        elif build_status == 'running':
-                            url = executable['url']
-                            m = re.search(
-                                r'/job/([^/]+)/.*',
-                                urlparse(url).path
-                            )
-                            job_name = m.group(1)
-                        builds.append({
-                            'job_name': job_name,
-                            'sha': sha
-                        })
-    elif event_type == "push":
-        if build_status == 'running':
-            # Based on the branch that is being merged into
-            # (master or one of the RELEASE_BRANCHES) find the sha
-            # and job being executed.
-            if target == "master":
-                target_branch = "origin/master"
-            else:
-                try:
-                    target_branch = "refs/remotes/origin/%s" (JOBS_DICT[target])
-                except:
-                    logger.error('Invalid target. Should either be master or '
-                        'an Open-Edx release branch. Got {}'.format(target_branch))
+    job_name = sha = None
+    for action in executable['actions']:
+        if 'parameters' in action:
+            for param in action['parameters']:
+                if (param['name'] == 'sha1'):
+                    sha = param['value']
+        if 'causes' in action:
+            for cause in action['causes']:
+                job_name = cause['upstreamProject']
+    # If both values exist for this executable, save the pair as a build.
+    if job_name and sha:
+        build = {
+            'job_name': job_name,
+            'sha': sha
+        }
 
-            for action in executable['actions']:
-                if 'buildsByBranchName' in action:
-                    if action.get('buildsByBranchName').get(target_branch):
-                        sha = action['buildsByBranchName'][target_branch]['revision']['SHA1']
-                        url = executable['url']
-                        m = re.search(
-                            r'/job/([^/]+)/.*',
-                            urlparse(url).path
-                        )
-                        job_name = m.group(1)
-                        builds.append({
-                            'job_name': job_name,
-                            'sha': sha
-                        })
-        if build_status == 'queued':
-            # For queued master builds, the only way to find out if a sha has executed
-            # a build is to find queued subsets, look at the sha1 parameter, and the
-            # upstream project associated with it.
-            job_name = sha = None
-            for action in executable['actions']:
-                if 'parameters' in action:
-                    for param in action['parameters']:
-                        if (param['name'] == 'sha1'):
-                            sha = param['value']
-                            job_name = executable['task']['name']
-                if 'causes' in action:
-                    for cause in action['causes']:
-                        job_name = cause[upstreamProject]
-            # If both values exist for this executable, save the pair as a build.
-            if job_name and sha:
-                builds.append({
-                    'job_name': job_name,
-                    'sha': sha
-                })
-
-    return builds
+    return build
 
 
 def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type, target):
@@ -268,7 +214,6 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type,
     Find all builds currently in the queue
     """
     builds = []
-    build_status = 'queued'
 
     # Use Jenkins REST API to get info on the queue
     # set a timeout for the request to avoid timing out of lambda
@@ -282,7 +227,7 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type,
         response_json = response.json()
 
         # Find all builds in the queue and add them to a list
-        [builds.extend(_parse_executables_for_builds(executable, build_status, event_type, target))
+        [builds.extend(_parse_executable_for_builds(executable))
          for executable in response_json['items']]
     except:
         logger.warning('Timed out while trying to access the queue.')
@@ -290,12 +235,11 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type,
     return builds
 
 
-def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type, target):
+def _get_running_builds(jenkins_url, jenkins_username, jenkins_token):
     """
     Find all builds that are currently running
     """
     builds = []
-    build_status = 'running'
 
     # Use Jenkins REST API to get info on all workers
     # set a timeout for the request to avoid timing out of lambda
@@ -314,7 +258,7 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type
                 executable = executor['currentExecutable']
                 if executable:
                     builds.extend(
-                        _parse_executables_for_builds(executable, build_status, event_type, target)
+                        _parse_executable_for_builds(executable)
                     )
     except:
         logger.warning('Timed out while trying to access the running builds.')
@@ -322,7 +266,7 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token, event_type
     return builds
 
 
-def _get_all_triggered_builds(jenkins_url, sha, jobs_list, event_type, target):
+def _get_all_triggered_builds(jenkins_url, sha):
     """
     Check to see if the sha has triggered each
     job in the jobs_list. Looks at both the queue
@@ -331,10 +275,10 @@ def _get_all_triggered_builds(jenkins_url, sha, jobs_list, event_type, target):
     jenkins_username, jenkins_token = _get_credentials_from_s3(jenkins_url)
 
     queued = _get_queued_builds(
-        jenkins_url, jenkins_username, jenkins_token, event_type, target
+        jenkins_url, jenkins_username, jenkins_token
     )
     running = _get_running_builds(
-        jenkins_url, jenkins_username, jenkins_token, event_type, target
+        jenkins_url, jenkins_username, jenkins_token
     )
     queued_or_running = queued + running
 
@@ -507,8 +451,6 @@ def lambda_handler(event, _context):
             url,
             sha,
             jobs_list,
-            event_type,
-            target
         )
 
         # Check if this hook has already successfully triggered some jobs.
