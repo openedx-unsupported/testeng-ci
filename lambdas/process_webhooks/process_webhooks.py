@@ -235,7 +235,7 @@ def _parse_executable_for_builds(
             for action in executable['actions']:
                 if 'buildsByBranchName' in action:
                     if action.get('buildsByBranchName').get(target_branch):
-                        sha = action['buildsByBranchName'][target_branch] \
+                        sha = action['buildsByBranchName'][target_branch]\
                             ['revision']['SHA1']
                         url = executable['url']
                         m = re.search(
