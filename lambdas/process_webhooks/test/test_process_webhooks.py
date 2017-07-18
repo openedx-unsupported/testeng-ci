@@ -259,7 +259,8 @@ class JenkinsApiTestCase(TestCase):
         return_value={})
     def test_parse_hook_pr_ficus(self, _jobs_list_mock):
         payload = pr_event.get("body")
-        payload["pull_request"]["base"]["ref"] = "refs/heads/open-release/ficus.master"
+        payload["pull_request"]["base"]["ref"] = \
+            "refs/heads/open-release/ficus.master"
         event_type = "pull_request"
         sha, _, target = _parse_hook_for_testing_info(payload, event_type)
         self.assertEqual(sha, "2aebed50cfda531dd0c0d3916c084fd26d81362f")
@@ -269,7 +270,8 @@ class JenkinsApiTestCase(TestCase):
         return_value={})
     def test_parse_hook_pr_ficus(self, _jobs_list_mock):
         payload = pr_event.get("body")
-        payload["pull_request"]["base"]["ref"] = "refs/heads/open-release/ginkgo.master"
+        payload["pull_request"]["base"]["ref"] = \
+            "refs/heads/open-release/ginkgo.master"
         event_type = "pull_request"
         sha, _, target = _parse_hook_for_testing_info(payload, event_type)
         self.assertEqual(sha, "2aebed50cfda531dd0c0d3916c084fd26d81362f")
@@ -289,7 +291,7 @@ class JenkinsApiTestCase(TestCase):
                 }]
             }],
            "url": "https://build.testeng.edx.org"
-                   "/job/edx-platform-bok-choy-pr/1234"
+                  "/job/edx-platform-bok-choy-pr/1234"
         }
         build_status = "running"
         event_type = "pull_request"
@@ -315,7 +317,7 @@ class JenkinsApiTestCase(TestCase):
                     "value": "12345"
                 }]
             }],
-           "task": {
+            "task": {
                 "name": "edx-platform-bok-choy-pr"
            }
         }
@@ -337,16 +339,16 @@ class JenkinsApiTestCase(TestCase):
     def test_parse_executable_push_running(self):
         data = {
             "actions": [{
-                "buildsByBranchName" : {
-                    "origin/master" : {
-                        "buildNumber" : 40034,
-                        "revision" : {
-                            "SHA1" : "12345",
+                "buildsByBranchName": {
+                    "origin/master": {
+                        "buildNumber": 40034,
+                        "revision": {
+                            "SHA1": "12345",
                         }
                     }
                 }
             }],
-            "url": "https://build.testeng.edx.org/job/edx-platform-bok-choy-pr/40034/"
+            "url": "https://jenkins.org/job/edx-platform-bok-choy-pr/400/"
         }
         build_status = "running"
         event_type = "push"
@@ -367,11 +369,11 @@ class JenkinsApiTestCase(TestCase):
     def test_parse_executable_push_running_ficus(self):
         data = {
             "actions": [{
-                "buildsByBranchName" : {
-                    "refs/heads/open-release/ficus.master" : {
-                        "buildNumber" : 40034,
-                        "revision" : {
-                            "SHA1" : "12345",
+                "buildsByBranchName": {
+                    "refs/heads/open-release/ficus.master": {
+                        "buildNumber": 40034,
+                        "revision": {
+                            "SHA1": "12345",
                         }
                     }
                 }
@@ -397,11 +399,11 @@ class JenkinsApiTestCase(TestCase):
     def test_parse_executable_push_running_ginkgo(self):
         data = {
             "actions": [{
-                "buildsByBranchName" : {
-                    "refs/heads/open-release/ginkgo.master" : {
-                        "buildNumber" : 40034,
-                        "revision" : {
-                            "SHA1" : "12345",
+                "buildsByBranchName": {
+                    "refs/heads/open-release/ginkgo.master": {
+                        "buildNumber": 40034,
+                        "revision": {
+                            "SHA1": "12345",
                         }
                     }
                 }
@@ -426,15 +428,15 @@ class JenkinsApiTestCase(TestCase):
 
     def test_parse_executable_push_queued(self):
         data = {
-            'actions': [{
-                'parameters': [{
-                    'name': 'sha1',
-                    'value': '12345'
+            "actions": [{
+                "parameters": [{
+                    "name": "sha1",
+                    "value": "12345"
                 }],
                 },
                 {
                 "causes": [{
-                    "upstreamProject" : "edx-platform-bok-choy-pr"
+                    "upstreamProject": "edx-platform-bok-choy-pr"
                 }]
             }]
         }
@@ -452,60 +454,60 @@ class JenkinsApiTestCase(TestCase):
     @staticmethod
     def mock_running_response():
         data = {
-            'computer': [{
-                'executors': [{
-                    'currentExecutable': {
-                        'actions': [{
-                            'parameters': [{
-                                'name': 'sha1',
-                                'value': '12345'
+            "computer": [{
+                "executors": [{
+                    "currentExecutable": {
+                        "actions": [{
+                            "parameters": [{
+                                "name": "sha1",
+                                "value": "12345"
                             }]
                         }],
-                        'url': 'https://build.testeng.edx.org'
-                               '/job/edx-platform-bokchoy-pr/1234'
+                        "url": "https://build.testeng.edx.org"
+                               "/job/edx-platform-bokchoy-pr/1234"
                         }
                 }],
-                'oneOffExecutors': []
+                "oneOffExecutors": []
             }]
         }
         return data
 
-    @patch('process_webhooks.process_webhooks.get',
+    @patch("process_webhooks.process_webhooks.get",
            return_value=Response())
     def test_get_running_builds(self, json_mock):
         with patch(
-            'botocore.vendored.requests.models.Response.json',
+            "botocore.vendored.requests.models.Response.json",
             return_value=self.mock_running_response()
         ):
             expected_response = [
                 {"job_name": "edx-platform-bokchoy-pr", "sha": "12345"}
             ]
-            url = 'https://www.jenkins.org'
-            username = 'username'
-            token = 'password'
+            url = "https://www.jenkins.org"
+            username = "username"
+            token = "password"
             actual_response = _get_running_builds(
                 url, username, token, "pull_request", "master", "12345"
             )
             self.assertEqual(expected_response, actual_response)
 
     def test_get_triggered_from_list(self):
-        jobs_list = JOBS_DICT['EDX_PLATFORM_PR']
+        jobs_list = JOBS_DICT["EDX_PLATFORM_PR"]
         builds = [{
-            'job_name': 'edx-platform-bok-choy-pr',
-            'sha': '12345'
+            "job_name": "edx-platform-bok-choy-pr",
+            "sha": "12345"
         }, {
-            'job_name': 'edx-platform-accessibility-pr',
-            'sha': '12345'
+            "job_name": "edx-platform-accessibility-pr",
+            "sha": "12345"
         }, {
-            'job_name': 'edx-platform-js-pr',
-            'sha': '12345'
+            "job_name": "edx-platform-js-pr",
+            "sha": "12345"
         }, {
-            'job_name': 'edx-platform-lettuce-pr',
-            'sha': '12345'
+            "job_name": "edx-platform-lettuce-pr",
+            "sha": "12345"
         }]
         sha = "12345"
         already_triggered = [
-            'edx-platform-quality-pr', 'edx-platform-python-unittests-pr'
+            "edx-platform-quality-pr", "edx-platform-python-unittests-pr"
         ]
         jobs = _get_triggered_jobs_from_list(
             builds, already_triggered, sha, jobs_list
@@ -514,17 +516,17 @@ class JenkinsApiTestCase(TestCase):
 
     def test_all_tests_triggered(self):
         triggered_jobs = [
-            'edx-platform-quality-pr', 'edx-platform-python-unittests-pr',
-            'edx-platform-bok-choy-pr', 'edx-platform-accessibility-pr',
-            'edx-platform-js-pr', 'edx-platform-lettuce-pr',
+            "edx-platform-quality-pr", "edx-platform-python-unittests-pr",
+            "edx-platform-bok-choy-pr", "edx-platform-accessibility-pr",
+            "edx-platform-js-pr", "edx-platform-lettuce-pr",
         ]
         all_triggered = _all_jobs_triggered(
-            triggered_jobs, JOBS_DICT['EDX_PLATFORM_PR']
+            triggered_jobs, JOBS_DICT["EDX_PLATFORM_PR"]
         )
         self.assertEqual(all_triggered, True)
         triggered_jobs.pop()
         all_triggered = _all_jobs_triggered(
-            triggered_jobs, JOBS_DICT['EDX_PLATFORM_PR']
+            triggered_jobs, JOBS_DICT["EDX_PLATFORM_PR"]
         )
         self.assertEqual(all_triggered, False)
 
@@ -562,7 +564,9 @@ class LambdaHandlerTestCase(TestCase):
            return_value={})
     @patch("process_webhooks.process_webhooks._parse_hook_for_testing_info",
            return_value=(None, None, []))
-    def test_lambda_handler_to_target(self, _parse_hook_mock, send_msg_mock, _url_mock):
+    def test_lambda_handler_to_target(
+        self, _parse_hook_mock, send_msg_mock, _url_mock
+    ):
         push_event["spigot_state"] = "ON"
         lambda_handler(push_event, None)
         send_msg_mock.assert_called_with(
