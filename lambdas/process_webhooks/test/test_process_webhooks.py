@@ -10,6 +10,7 @@ from ..process_webhooks import _send_message, _add_gh_header
 from ..process_webhooks import _get_target_url, _get_target_queue
 from ..process_webhooks import lambda_handler, _is_from_queue
 from ..process_webhooks import _get_jobs_list, _parse_hook_for_testing_info
+from ..process_webhooks import _parse_executable_for_builds
 
 from ..constants import *
 
@@ -277,6 +278,27 @@ class JenkinsApiTestCase(TestCase):
         sha, _, target = _parse_hook_for_testing_info(None, 'issue_comment')
         self.assertEqual(sha, None)
         self.assertEqual(target, None)
+
+    def test_parse_executable(self):
+        data = {
+            'actions': [{
+                'parameters': [{
+                    'name': 'sha1',
+                    'value': '12345'
+                }],
+            },
+            {
+            "causes": [{
+                "upstreamProject" : "edx-platform-bok-choy-pr"
+            }]
+            }]
+        }
+
+        expected_response = {
+            "job_name": "edx-platform-bok-choy-pr", "sha": "12345"
+        }
+        actual_response = _parse_executable_for_builds(data)
+        self.assertEqual(expected_response, actual_response)
 
 
 class ProcessWebhooksRequestTestCase(TestCase):
