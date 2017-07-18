@@ -216,14 +216,17 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, s
             # Based on the branch that is being merged into
             # (master or one of the RELEASE_BRANCHES) find the sha
             # and job being executed.
+            target_branch = None
             if target == "master":
                 target_branch = "origin/master"
             else:
-                try:
-                    target_branch = "refs/remotes/origin/%s" (JOBS_DICT[target])
-                except:
-                    logger.error('Invalid target. Should either be master or '
-                        'an Open-Edx release branch. Got {}'.format(target_branch))
+                for release in RELEASE_BRANCHES:
+                    if RELEASE_BRANCHES[release] == target:
+                        target_branch = release
+
+            if not target_branch:
+                logger.error('Invalid target. Should either be master or '
+                    'an Open-Edx release branch. Got {}'.format(target_branch))
 
             for action in executable['actions']:
                 if 'buildsByBranchName' in action:
