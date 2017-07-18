@@ -259,6 +259,7 @@ def _parse_executable_for_builds(executable, build_status, event_type, target, s
                 'job_name': job_name,
                 'sha': sha
             })
+
     return builds
 
 
@@ -340,7 +341,7 @@ def _get_all_triggered_builds(jenkins_url, event_type, target, sha):
     return queued_or_running
 
 
-def _get_jobs_triggered_from_list(builds, already_triggered, sha, jobs_list):
+def _get_triggered_jobs_from_list(builds, already_triggered, sha, jobs_list):
     """
     From the list of all running/queued builds, find which
     jobs from the jobs_list have been triggered.
@@ -360,8 +361,8 @@ def _get_jobs_triggered_from_list(builds, already_triggered, sha, jobs_list):
 
 def _all_jobs_triggered(triggered_jobs, jobs_list):
     """
-    Determine if all of the expected jobs have been
-    triggered.
+    Check to see if all jobs in the jobs list
+    have been triggered.
     """
     return set(triggered_jobs) == set(jobs_list)
 
@@ -518,16 +519,11 @@ def lambda_handler(event, _context):
         else:
             already_triggered_builds = None
 
-        # Find a list of the jobs from the jobs_list that have
-        # been triggered.
-        triggered_builds_from_list = _get_jobs_triggered_from_list(
-            triggered_builds,
-            already_triggered_builds,
-            sha,
-            jobs_list
+        triggered_jobs = _get_triggered_jobs_from_list(
+            triggered_builds, already_triggered_builds, sha, jobs_list
         )
 
-        if _all_jobs_triggered(queued_or_running, jobs_list):
+        if _all_jobs_triggered(triggered_builds, jobs_list):
             logger.info(
                 "All Jenkins jobs have been triggered "
                 "for sha: '{}'".format(sha)
