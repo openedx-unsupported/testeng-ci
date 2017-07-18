@@ -10,7 +10,8 @@ from ..process_webhooks import _send_message, _add_gh_header
 from ..process_webhooks import _get_target_url, _get_target_queue
 from ..process_webhooks import lambda_handler, _is_from_queue
 from ..process_webhooks import _get_jobs_list, _parse_hook_for_testing_info
-from ..process_webhooks import _parse_executable_for_builds
+from ..process_webhooks import _parse_executable_for_builds, _get_running_builds
+from ..process_webhooks import _get_triggered_jobs_from_list, _all_jobs_triggered
 
 from ..constants import *
 
@@ -447,6 +448,85 @@ class JenkinsApiTestCase(TestCase):
             data, build_status, event_type, target, "12345"
         )
         self.assertEqual(expected_response, actual_response)
+
+    @staticmethod
+    def mock_running_response():
+        data = {
+            'computer': [{
+                'executors': [{
+                    'currentExecutable': {
+                        'actions': [{
+                            'parameters': [{
+                                'name': 'sha1',
+                                'value': '12345'
+                            }]
+                        }],
+                        'url': 'https://build.testeng.edx.org'
+                               '/job/edx-platform-bokchoy-pr/1234'
+                        }
+                }],
+                'oneOffExecutors': []
+            }]
+        }
+        return data
+
+    @patch('process_webhooks.process_webhooks.get',
+           return_value=Response())
+    def test_get_running_builds(self, json_mock):
+        with patch(
+            'botocore.vendored.requests.models.Response.json',
+            return_value=self.mock_running_response()
+        ):
+            expected_response = [
+                {"job_name": "edx-platform-bokchoy-pr", "sha": "12345"}
+            ]
+            url = 'https://www.jenkins.org'
+            username = 'username'
+            token = 'password'
+            actual_response = _get_running_builds(
+                url, username, token, "pull_request", "master", "12345"
+            )
+            self.assertEqual(expected_response, actual_response)
+
+    def test_get_triggered_from_list(self):
+        jobs_list = JOBS_DICT['EDX_PLATFORM_PR']
+        builds = [{
+            'job_name': 'edx-platform-bok-choy-pr',
+            'sha': '12345'
+        }, {
+            'job_name': 'edx-platform-accessibility-pr',
+            'sha': '12345'
+        }, {
+            'job_name': 'edx-platform-js-pr',
+            'sha': '12345'
+        }, {
+            'job_name': 'edx-platform-lettuce-pr',
+            'sha': '12345'
+        }]
+        sha = "12345"
+        already_triggered = [
+            'edx-platform-quality-pr', 'edx-platform-python-unittests-pr'
+        ]
+        jobs = _get_triggered_jobs_from_list(
+            builds, already_triggered, sha, jobs_list
+        )
+        self.assertEqual(set(jobs), set(jobs_list))
+
+    def test_all_tests_triggered(self):
+        triggered_jobs = [
+            'edx-platform-quality-pr', 'edx-platform-python-unittests-pr',
+            'edx-platform-bok-choy-pr', 'edx-platform-accessibility-pr',
+            'edx-platform-js-pr', 'edx-platform-lettuce-pr',
+        ]
+        all_triggered = _all_jobs_triggered(
+            triggered_jobs, JOBS_DICT['EDX_PLATFORM_PR']
+        )
+        self.assertEqual(all_triggered, True)
+        triggered_jobs.pop()
+        all_triggered = _all_jobs_triggered(
+            triggered_jobs, JOBS_DICT['EDX_PLATFORM_PR']
+        )
+        self.assertEqual(all_triggered, False)
 
 
 class ProcessWebhooksRequestTestCase(TestCase):
