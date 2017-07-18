@@ -147,22 +147,24 @@ def _parse_hook_for_testing_info(payload, event_type):
             # when a new commit is pushed to the PR
             repository = payload['pull_request']['base']['repo']['name']
             ref = payload['pull_request']['base']['ref']
+            sha = payload['pull_request']['head']['sha']
         else:
             ignore = True
     elif event_type == 'push':
         repository = payload['repository']['name']
         ref = payload['ref']
+        sha = payload['head_commit']['id']
     else:
         # Unsupported event type, return None for both values
         ignore = True
 
     # Find the target based on the base_ref
     if not ignore:
-        if ref == "refs/heads/origin/master":
+        if ref == "refs/heads/master":
             target = "master"
         elif ref in RELEASE_BRANCHES:
             # find the target from constants.py
-            target = RELEASE_BRANCHES[target]
+            target = RELEASE_BRANCHES[ref]
         else:
             # no jobs are expected in this case
             ignore = True
@@ -171,7 +173,7 @@ def _parse_hook_for_testing_info(payload, event_type):
     # otherwise, return sha, jobs_list
     if ignore:
         # We don't care about these so assign None, None
-        return (None, None)
+        return (None, None, None)
     else:
         # Find the jobs list for this hook
         jobs_list = _get_jobs_list(repository, target, event_type)
