@@ -227,7 +227,7 @@ def _get_queued_builds(jenkins_url, jenkins_username, jenkins_token, event_type,
         response_json = response.json()
 
         # Find all builds in the queue and add them to a list
-        [builds.extend(_parse_executable_for_builds(executable))
+        [builds.append(_parse_executable_for_builds(executable))
          for executable in response_json['items']]
     except:
         logger.warning('Timed out while trying to access the queue.')
@@ -257,7 +257,7 @@ def _get_running_builds(jenkins_url, jenkins_username, jenkins_token):
             for executor in worker['executors'] + worker['oneOffExecutors']:
                 executable = executor['currentExecutable']
                 if executable:
-                    builds.extend(
+                    builds.append(
                         _parse_executable_for_builds(executable)
                     )
     except:
