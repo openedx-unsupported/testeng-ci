@@ -151,9 +151,16 @@ def _parse_hook_for_testing_info(payload, event_type):
         else:
             ignore = True
     elif event_type == 'push':
-        repository = payload['repository']['name']
-        ref = payload['ref']
-        sha = payload['head_commit']['id']
+        try:
+            repository = payload['repository']['name']
+            ref = payload['ref']
+            sha = payload['head_commit']['id']
+        except:
+            # If the hook is missing any of these ignore it.
+            # One example where this happens is the
+            # push hook triggered to a feature branch
+            # when it is being merged.
+            ignore = True
     else:
         # Unsupported event type, return None for both values
         ignore = True
@@ -518,6 +525,10 @@ def lambda_handler(event, _context):
 
         # If there is no jobs_list then no Jenkins jobs are expected
         if not jobs_list:
+            logger.info(
+                "No platform jobs are expected to be triggered "
+                "by this hook."
+            )
             return (
                 "Webhook successfully sent to url: {}".format(url)
             )
