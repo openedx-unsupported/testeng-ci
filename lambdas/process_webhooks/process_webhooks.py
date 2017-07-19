@@ -487,7 +487,7 @@ def lambda_handler(event, _context):
 
     if spigot_state == "ON":
         # Get the url that the webhook will be sent to
-        url = _get_target_url(headers)
+        url = _get_target_url()
         url_with_endpoint = _get_url_endpoint(url, headers)
 
         if not url_with_endpoint:
