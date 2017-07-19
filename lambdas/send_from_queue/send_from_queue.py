@@ -216,11 +216,20 @@ def lambda_handler(event, _context):
                 timeout=(3.05, 30)
             )
 
-            # If there was a problem, raise an error
-            response.raise_for_status()
+            error_message = "More jobs triggered, but " \
+                            "unable to trigger all jobs."
+            if error_message in response.text:
+                # The hook failed to trigger all jobs, but it has
+                # been replaced in the queue with a new hook, so
+                # delete this one.
+                _delete_from_queue(queue_object, message)
+                response.raise_for_status()
+            else:
+                # If there was a problem, raise an error
+                response.raise_for_status()
 
-            # Otherwise, delete the message since it has been processed
-            _delete_from_queue(queue_object, message)
+                # Otherwise, delete the message since it has been processed
+                _delete_from_queue(queue_object, message)
 
     # If this gets reached before a timeout, the queue had been emptied
     return "The queue has been cleared."

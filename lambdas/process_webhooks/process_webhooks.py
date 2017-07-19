@@ -373,7 +373,7 @@ def _get_triggered_jobs_from_list(builds, already_triggered, sha, jobs_list):
     jobs from the jobs_list have been triggered.
     """
     triggered_jobs = already_triggered if already_triggered else []
-    if jobs_list:
+    if builds and jobs_list:
         for build in builds:
             build_job_name = build['job_name']
             build_sha = build['sha']
@@ -564,9 +564,22 @@ def lambda_handler(event, _context):
         else:
             # Not all tests were triggered, queue this hook
             # for later processing.
-            event.update({'already_triggered': triggered_jobs_from_list})
-            queue_name = _get_target_queue()
-            _response = _send_to_queue(event, queue_name)
+            if from_queue and already_triggered != triggered_jobs_from_list:
+                # The message came from the queue, and not all the expected
+                # jobs have been triggered. However, more jobs were kicked
+                # off, so we need to update that by adding a new hook to the
+                # queue, and deleting the old. Send a unique error message
+                # so send_from_queue knows to delete it despite the failure.
+                event.update({'already_triggered': triggered_jobs_from_list})
+                queue_name = _get_target_queue()
+                _response = _send_to_queue(event, queue_name)
+                raise StandardError(
+                    "More jobs triggered, but unable to trigger all jobs."
+                )
+            elif not from_queue:
+                event.update({'already_triggered': triggered_jobs_from_list})
+                queue_name = _get_target_queue()
+                _response = _send_to_queue(event, queue_name)
             raise StandardError(
                 "Unable to trigger all jobs for "
                 "sha: '{}'".format(sha)
