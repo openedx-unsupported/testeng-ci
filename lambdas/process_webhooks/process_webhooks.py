@@ -227,29 +227,25 @@ def _parse_executable_for_builds(
                     if RELEASE_BRANCHES[release] == target:
                         target_branch = release
 
-            if not target_branch:
-                logger.error('Invalid target. Should either be master or '
-                             'an Open-Edx release branch.'
-                             'Got {}'.format(target_branch))
-
-            for action in executable['actions']:
-                if 'buildsByBranchName' in action:
-                    if action.get('buildsByBranchName').get(target_branch):
-                        sha = (
-                            action['buildsByBranchName'][target_branch]
-                            ['revision']['SHA1']
-                        )
-                        url = executable['url']
-                        m = re.search(
-                            r'/job/([^/]+)/.*',
-                            urlparse(url).path
-                        )
-                        job_name = m.group(1)
-                        if sha == hook_sha:
-                            builds.append({
-                                'job_name': job_name,
-                                'sha': sha
-                            })
+            if target_branch:
+                for action in executable['actions']:
+                    if 'buildsByBranchName' in action:
+                        if action['buildsByBranchName'][target_branch]:
+                            sha = (
+                                action['buildsByBranchName'][target_branch]
+                                ['revision']['SHA1']
+                            )
+                            url = executable['url']
+                            m = re.search(
+                                r'/job/([^/]+)/.*',
+                                urlparse(url).path
+                            )
+                            job_name = m.group(1)
+                            if sha == hook_sha:
+                                builds.append({
+                                    'job_name': job_name,
+                                    'sha': sha
+                                })
         elif build_status == 'queued':
             # For queued master builds, the only way to find out
             # if a sha has executed a build is to find queued subsets,
@@ -527,6 +523,7 @@ def lambda_handler(event, _context):
             )
 
         # Get all triggered running/ queued builds from Jenkins
+        # that match the desired sha.
         triggered_builds = _get_all_triggered_builds(
             url, event_type, target, sha
         )
@@ -543,11 +540,11 @@ def lambda_handler(event, _context):
         else:
             already_triggered_builds = None
 
-        triggered_jobs = _get_triggered_jobs_from_list(
+        triggered_jobs_from_list = _get_triggered_jobs_from_list(
             triggered_builds, already_triggered_builds, sha, jobs_list
         )
 
-        if _all_jobs_triggered(triggered_builds, jobs_list):
+        if _all_jobs_triggered(triggered_jobs_from_list, jobs_list):
             logger.info(
                 "All Jenkins jobs have been triggered "
                 "for sha: '{}'".format(sha)
@@ -555,10 +552,10 @@ def lambda_handler(event, _context):
         else:
             # Not all tests were triggered, queue this hook
             # for later processing.
-            event.update({'already_triggered': triggered_builds_from_list})
+            event.update({'already_triggered': triggered_jobs_from_list})
             queue_name = _get_target_queue()
             _response = _send_to_queue(event, queue_name)
-            logger.error(
+            raise StandardError(
                 "Unable to trigger all jobs for "
                 "sha: '{}'".format(sha)
             )

@@ -586,8 +586,99 @@ class LambdaHandlerTestCase(TestCase):
     @patch("process_webhooks.process_webhooks._send_message",
            return_value={})
     @patch("process_webhooks.process_webhooks._parse_hook_for_testing_info",
-           return_value=(None, None, []))
-    def test_lambda_handler_to_target(
+           return_value=("12345", JOBS_DICT['EDX_PLATFORM_MASTER'], "master"))
+    @patch("process_webhooks.process_webhooks._get_all_triggered_builds",
+           return_value={})
+    @patch("process_webhooks.process_webhooks._get_triggered_jobs_from_list",
+           return_value=list(JOBS_DICT['EDX_PLATFORM_MASTER']))
+    @patch("process_webhooks.process_webhooks._all_jobs_triggered",
+           return_value=True)
+    def test_lambda_handler_to_target_jobs_list(
+        self, all_triggered_mock, _from_list_mock, _get_jobs_mock,
+        _parse_hook_mock, send_msg_mock, _url_mock
+    ):
+        push_event["spigot_state"] = "ON"
+        lambda_handler(push_event, None)
+        send_msg_mock.assert_called_with(
+            "http://www.example.com/endpoint/",
+            push_event.get("body"),
+            {"Content-Type": "application/json", "X-GitHub-Event": u"push"}
+        )
+        all_triggered_mock.assert_called_with(
+            list(JOBS_DICT['EDX_PLATFORM_MASTER']),
+            JOBS_DICT['EDX_PLATFORM_MASTER']
+        )
+
+    @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com/endpoint/")
+    @patch("process_webhooks.process_webhooks._send_message",
+           return_value={})
+    @patch("process_webhooks.process_webhooks._parse_hook_for_testing_info",
+           return_value=("12345", ('job1', 'job2'), "master"))
+    @patch("process_webhooks.process_webhooks._get_all_triggered_builds",
+           return_value={})
+    @patch("process_webhooks.process_webhooks._all_jobs_triggered",
+           return_value=True)
+    def test_lambda_handler_to_target_jobs_list_already_triggered(
+        self, all_triggered_mock, _get_jobs_mock,
+        _parse_hook_mock, send_msg_mock, _url_mock
+    ):
+        push_event.update({'already_triggered': ['job1', 'job2']})
+        push_event["spigot_state"] = "ON"
+        lambda_handler(push_event, None)
+        send_msg_mock.assert_called_with(
+            "http://www.example.com/endpoint/",
+            push_event.get("body"),
+            {"Content-Type": "application/json", "X-GitHub-Event": u"push"}
+        )
+        all_triggered_mock.assert_called_with(
+            ['job1', 'job2'],
+            ('job1', 'job2')
+        )
+
+    @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com/endpoint/")
+    @patch("process_webhooks.process_webhooks._send_message",
+           return_value={})
+    @patch("process_webhooks.process_webhooks._parse_hook_for_testing_info",
+           return_value=("12345", JOBS_DICT['EDX_PLATFORM_MASTER'], "master"))
+    @patch("process_webhooks.process_webhooks._get_all_triggered_builds",
+           return_value={})
+    @patch("process_webhooks.process_webhooks._get_triggered_jobs_from_list",
+           return_value=[])
+    @patch("process_webhooks.process_webhooks._all_jobs_triggered",
+           return_value=False)
+    @patch("process_webhooks.process_webhooks._get_target_queue",
+           return_value="queue_name")
+    @patch("process_webhooks.process_webhooks._send_to_queue",
+           return_value=None)
+    def test_lambda_handler_to_target_jobs_list_not_triggered(
+        self, send_to_queue, _queue_mock, all_triggered_mock,
+        _from_list_mock, _get_jobs_mock, _parse_hook_mock,
+        send_msg_mock, _url_mock
+    ):
+        push_event["spigot_state"] = "ON"
+        with self.assertRaises(StandardError):
+            lambda_handler(push_event, None)
+        send_msg_mock.assert_called_with(
+            "http://www.example.com/endpoint/",
+            push_event.get("body"),
+            {"Content-Type": "application/json", "X-GitHub-Event": u"push"}
+        )
+        all_triggered_mock.assert_called_with(
+            [],
+            JOBS_DICT['EDX_PLATFORM_MASTER']
+        )
+        send_to_queue.assert_called_with(push_event, "queue_name")
+
+
+    @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com/endpoint/")
+    @patch("process_webhooks.process_webhooks._send_message",
+           return_value={})
+    @patch("process_webhooks.process_webhooks._parse_hook_for_testing_info",
+           return_value=(None, [], None))
+    def test_lambda_handler_to_target_no_jobs_list(
         self, _parse_hook_mock, send_msg_mock, _url_mock
     ):
         push_event["spigot_state"] = "ON"
