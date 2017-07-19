@@ -671,7 +671,6 @@ class LambdaHandlerTestCase(TestCase):
         )
         send_to_queue.assert_called_with(push_event, "queue_name")
 
-
     @patch("process_webhooks.process_webhooks._get_target_url",
            return_value="http://www.example.com/endpoint/")
     @patch("process_webhooks.process_webhooks._send_message",
