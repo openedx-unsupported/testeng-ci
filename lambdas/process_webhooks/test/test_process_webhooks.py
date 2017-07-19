@@ -7,9 +7,10 @@ from botocore.vendored.requests import Response
 from mock import patch, Mock
 
 from ..process_webhooks import _send_message, _add_gh_header
-from ..process_webhooks import _get_target_url, _get_target_queue
-from ..process_webhooks import lambda_handler, _is_from_queue
-from ..process_webhooks import _get_jobs_list, _parse_hook_for_testing_info
+from ..process_webhooks import _get_target_url, _get_url_endpoint
+from ..process_webhooks import _get_target_queue, lambda_handler
+from ..process_webhooks import _is_from_queue, _get_jobs_list
+from ..process_webhooks import _parse_hook_for_testing_info
 from ..process_webhooks import _parse_executable_for_builds
 from ..process_webhooks import _get_running_builds
 from ..process_webhooks import _get_triggered_jobs_from_list
@@ -102,34 +103,38 @@ class ProcessWebhooksTestCase(TestCase):
     }
 
     @patch.dict(os.environ, {"TARGET_URL": "http://www.example.com"})
-    def test_get_target_url_pr(self):
+    def test_get_target_url(self):
+        url = _get_target_url()
+        self.assertEqual(url, "http://www.example.com")
+
+    def test_get_target_url_error(self):
+        with self.assertRaises(StandardError):
+            url = _get_target_url()
+
+    def test_get_url_endpoint_pr(self):
         self.headers["X-GitHub-Event"] = "pull_request"
-        url = _get_target_url(self.headers)
+        url = _get_url_endpoint("http://www.example.com", self.headers)
         self.assertEqual(url, "http://www.example.com/ghprbhook/")
 
-    @patch.dict(os.environ, {"TARGET_URL": "http://www.example.com"})
-    def test_get_target_url_comment(self):
+    def test_get_url_endpoint_comment(self):
         self.headers["X-GitHub-Event"] = "issue_comment"
-        url = _get_target_url(self.headers)
+        url = _get_url_endpoint("http://www.example.com", self.headers)
         self.assertEqual(url, "http://www.example.com/ghprbhook/")
 
-    @patch.dict(os.environ, {"TARGET_URL": "http://www.example.com"})
-    def test_get_target_url_push(self):
+    def test_get_url_endpoint_push(self):
         self.headers["X-GitHub-Event"] = "push"
-        url = _get_target_url(self.headers)
+        url = _get_url_endpoint("http://www.example.com", self.headers)
         self.assertEqual(url, "http://www.example.com/github-webhook/")
 
-    @patch.dict(os.environ, {"TARGET_URL": "http://www.example.com"})
-    def test_get_target_url_ping(self):
+    def test_get_url_endpoint_ping(self):
         self.headers["X-GitHub-Event"] = "ping"
-        url = _get_target_url(self.headers)
+        url = _get_url_endpoint("http://www.example.com", self.headers)
         self.assertEqual(url, None)
 
-    @patch.dict(os.environ, {"TARGET_URL": "http://www.example.com"})
-    def test_get_target_url_error(self):
+    def test_get_url_endpoint_error(self):
         self.headers["X-GitHub-Event"] = "status"
         with self.assertRaises(StandardError):
-            url = _get_target_url(self.headers)
+            url = _get_url_endpoint("http://www.example.com", self.headers)
 
     def test_add_gh_header(self):
         gh_header = {"X-GitHub-Event": "push"}
@@ -582,6 +587,8 @@ class ProcessWebhooksRequestTestCase(TestCase):
 
 class LambdaHandlerTestCase(TestCase):
     @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com")
+    @patch("process_webhooks.process_webhooks._get_url_endpoint",
            return_value="http://www.example.com/endpoint/")
     @patch("process_webhooks.process_webhooks._send_message",
            return_value={})
@@ -595,7 +602,7 @@ class LambdaHandlerTestCase(TestCase):
            return_value=True)
     def test_lambda_handler_to_target_jobs_list(
         self, all_triggered_mock, _from_list_mock, _get_jobs_mock,
-        _parse_hook_mock, send_msg_mock, _url_mock
+        _parse_hook_mock, send_msg_mock, _url_mock, _url_endpoint
     ):
         push_event["spigot_state"] = "ON"
         lambda_handler(push_event, None)
@@ -610,6 +617,8 @@ class LambdaHandlerTestCase(TestCase):
         )
 
     @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com")
+    @patch("process_webhooks.process_webhooks._get_url_endpoint",
            return_value="http://www.example.com/endpoint/")
     @patch("process_webhooks.process_webhooks._send_message",
            return_value={})
@@ -621,7 +630,7 @@ class LambdaHandlerTestCase(TestCase):
            return_value=True)
     def test_lambda_handler_to_target_jobs_list_already_triggered(
         self, all_triggered_mock, _get_jobs_mock,
-        _parse_hook_mock, send_msg_mock, _url_mock
+        _parse_hook_mock, send_msg_mock, _url_mock, _url_endpoint
     ):
         push_event.update({'already_triggered': ['job1', 'job2']})
         push_event["spigot_state"] = "ON"
@@ -637,6 +646,8 @@ class LambdaHandlerTestCase(TestCase):
         )
 
     @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com")
+    @patch("process_webhooks.process_webhooks._get_url_endpoint",
            return_value="http://www.example.com/endpoint/")
     @patch("process_webhooks.process_webhooks._send_message",
            return_value={})
@@ -655,7 +666,7 @@ class LambdaHandlerTestCase(TestCase):
     def test_lambda_handler_to_target_jobs_list_not_triggered(
         self, send_to_queue, _queue_mock, all_triggered_mock,
         _from_list_mock, _get_jobs_mock, _parse_hook_mock,
-        send_msg_mock, _url_mock
+        send_msg_mock, _url_mock, _url_endpoint
     ):
         push_event["spigot_state"] = "ON"
         with self.assertRaises(StandardError):
@@ -672,13 +683,16 @@ class LambdaHandlerTestCase(TestCase):
         send_to_queue.assert_called_with(push_event, "queue_name")
 
     @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com")
+    @patch("process_webhooks.process_webhooks._get_url_endpoint",
            return_value="http://www.example.com/endpoint/")
     @patch("process_webhooks.process_webhooks._send_message",
            return_value={})
     @patch("process_webhooks.process_webhooks._parse_hook_for_testing_info",
            return_value=(None, [], None))
     def test_lambda_handler_to_target_no_jobs_list(
-        self, _parse_hook_mock, send_msg_mock, _url_mock
+        self, _parse_hook_mock, send_msg_mock,
+        _url_mock, _url_endpoint
     ):
         push_event["spigot_state"] = "ON"
         lambda_handler(push_event, None)
@@ -689,6 +703,8 @@ class LambdaHandlerTestCase(TestCase):
         )
 
     @patch("process_webhooks.process_webhooks._get_target_url",
+           return_value="http://www.example.com")
+    @patch("process_webhooks.process_webhooks._get_url_endpoint",
            return_value="http://www.example.com/endpoint/")
     @patch("process_webhooks.process_webhooks._send_message",
            side_effect=StandardError("Error!"))
@@ -700,7 +716,8 @@ class LambdaHandlerTestCase(TestCase):
            return_value={})
     def test_lambda_handler_to_target_error(
         self, send_queue_mock, _queue_mock,
-        _from_queue_mock, send_msg_mock, _url_mock
+        _from_queue_mock, send_msg_mock,
+        _url_mock, _url_endpoint
     ):
         push_event["spigot_state"] = "ON"
         with self.assertRaises(StandardError):
@@ -718,9 +735,13 @@ class LambdaHandlerTestCase(TestCase):
 
     @patch("process_webhooks.process_webhooks._get_target_url",
            return_value=None)
+    @patch("process_webhooks.process_webhooks._get_url_endpoint",
+           return_value=None)
     @patch("process_webhooks.process_webhooks._send_message",
            return_value={})
-    def test_lambda_handler_ping(self, send_msg_mock, _url_mock):
+    def test_lambda_handler_ping(self, send_msg_mock,
+        _url_mock, _url_endpoint
+    ):
         ping_event["spigot_state"] = "ON"
         lambda_handler(ping_event, None)
         assert not send_msg_mock.called

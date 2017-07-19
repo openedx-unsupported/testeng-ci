@@ -25,13 +25,10 @@ if not isinstance(numeric_level, int):
 logger.setLevel(numeric_level)
 
 
-def _get_target_url(headers):
+def _get_target_url():
     """
     Get the target URL for the processed hooks from the
-    OS environment variable. Based on the GitHub event,
-    add the proper endpoint.
-
-    Return the target URL with the appropriate endpoint
+    OS environment variable.
     """
     url = os.environ.get('TARGET_URL')
     if not url:
@@ -39,6 +36,14 @@ def _get_target_url(headers):
             "Environment variable TARGET_URL was not set"
         )
 
+    return url
+
+
+def _get_url_endpoint(base_url, headers):
+    """
+    Based on the GitHub event, add the proper endpoint
+    to the target url.
+    """
     event_type = headers.get('X-GitHub-Event')
 
     # Based on the X-Github-Event header, determine the
@@ -57,7 +62,7 @@ def _get_target_url(headers):
             "type: {}".format(event_type)
         )
 
-    return url + "/" + endpoint
+    return base_url + "/" + endpoint
 
 
 def _get_credentials_from_s3(jenkins_url):
@@ -73,13 +78,6 @@ def _get_credentials_from_s3(jenkins_url):
     # the same credentials
     session = botocore.session.get_session()
     client = session.create_client('s3')
-
-    try:
-        file_name = JENKINS_S3_OBJECTS[jenkins_url] + '.json'
-    except:
-        raise StandardError(
-            'Jenkins url not found in JENKINS_S3_OBJECTS'
-        )
 
     creds_file = client.get_object(
         Bucket=CREDENTIALS_BUCKET,
@@ -238,7 +236,7 @@ def _parse_executable_for_builds(
             if target_branch:
                 for action in executable['actions']:
                     if 'buildsByBranchName' in action:
-                        if action['buildsByBranchName'][target_branch]:
+                        if action.get('buildsByBranchName').get(target_branch):
                             sha = (
                                 action['buildsByBranchName'][target_branch]
                                 ['revision']['SHA1']
@@ -490,8 +488,9 @@ def lambda_handler(event, _context):
     if spigot_state == "ON":
         # Get the url that the webhook will be sent to
         url = _get_target_url(headers)
+        url_with_endpoint = _get_url_endpoint(url, headers)
 
-        if not url:
+        if not url_with_endpoint:
             # If url is None, swallow the hook, since it is just a ping
             return (
                 "Received a ping webhook. No action required."
@@ -506,7 +505,7 @@ def lambda_handler(event, _context):
 
         # Send it off!
         try:
-            _result = _send_message(url, payload, headers)
+            _result = _send_message(url_with_endpoint, payload, headers)
         except:
             if not from_queue:
                 # The transmission was a failure, if it's not
@@ -515,7 +514,7 @@ def lambda_handler(event, _context):
                 _response = _send_to_queue(event, queue_name)
             raise StandardError(
                 "There was an error sending the message "
-                "to the url: {}".format(url)
+                "to the url: {}".format(url_with_endpoint)
             )
 
         # Get the commit sha and list of expected jobs to be executed
@@ -531,7 +530,8 @@ def lambda_handler(event, _context):
                 "by this hook."
             )
             return (
-                "Webhook successfully sent to url: {}".format(url)
+                "Webhook successfully sent to "
+                "url: {}".format(url_with_endpoint)
             )
 
         # Get all triggered running/ queued builds from Jenkins
@@ -585,7 +585,8 @@ def lambda_handler(event, _context):
                 "sha: '{}'".format(sha)
             )
         return (
-            "Webhook successfully sent to url: {}".format(url)
+            "Webhook successfully sent to url: {} and the following jobs "
+            "have been kicked off: {}".format(url_with_endpoint, jobs_list)
         )
     elif spigot_state == "OFF":
         # Since the spigot is off, send the event
