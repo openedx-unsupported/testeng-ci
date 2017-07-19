@@ -7,6 +7,7 @@ from six.moves.urllib.parse import urlparse
 from constants import *
 
 import boto3
+import botocore.session
 from botocore.vendored.requests import post, get
 
 logger = logging.getLogger()
