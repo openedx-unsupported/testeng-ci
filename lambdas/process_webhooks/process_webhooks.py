@@ -569,7 +569,7 @@ def lambda_handler(event, _context):
                 # jobs have been triggered. However, more jobs were kicked
                 # off, so we need to update that by adding a new hook to the
                 # queue, and deleting the old. Send a unique error message
-                # so send_from_queue knows to delete it despite the failure.
+                # so send_from_queue knows to delete it despite the error.
                 event.update({'already_triggered': triggered_jobs_from_list})
                 queue_name = _get_target_queue()
                 _response = _send_to_queue(event, queue_name)
