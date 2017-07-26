@@ -1,13 +1,13 @@
 """
 Tests for testeng-ci/travis/build_info
 """
+from unittest import TestCase
+import os
 from ddt import ddt, data
 from mock import patch
 from testfixtures import LogCapture
-from unittest import TestCase
 
 import httpretty
-import os
 import requests
 
 from travis.build_info import (
