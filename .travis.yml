@@ -12,5 +12,6 @@ install:
   - pip install -r test-requirements.txt
 script:
   - pep8 .
+  - pylint --version
   - pylint travis/
   - nosetests -v --with-coverage --cover-package=$PACKAGES_STRING
