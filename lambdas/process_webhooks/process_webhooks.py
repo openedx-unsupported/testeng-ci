@@ -294,7 +294,7 @@ def _get_triggered_jobs_from_list(builds, already_triggered, sha, jobs_list):
     From the list of all running/queued builds, find which
     jobs from the jobs_list have been triggered.
     """
-    triggered_jobs = already_triggered[:]
+    triggered_jobs = already_triggered
     if builds and jobs_list:
         for build in builds:
             build_job_name = build['job_name']
