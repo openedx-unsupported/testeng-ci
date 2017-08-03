@@ -181,7 +181,7 @@ def lambda_handler(event, _context):
     # Rather than hardcoding the api url, get it from boto.
     # Add the query param so the process_webhooks lambda
     # knows the webhook is coming from the queue.
-    api_url = _get_api_url() + "?from_queue=True"
+    api_url_query = _get_api_url() + "?from_queue=True"
 
     # The SQS queue is draining
     logger.info('Attempting to drain the queue.')
@@ -208,41 +208,18 @@ def lambda_handler(event, _context):
                     "queue. {}".format(message_body)
                 )
 
-            api_url_full_query = api_url
-            already_triggered = message_body.get("already_triggered")
-            if already_triggered:
-                    api_url_full_query = api_url_full_query + \
-                        "&already_triggered={}".format(already_triggered)
-
             # Send the SQS message to the API Gateway
             response = post(
-                api_url_full_query,
+                api_url_query,
                 json=payload,
                 headers=headers,
                 timeout=(3.05, 30)
             )
 
-            error_message = "More jobs triggered, but " \
-                            "unable to trigger all jobs."
-            if error_message in response.text:
-                # The hook failed to trigger all jobs, so
-                # process_webhooks has returned an error.
-                # However this hook has been replaced in the queue
-                # so we should delete this obsolete hook now,
-                # before raising an error.
-                _delete_from_queue(queue_object, message)
+            # If there was a problem, raise an error
+            response.raise_for_status()
 
-            try:
-                # If there was a problem, raise an error
-                response.raise_for_status()
-            except:
-                raise StandardError(
-                    "Unable to clear item from the queue due to "
-                    "an error from process_webhooks."
-                )
-
-            # If no error was returned, delete the message since it has
-            # successfully been processed.
+            # Otherwise, delete the message since it has been processed
             _delete_from_queue(queue_object, message)
 
     # If this gets reached before a timeout, the queue had been emptied
