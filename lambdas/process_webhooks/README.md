@@ -14,7 +14,7 @@ terraform apply --target aws_s3_bucket.edx-testeng-spigot
 
 To zip and upload a new version, using the aws cli:
 ```
-zip process_webhooks.zip process_webhooks.py constants.py
+zip process_webhooks.zip process_webhooks.py
 aws s3 cp process_webhooks.zip s3://edx-tools-spigot/
 rm process_webhooks.zip
 ```
