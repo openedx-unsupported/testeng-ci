@@ -75,35 +75,44 @@ def sample_data(running_builds, not_running_builds):
     def mktimestamp(minutes_ago):
         first_time = 142009200 * 1000
         build_time = first_time - (minutes_ago * 60000)
-        return str(build_time)
+        return build_time
 
     for i in range(0, len(running_builds)):
-        builds.append(
-            '{"actions" : [{"parameters" :[{"name": "ghprbPullId",'
-            '"value" : "' +
-            running_builds[i].get(
-                'prnum') + '"}, {"name":"ghprbActualCommitAuthorEmail",'
-            '"value":"' + running_builds[i].get('author') + '"}]},{},{}], '
-            '"building": true, "number": ' + str(i) +
-            ', "timestamp" : ' + mktimestamp(i) + '}'
-        )
+        parameters = [
+            {'name': 'ghprbPullId', 'value': running_builds[i].get('prnum')},
+            {'name': 'ghprbActualCommitAuthorEmail', 'value': running_builds[i].get('author')}
+        ]
+        actions = [
+            {
+                '_class': 'org.jenkinsci.plugins.ghprb.GhprbParametersAction',
+                'parameters': parameters
+            }, {}, {}
+        ]
+        builds.append({
+            'actions': actions,
+            'building': True,
+            'number': i,
+            'timestamp': mktimestamp(i)
+        })
 
     for i in range(0, len(not_running_builds)):
         num = i + len(running_builds)
-        builds.append(
-            '{"actions" : [{"parameters" :[{"name": "ghprbPullId",'
-            '"value" : "' +
-            not_running_builds[i].get(
-                'prnum') + '"}, {"name":"ghprbActualCommitAuthorEmail",'
-            '"value":"' + not_running_builds[i].get('author') + '"}]},{},{}], '
-            '"building": false, "number": ' + str(num) +
-            ', "timestamp" : ' + mktimestamp(num) + '}'
-        )
+        parameters = [
+            {'name': 'ghprbPullId', 'value': not_running_builds[i].get('prnum')},
+            {'name': 'ghprbActualCommitAuthorEmail', 'value': not_running_builds[i].get('author')}
+        ]
+        actions = [
+            {
+                '_class': 'org.jenkinsci.plugins.ghprb.GhprbParametersAction',
+                'parameters': parameters
+            }, {}, {}
+        ]
+        builds.append({
+            'actions': actions,
+            'building': False,
+            'number': num,
+            'timestamp': mktimestamp(num)
+        })
 
-    build_data = ''.join([
-        '{"builds": [',
-        ','.join(builds),
-        ']}',
-    ])
-
-    return json.loads(build_data)
+    build_data = {'builds': builds}
+    return build_data

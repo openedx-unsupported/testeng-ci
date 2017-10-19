@@ -56,9 +56,9 @@ class TimeoutTestCase(TestCase):
     def test_stop_stuck_builds_with_stuck(self, mock_desc,
                                           update_desc,
                                           stop_build):
-        sample_buid_data = sample_data(
+        sample_build_data = sample_data(
             [Pr('0').dict, Pr('1').dict, Pr('2').dict, Pr('3').dict], [])
-        build_data = self.timer.get_stuck_builds(sample_buid_data)
+        build_data = self.timer.get_stuck_builds(sample_build_data)
         self.timer.stop_stuck_builds(build_data)
 
         stop_build.assert_has_calls([call(3), call(2)], any_order=True)
@@ -72,9 +72,9 @@ class TimeoutTestCase(TestCase):
     @patch('jenkins.job.JenkinsJob.stop_build', side_effect=HTTPError())
     @patch('jenkins.job.JenkinsJob.update_build_desc', return_value=True)
     def test_stop_stuck_builds_failed_to_stop(self, update_desc, stop_build):
-        sample_buid_data = sample_data(
+        sample_build_data = sample_data(
             [Pr('1').dict, Pr('2').dict, Pr('3').dict], [])
-        build_data = self.timer.get_stuck_builds(sample_buid_data)
+        build_data = self.timer.get_stuck_builds(sample_build_data)
         self.timer.stop_stuck_builds(build_data)
         stop_build.assert_called_once_with(2)
         self.assertFalse(update_desc.called)
@@ -83,9 +83,9 @@ class TimeoutTestCase(TestCase):
     @patch('jenkins.job.JenkinsJob.stop_build', return_value=True)
     @patch('jenkins.job.JenkinsJob.update_build_desc', return_value=True)
     def test_stop_stuck_builds_none_stuck(self, update_desc, stop_build):
-        sample_buid_data = sample_data(
+        sample_build_data = sample_data(
             [Pr('1').dict, Pr('2').dict], [Pr('2').dict])
-        build_data = self.timer.get_stuck_builds(sample_buid_data)
+        build_data = self.timer.get_stuck_builds(sample_build_data)
         self.timer.stop_stuck_builds(build_data)
         self.assertFalse(stop_build.called)
         self.assertFalse(update_desc.called)
