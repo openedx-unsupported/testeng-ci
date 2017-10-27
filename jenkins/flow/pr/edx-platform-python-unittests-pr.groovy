@@ -64,4 +64,21 @@ guard{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
     FilePath copyToDir = new FilePath(build.workspace, repoName)
     artifactsDir.copyRecursiveTo(copyToDir)
+
+    // Delete the report artifacts that we copied into the staging area, to reduce
+    // disk usage. These are copied by the HTML Publisher plugin and the
+    // Shining Panda Coverage plugin, and these are redundant. However, leave
+    // the 'test_root' directory, as it is indexed by Splunk for paver timing
+    // reports
+    List toDelete = artifactsDir.list().findAll { item ->
+        item.getName() != 'test_root' 
+    }
+    toDelete.each { item ->
+        if (item.isDirectory()) {
+            item.deleteRecursive()
+        } else {
+            item.delete()
+        }
+    }
+
 }
