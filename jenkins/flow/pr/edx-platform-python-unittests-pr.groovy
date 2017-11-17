@@ -128,7 +128,7 @@ guard{
                 item.delete()
             }
         }
-    } except (IOException e) {
+    } catch (IOException e) {
         println("Couldn't copy artifacts into the workspace. Continuing")
     }
 

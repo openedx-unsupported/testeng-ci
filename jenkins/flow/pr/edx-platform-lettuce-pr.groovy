@@ -43,7 +43,7 @@ guard{
   FilePath copyToDir = new FilePath(build.workspace, repoName)
   try {
     artifactsDir.copyRecursiveTo(copyToDir)
-  } except (IOException e) {
+  } catch (IOException e) {
     println("Couldn't copy artifacts into the workspace. Continuing")
   }
 }
