@@ -46,6 +46,10 @@ try{
   }rescue{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
     FilePath copyToDir = new FilePath(build.workspace, repoName)
-    artifactsDir.copyRecursiveTo(copyToDir)
+    try {
+        artifactsDir.copyRecursiveTo(copyToDir)
+    } except (IOException e) {
+        println("Couldn't copy artifacts into the workspace. Continuing")
+    }
   }
 }
