@@ -9,6 +9,7 @@ def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
+def targetBranch = build.environment.get("TARGET_BRANCH") ?: "master"
 
 // Any environment variables that you want to inject into the environment of
 // child jobs of this build flow should be added here (comma-separated,
@@ -104,6 +105,7 @@ guard{
                             sha1: sha1,
                             PARENT_BUILD: "PR Build #" + build.number,
                             CI_BRANCH: branch,
+                            TARGET_BRANCH: targetBranch
                            )
 
       toolbox.slurpArtifacts(unit_coverage)
