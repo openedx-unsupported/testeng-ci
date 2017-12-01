@@ -9,7 +9,7 @@ def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset
 def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
-def targetBranch = build.environment.get("TARGET_BRANCH") ?: "master"
+def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
 
 try{
   def statusJobParams = [
