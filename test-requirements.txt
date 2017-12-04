@@ -9,4 +9,5 @@ moto==0.4.2
 pep8==1.5.7
 pytest==3.2.3
 pytest-cov==2.5.1
+pytest-xdist==1.20.0
 testfixtures==4.1.2
