@@ -42,4 +42,17 @@ guard{
   FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
   FilePath copyToDir = new FilePath(build.workspace, repoName)
   artifactsDir.copyRecursiveTo(copyToDir)
+
+  // Delete the report artifacts that we copied from the subset job up into
+  // the staging area, to reduce disk usage and network i/o.
+  List toDelete = artifactsDir.list().findAll { item ->
+      item.getName() != 'test_root'
+  }
+  toDelete.each { item ->
+    if (item.isDirectory()) {
+        item.deleteRecursive()
+    } else {
+        item.delete()
+    }
+  }
 }
