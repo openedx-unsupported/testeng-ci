@@ -1,6 +1,0 @@
-https://sitespeed.sandbox.edx.org/courses/course-v1:DemoX+PERF101+course/courseware/c057868d44184f65a70f47a412c0bc75/d3bf0ff6cb6b45f19d02f6928c94c3c8/
-https://sitespeed.sandbox.edx.org/courses/course-v1:DemoX+PERF101+course/courseware/a10ce94997a44d4ca812d9ba1ea824e0/94a6ad4446df40f19ebcca887458e71a/
-https://sitespeed.sandbox.edx.org/courses/course-v1:DemoX+PERF101+course/info
-https://sitespeed.sandbox.edx.org/dashboard
-https://sitespeed.sandbox.edx.org/account/settings
-https://sitespeed.sandbox.edx.org/u/audit
