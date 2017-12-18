@@ -20,7 +20,13 @@ logger.setLevel(logging.INFO)
     help="Github token for authentication",
     required=True,
 )
-def main(sha, github_token):
+@click.option(
+    '--repo_root',
+    help="Path to local edx-platform repository that will "
+         "hold updated database files.",
+    required=True,
+)
+def main(sha, github_token, repo_root):
     try:
         logger.info("Authenticating with Github.")
         github_instance = Github(github_token)
@@ -71,8 +77,9 @@ def main(sha, github_token):
             logger.error("Could not locate file: {}".format(db_file))
             sys.exit(1)
 
-        # Open the file and save it as a string
-        with open('toggle-spigot.py', 'r') as opened_file:
+        # Open the local db file and read to a String
+        local_file_path = repo_root + db_file
+        with open(local_file_path, 'r') as opened_file:
             data = opened_file.read()
 
         # Update the database file with the new changes
