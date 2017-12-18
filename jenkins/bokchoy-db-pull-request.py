@@ -69,6 +69,7 @@ def main(sha, github_token, repo_root):
     ]
 
     # Iterate through the db files and update them accordingly
+    changes_needed = False
     for db_file in db_files_list:
         try:
             # Get the blob sha of the file
@@ -77,31 +78,41 @@ def main(sha, github_token, repo_root):
             logger.error("Could not locate file: {}".format(db_file))
             sys.exit(1)
 
+        with open(db_file, 'r') as opened_db_file:
+            current_file = opened_file.read()
+
         # Open the local db file and read to a String
         local_file_path = repo_root + db_file
-        with open(local_file_path, 'r') as opened_file:
-            data = opened_file.read()
+        with open(local_file_path, 'r') as opened_local_file:
+            new_file = opened_file.read()
 
-        # Update the database file with the new changes
-        logger.info("Updating database file: {}".format(db_file))
-        try:
-            repository.update_file(db_file, 'Updating migrations', data, file_sha, branch_name)
-        except:
-            logger.error("Error updating database file: {}".format(db_file))
-            sys.exit(1)
+        if current_file == new_file:
+            logger.info('No differences needed for the db file: {}'.format(db_file))
+        else:
+            # Update the database file with the new changes
+            changes_needed = True
+            logger.info("Updating database file: {}".format(db_file))
+            try:
+                repository.update_file(db_file, 'Updating migrations', new_file, file_sha, branch_name)
+            except:
+                logger.error("Error updating database file: {}".format(db_file))
+                sys.exit(1)
 
     # Create a pull request against master
-    try:
-        logger.info("Creating pull request with comment tag to @edx/testeng")
-        pull_request = repository.create_pull(
-            title='Bokchoy db cache update',
-            body='@michaelyoungstrom please review',
-            base='master',
-            head=branch_name
-        )
-    except:
-        logger.error("Error creating pull request")
-        sys.exit(1)
+    if changes_needed:
+        try:
+            logger.info("Creating pull request with comment tag to @edx/testeng")
+            pull_request = repository.create_pull(
+                title='Bokchoy db cache update',
+                body='@michaelyoungstrom please review',
+                base='master',
+                head=branch_name
+            )
+        except:
+            logger.error("Error creating pull request")
+            sys.exit(1)
+    else:
+        logger.info('No changes to db cache needed for this merge.')
 
 
 if __name__ == "__main__":
