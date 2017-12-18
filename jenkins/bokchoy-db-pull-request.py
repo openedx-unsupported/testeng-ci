@@ -88,7 +88,7 @@ def main(sha, github_token):
         logger.info("Creating pull request with comment tag to @edx/testeng")
         pull_request = repository.create_pull(
             title='Bokchoy db cache update',
-            body='@edx/testeng please review',
+            body='@michaelyoungstrom please review',
             base='master',
             head=branch_name
         )
