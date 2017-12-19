@@ -17,8 +17,8 @@ BOKCHOY_DB_FILES = [
     'bok_choy_migrations_data_student_module_history.sql',
     'bok_choy_schema_default.sql',
     'bok_choy_schema_student_module_history.sql',
-    'bok_choy_default_migrations.yaml',
-    'bok_choy_student_module_history_migrations.yaml'
+    # 'bok_choy_default_migrations.yaml',
+    # 'bok_choy_student_module_history_migrations.yaml'
  ]
 
 
