@@ -104,17 +104,17 @@ def main(sha, github_token, repo_root):
             sys.exit(1)
 
     # Create a pull request against master and tag testeng for further action
-    try:
-        logger.info("Creating pull request with comment tag to @edx/testeng")
-        pull_request = repository.create_pull(
-            title='Bokchoy db cache update',
-            body='@michaelyoungstrom please review',
-            base='master',
-            head=branch_name
-        )
-    except:
-        logger.error("Error creating pull request")
-        sys.exit(1)
+    # try:
+    #     logger.info("Creating pull request with comment tag to @edx/testeng")
+    #     pull_request = repository.create_pull(
+    #         title='Bokchoy db cache update',
+    #         body='@michaelyoungstrom please review',
+    #         base='master',
+    #         head=branch_name
+    #     )
+    # except:
+    #     logger.error("Error creating pull request")
+    #     sys.exit(1)
 
 
 if __name__ == "__main__":
