@@ -90,7 +90,8 @@ def main(sha, github_token, repo_root):
             new_file = local_db_file.read()
 
         # Read the file in the repo
-        current = repository.get_file_contents(forward_slash_path)
+        current = repository.get_file_contents(forward_slash_path).content
+        logger.info('checking {}'.format(forward_slash_path))
         if new_file == current:
             logger.info('Files are equal!!!')
 
