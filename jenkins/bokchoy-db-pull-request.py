@@ -89,6 +89,11 @@ def main(sha, github_token, repo_root):
         with open(local_file_path, 'r') as local_db_file:
             new_file = local_db_file.read()
 
+        # Read the file in the repo
+        current = repository.get_file_contents(forward_slash_path)
+        if new_file == current:
+            logger.info('Files are equal!!!')
+
         # Update the db files on our branch to reflect the new changes
         logger.info("Updating database file: {}".format(file_path))
         try:
