@@ -62,15 +62,7 @@ def main(sha, github_token, repo_root):
         logger.error("Could not connect to the repository: edx-platform")
         sys.exit(1)
 
-    # Create a new branch for the db file changes
-    branch_name = "refs/heads/bokchoy_auto_cache_update_" + sha
-    try:
-        logger.info("Creating git branch: {}".format(branch_name))
-        ref = repository.create_git_ref(branch_name, sha)
-    except:
-        logger.error("Unable to create git branch: {}".format(branch_name))
-        sys.exit(1)
-
+    changes_needed = False; branch_created = False
     # Iterate through the db files and update them accordingly
     for db_file in BOKCHOY_DB_FILES:
         # Create the path to the db file
@@ -89,36 +81,47 @@ def main(sha, github_token, repo_root):
         with open(local_file_path, 'r') as local_db_file:
             new_file = local_db_file.read()
 
-        # Read the file in the repo
-        current = repository.get_file_contents(forward_slash_path).decoded_content
-        logger.info('CURRENT')
-        logger.info(current)
-        logger.info('NEW')
-        logger.info(new_file)
-        logger.info('checking {}'.format(forward_slash_path))
-        if new_file == current:
-            logger.info('Files are equal!!!')
+        # Check if the local file is different from whats in the repo currently
+        if new_file == repository.get_file_contents(forward_slash_path).decoded_content:
+            # The file hasn't changed
+            logger.info('The database file {} has not changed. No update needed.'.format(file_path))
+        else:
+            changed_needed = True
+            # Since there are changes needed, create a new branch if we haven't already
+            if not branch_created:
+                # Create a new branch for the db file changes
+                branch_name = "refs/heads/bokchoy_auto_cache_update_" + sha
+                try:
+                    logger.info("Creating git branch: {}".format(branch_name))
+                    ref = repository.create_git_ref(branch_name, sha)
+                    branch_created = True
+                except:
+                    logger.error("Unable to create git branch: {}".format(branch_name))
+                    sys.exit(1)
 
-        # Update the db files on our branch to reflect the new changes
-        logger.info("Updating database file: {}".format(file_path))
+            # Update the db files on our branch to reflect the new changes
+            logger.info("Updating database file: {}".format(file_path))
+            try:
+                repository.update_file(forward_slash_path, 'Updating migrations', new_file, file_sha, branch_name)
+            except:
+                logger.error("Error updating database file: {}".format(file_path))
+                sys.exit(1)
+
+    # If there are changes, create a pull request against master and tag testeng for further action
+    if changes_needed:
         try:
-            repository.update_file(forward_slash_path, 'Updating migrations', new_file, file_sha, branch_name)
+            logger.info("Creating pull request with comment tag to @edx/testeng")
+            pull_request = repository.create_pull(
+                title='Bokchoy db cache update',
+                body='@michaelyoungstrom please review',
+                base='master',
+                head=branch_name
+            )
         except:
-            logger.error("Error updating database file: {}".format(file_path))
+            logger.error("Error creating pull request")
             sys.exit(1)
-
-    # Create a pull request against master and tag testeng for further action
-    # try:
-    #     logger.info("Creating pull request with comment tag to @edx/testeng")
-    #     pull_request = repository.create_pull(
-    #         title='Bokchoy db cache update',
-    #         body='@michaelyoungstrom please review',
-    #         base='master',
-    #         head=branch_name
-    #     )
-    # except:
-    #     logger.error("Error creating pull request")
-    #     sys.exit(1)
+    else:
+        logger.info("No changes needed")
 
 
 if __name__ == "__main__":
