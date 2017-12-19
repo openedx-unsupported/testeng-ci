@@ -62,27 +62,26 @@ def main(sha, github_token, repo_root):
         logger.error("Could not connect to the repository: edx-platform")
         sys.exit(1)
 
-    changes_needed = False; branch_created = False
     # Iterate through the db files and update them accordingly
+    changes_needed = False; branch_created = False
     for db_file in BOKCHOY_DB_FILES:
-        # Create the path to the db file
-        file_path = os.path.join(DB_CACHE_FILEPATH, db_file)
-        # The pygithub library needs a forward slash in front of file paths
-        forward_slash_path = os.path.join('/', file_path)
+        # Create the path to the db file beginning with a /
+        # per the expectations of pygithub
+        file_path = os.path.join('/', DB_CACHE_FILEPATH, db_file)
         try:
             # Get the blob sha of the db file on our branch
-            file_sha = repository.get_file_contents(forward_slash_path).sha
+            file_sha = repository.get_file_contents(file_path).sha
         except:
-            logger.error("Could not locate file: {}".format(forward_slash_path))
+            logger.error("Could not locate file: {}".format(file_path))
             sys.exit(1)
 
         # Read the local db files that were updated by paver
-        local_file_path = os.path.join(repo_root, file_path)
+        local_file_path = os.path.join(repo_root, DB_CACHE_FILEPATH, db_file)
         with open(local_file_path, 'r') as local_db_file:
             new_file = local_db_file.read()
 
         # Check if the local file is different from whats in the repo currently
-        if new_file == repository.get_file_contents(forward_slash_path).decoded_content:
+        if new_file == repository.get_file_contents(file_path).decoded_content:
             # The file hasn't changed
             logger.info('The database file {} has not changed. No update needed.'.format(file_path))
         else:
@@ -102,7 +101,7 @@ def main(sha, github_token, repo_root):
             # Update the db files on our branch to reflect the new changes
             logger.info("Updating database file: {}".format(file_path))
             try:
-                repository.update_file(forward_slash_path, 'Updating migrations', new_file, file_sha, branch_name)
+                repository.update_file(file_path, 'Updating migrations', new_file, file_sha, branch_name)
             except:
                 logger.error("Error updating database file: {}".format(file_path))
                 sys.exit(1)
