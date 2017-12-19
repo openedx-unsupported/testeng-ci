@@ -13,7 +13,6 @@ script:
   - pylint travis/
   - pytest --cov-report term-missing --cov=jenkins jenkins
   - pytest --cov-report term-missing --cov=aws aws
-  - pytest --cov-report term-missing --cov=release release
   - pytest --cov-report term-missing --cov=mobile_app mobile_app
   - pytest --cov-report term-missing --cov=travis travis
   - pytest --cov-report term-missing --cov=lambdas lambdas
