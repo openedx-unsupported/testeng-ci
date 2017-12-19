@@ -19,7 +19,7 @@ BOKCHOY_DB_FILES = [
     'bok_choy_schema_student_module_history.sql',
     # 'bok_choy_default_migrations.yaml',
     # 'bok_choy_student_module_history_migrations.yaml'
- ]
+]
 
 
 @click.command()
