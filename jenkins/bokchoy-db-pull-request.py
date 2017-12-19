@@ -40,6 +40,7 @@ BOKCHOY_DB_FILES = [
     required=True,
 )
 def main(sha, github_token, repo_root):
+    # Connect to Github
     try:
         logger.info("Authenticating with Github.")
         github_instance = Github(github_token)
@@ -61,7 +62,7 @@ def main(sha, github_token, repo_root):
         logger.error("Could not connect to the repository: edx-platform")
         sys.exit(1)
 
-    # Create a new branch for the changes
+    # Create a new branch for the db file changes
     branch_name = "refs/heads/bokchoy_auto_cache_update_" + sha
     try:
         logger.info("Creating git branch: {}".format(branch_name))
@@ -77,17 +78,18 @@ def main(sha, github_token, repo_root):
         # The pygithub library needs a forward slash in front of file paths
         forward_slash_path = os.path.join('/', file_path)
         try:
-            # Get the blob sha of the file
+            # Get the blob sha of the db file on our branch
             file_sha = repository.get_file_contents(forward_slash_path).sha
         except:
             logger.error("Could not locate file: {}".format(forward_slash_path))
             sys.exit(1)
 
+        # Read the local db files that were updated by paver
         local_file_path = os.path.join(repo_root, file_path)
         with open(local_file_path, 'r') as local_db_file:
             new_file = local_db_file.read()
 
-        # Update the database file with the new changes
+        # Update the db files on our branch to reflect the new changes
         logger.info("Updating database file: {}".format(file_path))
         try:
             repository.update_file(forward_slash_path, 'Updating migrations', new_file, file_sha, branch_name)
@@ -95,7 +97,7 @@ def main(sha, github_token, repo_root):
             logger.error("Error updating database file: {}".format(file_path))
             sys.exit(1)
 
-    # Create a pull request against master
+    # Create a pull request against master and tag testeng for further action
     try:
         logger.info("Creating pull request with comment tag to @edx/testeng")
         pull_request = repository.create_pull(
