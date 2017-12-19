@@ -85,7 +85,7 @@ def main(sha, github_token, repo_root):
             # The file hasn't changed
             logger.info('The database file {} has not changed. No update needed.'.format(file_path))
         else:
-            changed_needed = True
+            changes_needed = True
             # Since there are changes needed, create a new branch if we haven't already
             if not branch_created:
                 # Create a new branch for the db file changes
