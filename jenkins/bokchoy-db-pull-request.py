@@ -1,12 +1,25 @@
 import sys
 import logging
-import json
+import os
 import click
 from github import Github
 
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+DB_CACHE_FILEPATH = 'common/test/db_cache/'
+
+BOKCHOY_DB_FILES = [
+    'bok_choy_data_default.json',
+    'bok_choy_data_student_module_history.json',
+    'bok_choy_migrations_data_default.sql',
+    'bok_choy_migrations_data_student_module_history.sql',
+    'bok_choy_schema_default.sql',
+    'bok_choy_schema_student_module_history.sql',
+    'bok_choy_default_migrations.yaml',
+    'bok_choy_student_module_history_migrations.yaml'
+ ]
 
 
 @click.command()
@@ -57,62 +70,43 @@ def main(sha, github_token, repo_root):
         logger.error("Unable to create git branch: {}".format(branch_name))
         sys.exit(1)
 
-    db_files_list = [
-        '/common/test/db_cache/bok_choy_data_default.json',
-        '/common/test/db_cache/bok_choy_data_student_module_history.json',
-        '/common/test/db_cache/bok_choy_migrations_data_default.sql',
-        '/common/test/db_cache/bok_choy_migrations_data_student_module_history.sql',
-        '/common/test/db_cache/bok_choy_schema_default.sql',
-        '/common/test/db_cache/bok_choy_schema_student_module_history.sql',
-        # '/common/test/db_cache/bok_choy_default_migrations.yaml',
-        # '/common/test/db_cache/bok_choy_student_module_history_migrations.yaml'
-    ]
-
     # Iterate through the db files and update them accordingly
-    changes_needed = False
-    for db_file in db_files_list:
+    for db_file in BOKCHOY_DB_FILES:
+        # Create the path to the db file
+        file_path = os.path.join(DB_CACHE_FILEPATH, db_file)
+        # The pygithub library needs a forward slash in front of file paths
+        forward_slash_path = os.path.join('/', file_path)
         try:
             # Get the blob sha of the file
-            file_sha = repository.get_file_contents(db_file).sha
+            file_sha = repository.get_file_contents(forward_slash_path).sha
         except:
-            logger.error("Could not locate file: {}".format(db_file))
+            logger.error("Could not locate file: {}".format(forward_slash_path))
             sys.exit(1)
 
-        with open(db_file, 'r') as opened_db_file:
-            current_file = opened_file.read()
+        local_file_path = os.path.join(repo_root, file_path)
+        with open(local_file_path, 'r') as local_db_file:
+            new_file = local_db_file.read()
 
-        # Open the local db file and read to a String
-        local_file_path = repo_root + db_file
-        with open(local_file_path, 'r') as opened_local_file:
-            new_file = opened_file.read()
-
-        if current_file == new_file:
-            logger.info('No differences needed for the db file: {}'.format(db_file))
-        else:
-            # Update the database file with the new changes
-            changes_needed = True
-            logger.info("Updating database file: {}".format(db_file))
-            try:
-                repository.update_file(db_file, 'Updating migrations', new_file, file_sha, branch_name)
-            except:
-                logger.error("Error updating database file: {}".format(db_file))
-                sys.exit(1)
+        # Update the database file with the new changes
+        logger.info("Updating database file: {}".format(file_path))
+        try:
+            repository.update_file(forward_slash_path, 'Updating migrations', new_file, file_sha, branch_name)
+        except:
+            logger.error("Error updating database file: {}".format(file_path))
+            sys.exit(1)
 
     # Create a pull request against master
-    if changes_needed:
-        try:
-            logger.info("Creating pull request with comment tag to @edx/testeng")
-            pull_request = repository.create_pull(
-                title='Bokchoy db cache update',
-                body='@michaelyoungstrom please review',
-                base='master',
-                head=branch_name
-            )
-        except:
-            logger.error("Error creating pull request")
-            sys.exit(1)
-    else:
-        logger.info('No changes to db cache needed for this merge.')
+    try:
+        logger.info("Creating pull request with comment tag to @edx/testeng")
+        pull_request = repository.create_pull(
+            title='Bokchoy db cache update',
+            body='@michaelyoungstrom please review',
+            base='master',
+            head=branch_name
+        )
+    except:
+        logger.error("Error creating pull request")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
