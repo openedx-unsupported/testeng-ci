@@ -90,7 +90,7 @@ def main(sha, github_token, repo_root):
             new_file = local_db_file.read()
 
         # Read the file in the repo
-        current = repository.get_file_contents(forward_slash_path).content
+        current = repository.get_file_contents(forward_slash_path).decoded_content
         logger.info('CURRENT')
         logger.info(current)
         logger.info('NEW')
