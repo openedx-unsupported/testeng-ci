@@ -91,6 +91,10 @@ def main(sha, github_token, repo_root):
 
         # Read the file in the repo
         current = repository.get_file_contents(forward_slash_path).content
+        logger.info('CURRENT')
+        logger.info(current)
+        logger.info('NEW')
+        logger.info(new_file)
         logger.info('checking {}'.format(forward_slash_path))
         if new_file == current:
             logger.info('Files are equal!!!')
