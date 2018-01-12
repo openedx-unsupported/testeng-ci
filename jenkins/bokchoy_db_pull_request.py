@@ -233,7 +233,7 @@ def main(sha, repo_root):
         # for this fingerprint. To avoid excessive PR's, exit.
         logger.info(
             "Branch name: {} already exists. Exiting."
-        )
+        ).format(branch_name)
         return
 
     branch_object = _create_branch(repository, branch_name, sha)
