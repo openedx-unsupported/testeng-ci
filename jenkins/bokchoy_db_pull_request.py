@@ -28,6 +28,8 @@ BOKCHOY_DB_FILES = [
 ]
 BOKCHOY_DB_FILES.append(FINGERPRINT_FILE)
 
+BOT_USER_NAME = "edx-cache-uploader-bot"
+
 
 def _get_github_token():
     """
@@ -180,6 +182,19 @@ def _create_file(repository, file_path, commit_message, contents, branch_name):
         )
 
 
+def _close_existing_pulls(repository):
+    """
+    Close any existing PR's by the bot user. This will help
+    reduce excessive PR's in the event that new migrations have
+    been added before a previous cache update PR was merged.
+    """
+    pulls = repository.get_pulls()
+    for pr in pulls:
+        if pr.user.login == BOT_USER_NAME:
+            pr.create_issue_comment("Closing obsolete PR.")
+            pr.edit(state="closed")
+
+
 def _create_pull_request(repository, title, body, base, head):
     """
     Create a new pull request with the changes in head.
@@ -257,6 +272,7 @@ def main(sha, repo_root):
             changes_made = True
 
     if changes_made:
+        _close_existing_pulls(repository)
         logger.info("Creating a new pull request.")
         _create_pull_request(
             repository,

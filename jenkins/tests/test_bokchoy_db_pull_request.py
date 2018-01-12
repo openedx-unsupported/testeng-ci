@@ -7,8 +7,8 @@ from mock import patch, Mock
 from jenkins.bokchoy_db_pull_request import (_connect_to_repo, _read_local_file_contents,
                                              _branch_exists, _get_modified_files_list, _get_file_sha,
                                              _file_has_changed, _create_branch, _update_file,
-                                             _create_file, _create_pull_request,
-                                             _delete_branch, main)
+                                             _create_file, _close_existing_pulls,
+                                             _create_pull_request, _delete_branch, main)
 
 
 class BokchoyPullRequestTestCase(TestCase):
@@ -34,19 +34,22 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._update_file',
            return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request._close_existing_pulls',
+           return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._create_pull_request',
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._delete_branch',
            return_value=None)
     def test_no_changes(
-        self, delete_branch_mock, create_pr_mock, update_file_mock, create_branch_mock, file_changed_mock,
-        file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
+        self, delete_branch_mock, close_pulls_mock, create_pr_mock, update_file_mock, create_branch_mock,
+        file_changed_mock, file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
     ):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
         result = self.runner.invoke(main, args=['--sha=123', '--repo_root=../../repo'])
         assert not update_file_mock.called
+        assert not close_pulls_mock.called
         assert not create_pr_mock.called
         assert delete_branch_mock.called
 
@@ -66,13 +69,15 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._update_file',
            return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request._close_existing_pulls',
+           return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._create_pull_request',
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._delete_branch',
            return_value=None)
     def test_changes(
-        self, delete_branch_mock, create_pr_mock, update_file_mock, create_branch_mock, file_changed_mock,
-        file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
+        self, delete_branch_mock, close_pulls_mock, create_pr_mock, update_file_mock, create_branch_mock,
+        file_changed_mock, file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
     ):
         """
         Ensure a merge with changes to db files will result in the proper updates, a new branch, and a PR.
@@ -81,6 +86,7 @@ class BokchoyPullRequestTestCase(TestCase):
         assert create_branch_mock.called
         self.assertEqual(create_branch_mock.call_count, 1)
         assert update_file_mock.called
+        assert close_pulls_mock.called
         assert create_pr_mock.called
         assert not delete_branch_mock.called
 
@@ -100,13 +106,15 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._update_file',
            return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request._close_existing_pulls',
+           return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._create_pull_request',
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._delete_branch',
            return_value=None)
     def test_one_change(
-        self, delete_branch_mock, create_pr_mock, update_file_mock, create_branch_mock, file_changed_mock,
-        file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
+        self, delete_branch_mock, close_pulls_mock, create_pr_mock, update_file_mock, create_branch_mock,
+        file_changed_mock, file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
     ):
         """
         Ensure a merge with changes to one file will result in updating only that file, as well as a new branch and PR.
@@ -114,6 +122,7 @@ class BokchoyPullRequestTestCase(TestCase):
         result = self.runner.invoke(main, args=['--sha=123', '--repo_root=../../repo'])
         self.assertEqual(create_branch_mock.call_count, 1)
         self.assertEqual(update_file_mock.call_count, 1)
+        assert close_pulls_mock.called
         assert create_pr_mock.called
         assert not delete_branch_mock.called
 
@@ -133,13 +142,15 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._create_branch',
            return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request._close_existing_pulls',
+           return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._create_pull_request',
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._delete_branch',
            return_value=None)
     def test_create_file(
-        self, delete_branch_mock, create_pr_mock, create_branch_mock, create_file_mock, file_changed_mock,
-        file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
+        self, delete_branch_mock, close_pulls_mock, create_pr_mock, create_branch_mock, create_file_mock,
+        file_changed_mock, file_sha_mock, modified_list_mock, get_branch_mock, read_file_mock, repo_mock
     ):
         """
         Ensure that functionality for creating a new file works as expected.
@@ -149,6 +160,8 @@ class BokchoyPullRequestTestCase(TestCase):
         assert create_file_mock.called
         self.assertEqual(create_file_mock.call_count, 1)
         assert not delete_branch_mock.called
+        assert close_pulls_mock.called
+        assert create_pr_mock.called
 
     @patch('jenkins.bokchoy_db_pull_request._connect_to_repo',
            return_value=None)
@@ -158,12 +171,14 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._create_branch',
            return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request._close_existing_pulls',
+           return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._create_pull_request',
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._delete_branch',
            return_value=None)
     def test_branch_exists(
-        self, delete_branch_mock, create_pr_mock, create_branch_mock, modified_list_mock,
+        self, delete_branch_mock, close_pulls_mock, create_pr_mock, create_branch_mock, modified_list_mock,
         get_branch_mock, repo_mock
     ):
         """
@@ -172,5 +187,6 @@ class BokchoyPullRequestTestCase(TestCase):
         """
         result = self.runner.invoke(main, args=['--sha=123', '--repo_root=../../repo'])
         assert not create_branch_mock.called
+        assert not close_pulls_mock.called
         assert not create_pr_mock.called
         assert not delete_branch_mock.called
