@@ -231,9 +231,7 @@ def main(sha, repo_root):
     if _branch_exists(repository, branch_name):
         # If this branch already exists, then there's already a PR
         # for this fingerprint. To avoid excessive PR's, exit.
-        logger.info(
-            "Branch name: {} already exists. Exiting."
-        ).format(branch_name)
+        logger.info("Branch name: {} already exists. Exiting.".format(branch_name))
         return
 
     branch_object = _create_branch(repository, branch_name, sha)
