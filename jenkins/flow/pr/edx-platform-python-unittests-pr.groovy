@@ -10,11 +10,12 @@ def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-co
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
 def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
+def runCoverage = build.environment.get("RUN_COVERAGE") ?: "true"
 
 // Any environment variables that you want to inject into the environment of
 // child jobs of this build flow should be added here (comma-separated,
 // in the format VARIABLE=VALUE)
-def envVarString = "DJANGO_VERSION=${djangoVersion}"
+def envVarString = "DJANGO_VERSION=${djangoVersion}, RUN_COVERAGE=${runCoverage}"
 
 guard{
     unit = parallel(
@@ -92,7 +93,9 @@ guard{
       lms_unit_3.result.toString() == 'SUCCESS' &&
       lms_unit_4.result.toString() == 'SUCCESS' &&
       cms_unit.result.toString() == 'SUCCESS' &&
-      commonlib_unit.result.toString() == 'SUCCESS')
+      commonlib_unit.result.toString() == 'SUCCESS' &&
+      runCoverage.toBoolean()
+    )
 
     if (check_coverage){
       unit_coverage = build(coverageJob,
