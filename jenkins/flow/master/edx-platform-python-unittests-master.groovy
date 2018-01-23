@@ -9,7 +9,14 @@ def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset
 def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
+def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
 def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
+def runCoverage = build.environment.get("RUN_COVERAGE") ?: "true"
+
+// Any environment variables that you want to inject into the environment of
+// child jobs of this build flow should be added here (comma-separated,
+// in the format VARIABLE=VALUE)
+def envVarString = "DJANGO_VERSION=${djangoVersion}, RUN_COVERAGE=${runCoverage}"
 
 try{
   def statusJobParams = [
@@ -37,27 +44,75 @@ try{
   guard{
     unit = parallel(
       {
-        lms_unit_1 = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
+        lms_unit_1 = build(
+          subsetJob,
+          sha1: sha1,
+          SHARD: "1",
+          TEST_SUITE: "lms-unit",
+          PARENT_BUILD: "master #" + build.number,
+          WORKER_LABEL: workerLabel,
+          ENV_VARS: envVarString
+        )
         toolbox.slurpArtifacts(lms_unit_1)
       },
       {
-        lms_unit_2 = build(subsetJob, sha1: sha1, SHARD: "2", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
+        lms_unit_2 = build(
+          subsetJob,
+          sha1: sha1,
+          SHARD: "2",
+          TEST_SUITE: "lms-unit",
+          PARENT_BUILD: "master #" + build.number,
+          WORKER_LABEL: workerLabel,
+          ENV_VARS: envVarString
+        )
         toolbox.slurpArtifacts(lms_unit_2)
       },
       {
-        lms_unit_3 = build(subsetJob, sha1: sha1, SHARD: "3", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
+        lms_unit_3 = build(
+          subsetJob,
+          sha1: sha1,
+          SHARD: "3",
+          TEST_SUITE: "lms-unit",
+          PARENT_BUILD: "master #" + build.number,
+          WORKER_LABEL: workerLabel,
+          ENV_VARS: envVarString
+        )
         toolbox.slurpArtifacts(lms_unit_3)
       },
       {
-        lms_unit_4 = build(subsetJob, sha1: sha1, SHARD: "4", TEST_SUITE: "lms-unit", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
+        lms_unit_4 = build(
+          subsetJob,
+          sha1: sha1,
+          SHARD: "4",
+          TEST_SUITE: "lms-unit",
+          PARENT_BUILD: "master #" + build.number,
+          WORKER_LABEL: workerLabel,
+          ENV_VARS: envVarString
+        )
         toolbox.slurpArtifacts(lms_unit_4)
       },
       {
-        cms_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "cms-unit", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
+        cms_unit = build(
+          subsetJob,
+          sha1: sha1,
+          SHARD: "1",
+          TEST_SUITE: "cms-unit",
+          PARENT_BUILD: "master #" + build.number,
+          WORKER_LABEL: workerLabel,
+          ENV_VARS: envVarString
+        )
         toolbox.slurpArtifacts(cms_unit)
       },
       {
-        commonlib_unit = build(subsetJob, sha1: sha1, SHARD: "1", TEST_SUITE: "commonlib-unit", PARENT_BUILD: "master #" + build.number, WORKER_LABEL: workerLabel)
+        commonlib_unit = build(
+          subsetJob,
+          sha1: sha1,
+          SHARD: "1",
+          TEST_SUITE: "commonlib-unit",
+          PARENT_BUILD: "master #" + build.number,
+          WORKER_LABEL: workerLabel,
+          ENV_VARS: envVarString
+        )
         toolbox.slurpArtifacts(commonlib_unit)
       },
     )
@@ -68,7 +123,9 @@ try{
       lms_unit_3.result.toString() == 'SUCCESS' &&
       lms_unit_4.result.toString() == 'SUCCESS' &&
       cms_unit.result.toString() == 'SUCCESS' &&
-      commonlib_unit.result.toString() == 'SUCCESS')
+      commonlib_unit.result.toString() == 'SUCCESS' &&
+      runCoverage.toBoolean()
+    )
 
     if (check_coverage){
       unit_coverage = build(coverageJob,
