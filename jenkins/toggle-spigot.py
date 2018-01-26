@@ -3,6 +3,7 @@ import sys
 import logging
 import json
 import click
+from time import sleep
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -73,22 +74,21 @@ def _update_state(api_client, cloudwatch_client, spigot_state, api_id):
     Update the API stage variable to represent the new state,
     and update the send_to_queue lambda trigger accordingly.
     """
-    # Update the API stage variable
     update_variable_op = {
         'op': 'replace',
         'path': '/variables/spigot_state',
         'value': spigot_state
     }
 
-    api_client.update_stage(
-        restApiId=api_id,
-        stageName="prod",
-        patchOperations=[update_variable_op]
-    )
-
-    # Update the cloudwatch event state
     if spigot_state == "ON":
-        # Enable the cloudwatch event trigger
+        api_client.update_stage(
+            restApiId=api_id,
+            stageName="prod",
+            patchOperations=[update_variable_op]
+        )
+        # Sleep for one minute to ensure the API stage variable
+        # has updated and the dequeuer doesn't start too early.
+        sleep(60)
         try:
             cloudwatch_client.enable_rule(
                 Name="edx-spigot-send-from-queue"
@@ -100,7 +100,6 @@ def _update_state(api_client, cloudwatch_client, spigot_state, api_id):
             )
             sys.exit(1)
     elif spigot_state == "OFF":
-        # Disable the cloudwatch event trigger
         try:
             cloudwatch_client.disable_rule(
                 Name="edx-spigot-send-from-queue"
@@ -111,6 +110,11 @@ def _update_state(api_client, cloudwatch_client, spigot_state, api_id):
                 "edx-tools-webhooks-processing event trigger"
             )
             sys.exit(1)
+        api_client.update_stage(
+            restApiId=api_id,
+            stageName="prod",
+            patchOperations=[update_variable_op]
+        )
 
 
 if __name__ == "__main__":
