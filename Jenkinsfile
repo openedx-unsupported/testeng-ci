@@ -3,11 +3,15 @@ pipeline {
     stages {
         stage('Run Tests') {
             agent { label 'master' }
-            sh 'bash geroigr.sh'
+            steps {
+                sh 'bash geroigr.sh'
+            }
         }
 	    stage('test') {
             agent { label 'master' }
-	        sh 'echo hi'
+            steps {
+                sh 'echo hi'
+            }
         }
     }
 }
