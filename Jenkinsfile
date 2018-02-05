@@ -4,13 +4,13 @@ pipeline {
         stage('test') {
             agent { label 'master' }
             steps {
-                sh 'echo hi'
+                sh 'bash test.sh'
             }
         }
         stage('phony') {
             agent { label 'master' }
             steps {
-                sh 'bash test.sh'
+                sh 'sleep 60'
             }
         }
     }
