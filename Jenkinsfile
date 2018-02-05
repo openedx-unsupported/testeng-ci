@@ -4,13 +4,13 @@ pipeline {
         stage('test') {
             agent { label 'master' }
             steps {
-                sh 'bash test.sh'
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/edx/testeng-ci']]])
             }
         }
         stage('phony') {
             agent { label 'master' }
             steps {
-                sh 'sleep 60'
+                sh 'cd testeng-ci'
             }
         }
     }
