@@ -10,6 +10,15 @@ def qualityDiffJob = build.environment.get("QUALITY_DIFF_JOB") ?: "edx-platform-
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
 
+// Temporary fix until all edx-platform pull requests have rebased from master
+// to get the fix in https://github.com/edx/edx-platform/pull/17252
+File thresholdFile = new File('edx-platform/scripts/thresholds.sh')
+if(!thresholdFile.exists()) {
+    println('The quality job has been refactored and requires a fix in the platform')
+    println('Please rebase your pr and rerun this test')
+    return 1
+}
+
 guard{
     quality = parallel(
         {
