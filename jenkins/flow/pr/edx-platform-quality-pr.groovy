@@ -12,7 +12,8 @@ def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
 
 // Temporary fix until all edx-platform pull requests have rebased from master
 // to get the fix in https://github.com/edx/edx-platform/pull/17252
-File thresholdFile = new File('scripts/thresholds.sh')
+FilePath thresholdFilePath = new FilePath(build.workspace, 'scripts/thresholds.sh')
+File thresholdFile = new File(thresholdFilePath)
 if(!thresholdFile.exists()) {
     String failMsg = 'The quality job has been refactored and requires a fix ' +
                      'in the platform. Please rebase your pr and rerun this test'
