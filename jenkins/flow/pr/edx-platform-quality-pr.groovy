@@ -16,7 +16,7 @@ File thresholdFile = new File('scripts/thresholds.sh')
 if(!thresholdFile.exists()) {
     String failMsg = 'The quality job has been refactored and requires a fix ' +
                      'in the platform. Please rebase your pr and rerun this test'
-    throw new Exception("${job.fullDisplayName} aborted: ${failMsg}")
+    throw new Exception("Build aborted: ${failMsg}")
 }
 
 guard{
