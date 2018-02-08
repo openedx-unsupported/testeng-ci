@@ -14,9 +14,9 @@ def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
 // to get the fix in https://github.com/edx/edx-platform/pull/17252
 File thresholdFile = new File('edx-platform/scripts/thresholds.sh')
 if(!thresholdFile.exists()) {
-    println('The quality job has been refactored and requires a fix in the platform')
-    println('Please rebase your pr and rerun this test')
-    return 1
+    String failMsg = 'The quality job has been refactored and requires a fix ' +
+                     'in the platform. Please rebase your pr and rerun this test'
+    throw new Exception("${job.fullDisplayName} aborted: ${failMsg}")
 }
 
 guard{
