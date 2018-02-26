@@ -9,6 +9,12 @@ def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def qualityDiffJob = build.environment.get("QUALITY_DIFF_JOB") ?: "edx-platform-quality-diff"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
+def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
+
+// Any environment variables that you want to inject into the environment of
+// child jobs of this build flow should be added here (comma-separated,
+// in the format VARIABLE=VALUE)
+def envVarString = "DJANGO_VERSION=${djangoVersion}"
 
 guard{
     quality = parallel(
@@ -19,7 +25,8 @@ guard{
                 SHARD: "1",
                 TEST_SUITE: "quality",
                 PARENT_BUILD: "PR Build #" + build.number,
-                WORKER_LABEL: workerLabel
+                WORKER_LABEL: workerLabel,
+                ENV_VARS: envVarString
             )
             toolbox.slurpArtifacts(quality_job_1)
         },
@@ -30,7 +37,8 @@ guard{
                 SHARD: "2",
                 TEST_SUITE: "quality",
                 PARENT_BUILD: "PR Build #" + build.number,
-                WORKER_LABEL: workerLabel
+                WORKER_LABEL: workerLabel,
+                ENV_VARS: envVarString
             )
             toolbox.slurpArtifacts(quality_job_2)
         },
@@ -41,7 +49,8 @@ guard{
                 SHARD: "3",
                 TEST_SUITE: "quality",
                 PARENT_BUILD: "PR Build #" + build.number,
-                WORKER_LABEL: workerLabel
+                WORKER_LABEL: workerLabel,
+                ENV_VARS: envVarString
             )
             toolbox.slurpArtifacts(quality_job_3)
         },
@@ -52,7 +61,8 @@ guard{
                 SHARD: "4",
                 TEST_SUITE: "quality",
                 PARENT_BUILD: "PR Build #" + build.number,
-                WORKER_LABEL: workerLabel
+                WORKER_LABEL: workerLabel,
+                ENV_VARS: envVarString
             )
             toolbox.slurpArtifacts(quality_job_4)
         },
