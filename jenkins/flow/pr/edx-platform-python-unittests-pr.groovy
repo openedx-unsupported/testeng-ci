@@ -5,7 +5,6 @@ def toolbox = extension."build-flow-toolbox"
 def sha1 = build.environment.get("ghprbActualCommit")
 def branch = build.environment.get("ghprbSourceBranch")
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
-def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
@@ -32,19 +31,19 @@ guard{
       },
       {
         lms_unit_2 = build(subsetJob,
-                           sha1: sha1, 
-                           SHARD: "2", 
+                           sha1: sha1,
+                           SHARD: "2",
                            TEST_SUITE: "lms-unit",
                            PARENT_BUILD: "PR Build #" + build.number,
-                           WORKER_LABEL: workerLabel, 
+                           WORKER_LABEL: workerLabel,
                            ENV_VARS: envVarString
                            )
         toolbox.slurpArtifacts(lms_unit_2)
       },
       {
-        lms_unit_3 = build(subsetJob, 
+        lms_unit_3 = build(subsetJob,
                            sha1: sha1,
-                           SHARD: "3", 
+                           SHARD: "3",
                            TEST_SUITE: "lms-unit",
                            PARENT_BUILD: "PR Build #" + build.number,
                            WORKER_LABEL: workerLabel,
@@ -77,10 +76,10 @@ guard{
       {
         commonlib_unit = build(subsetJob,
                                sha1: sha1,
-                               SHARD: "1", 
+                               SHARD: "1",
                                TEST_SUITE: "commonlib-unit",
                                PARENT_BUILD: "PR Build #" + build.number,
-                               WORKER_LABEL: workerLabel, 
+                               WORKER_LABEL: workerLabel,
                                ENV_VARS: envVarString
                                )
         toolbox.slurpArtifacts(commonlib_unit)
@@ -115,8 +114,7 @@ guard{
     }
 }rescue{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-    FilePath copyToDir = new FilePath(build.workspace, repoName)
-    artifactsDir.copyRecursiveTo(copyToDir)
+    artifactsDir.copyRecursiveTo(build.workspace)
 
     // Delete the report artifacts that we copied into the staging area, to reduce
     // disk usage. These are copied by the HTML Publisher plugin and the
@@ -124,7 +122,7 @@ guard{
     // the 'test_root' directory, as it is indexed by Splunk for paver timing
     // reports
     List toDelete = artifactsDir.list().findAll { item ->
-        item.getName() != 'test_root' 
+        item.getName() != 'test_root'
     }
     toDelete.each { item ->
         if (item.isDirectory()) {

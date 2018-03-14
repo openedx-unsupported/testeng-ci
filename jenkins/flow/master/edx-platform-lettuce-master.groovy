@@ -42,8 +42,7 @@ try{
     )
   }rescue{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-    FilePath copyToDir = new FilePath(build.workspace, repoName)
-    artifactsDir.copyRecursiveTo(copyToDir)
+    artifactsDir.copyRecursiveTo(build.workspace)
 
     // Delete the report artifacts that we copied from the subset job up into
     // the staging area, to reduce disk usage and network i/o.
