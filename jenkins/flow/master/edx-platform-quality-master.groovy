@@ -87,7 +87,8 @@ try {
         )
     } rescue{
         FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-        artifactsDir.copyRecursiveTo(build.workspace)
+        FilePath copyToDir = new FilePath(build.workspace, repoName)
+        artifactsDir.copyRecursiveTo(copyToDir)
 
         // Delete the report artifacts that we copied into the staging area,
         // to reduce disk usage.
