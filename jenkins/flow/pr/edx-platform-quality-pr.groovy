@@ -5,6 +5,7 @@ def toolbox = extension."build-flow-toolbox"
 def sha1 = build.environment.get("ghprbActualCommit")
 def branch = build.environment.get("ghprbSourceBranch")
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
+def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def qualityDiffJob = build.environment.get("QUALITY_DIFF_JOB") ?: "edx-platform-quality-diff"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
@@ -81,7 +82,8 @@ guard{
     toolbox.slurpArtifacts(quality_check)
 }rescue{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-    artifactsDir.copyRecursiveTo(build.workspace)
+    FilePath copyToDir = new FilePath(build.workspace, repoName)
+    artifactsDir.copyRecursiveTo(copyToDir)
 
     // Delete the report artifacts that we copied into the staging area,
     // to reduce disk usage.
