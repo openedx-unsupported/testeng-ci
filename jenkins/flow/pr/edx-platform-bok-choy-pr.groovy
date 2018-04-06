@@ -14,7 +14,7 @@ def envVarString = "DJANGO_VERSION=${djangoVersion}"
 
 guard{
     parallel(
-      (1..11).collect { index ->
+      (1..22).collect { index ->
         return {
           bokchoybuild = build(subsetJob,
                                sha1: sha1,
