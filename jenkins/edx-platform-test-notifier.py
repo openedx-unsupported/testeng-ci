@@ -24,7 +24,7 @@ def _get_github_token():
 class EdxStatusBot:
     """
     A status bot that can perform multiple actions on PRs.
-    
+
     Looks for lines of the form '{botname}: {action}' in a PR's body to
     determine what actions to take.
     """
