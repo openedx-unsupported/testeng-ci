@@ -1,8 +1,8 @@
--r requirements.txt
+-r base.txt
 
 coverage==3.7.1
 ddt==0.8.0
-edx-lint==0.5.4
+edx-lint==0.5.5
 mock==1.0.1
 moto==0.4.2
 pep8==1.5.7

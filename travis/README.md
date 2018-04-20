@@ -12,8 +12,7 @@ This script will:
 *Usage*
 
 * create your virtual environment
-* pip install -r travis/requirements.txt
+* pip install -r requirements/travis.txt
 * Call script as a python module, e.g.
 
 	`python -m travis.build_info --org MyGithubOrg --log_level debug`
-	

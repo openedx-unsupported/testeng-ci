@@ -1,6 +1,0 @@
--r aws/requirements.txt
-
-GitPython==2.1.8
-PyGithub==1.35
-requests==2.5.3
-click
