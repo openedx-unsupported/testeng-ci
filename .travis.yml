@@ -7,7 +7,7 @@ branches:
 python:
   - "2.7"
 install:
-  - pip install -r test-requirements.txt
+  - pip install -r requirements/testing.txt
 script:
   - pep8 .
   - pylint travis/
