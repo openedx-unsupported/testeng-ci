@@ -5,7 +5,6 @@ def toolbox = extension."build-flow-toolbox"
 def sha1 = build.environment.get("ghprbActualCommit")
 def branch = build.environment.get("ghprbSourceBranch")
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
-def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 
@@ -62,6 +61,5 @@ guard{
     }
 }rescue{
     FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-    FilePath copyToDir = new FilePath(build.workspace, repoName)
-    artifactsDir.copyRecursiveTo(copyToDir)
+    artifactsDir.copyRecursiveTo(build.workspace)
 }
