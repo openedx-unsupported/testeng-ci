@@ -4,7 +4,6 @@ import hudson.model.*
 def toolbox = extension."build-flow-toolbox"
 def sha1 = build.environment.get("ghprbActualCommit")
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
-def repoName = build.environment.get("REPO_NAME") ?: "edx-platform"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 
 guard{
@@ -19,6 +18,5 @@ guard{
     )
 }rescue{
   FilePath artifactsDir =  new FilePath(build.artifactManager.getArtifactsDir())
-  FilePath copyToDir = new FilePath(build.workspace, repoName)
-  artifactsDir.copyRecursiveTo(copyToDir)
+  artifactsDir.copyRecursiveTo(build.workspace)
 }
