@@ -63,6 +63,7 @@ class EdxStatusBot:
     def notify_tests_completed(self, pr):
         """Post a notification on the PR that tests have finished running."""
         comment = "Your PR has finished running tests."
+        self.delete_old_issue_comments(pr)
         try:
             pr.create_issue_comment(comment)
         except:
@@ -81,6 +82,15 @@ class EdxStatusBot:
                 break
         else:
             return True
+
+    def delete_old_issue_comments(self, pr):
+        comments = pr.get_issue_comments()
+        for comment in comments:
+            if comment.user.login == self.name:
+                logger.info(
+                    "Old comment found on PR. Deleting"
+                )
+                comment.delete()
 
     def get_repo(self, target_repo):
         repos = self.github.get_user().get_repos()
