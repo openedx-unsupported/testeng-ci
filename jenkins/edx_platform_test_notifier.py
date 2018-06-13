@@ -74,7 +74,7 @@ class EdxStatusBot:
 
     def notify_tests_completed(self, pr):
         """Post a notification on the PR that tests have finished running."""
-        comment = "Your PR has finished running tests."
+        comment = self.generate_notification_message(pr)
         try:
             pr.create_issue_comment(comment)
         except:
@@ -93,6 +93,28 @@ class EdxStatusBot:
                 break
         else:
             return True
+
+    def generate_notification_message(self, pr):
+        failing_contexts = self.get_failures(pr)
+        if not failing_contexts:
+            status_description = "There were no failures."
+        else:
+            status_description = "The following contexts failed:\n{}".format(
+                '\n'.join(["* {}".format(f) for f in failing_contexts])
+            )
+        comment = "Your PR has finished running tests. {}".format(
+            status_description
+        )
+        return comment
+
+    def get_failures(self, pr):
+        """ return a list of the contexts that recently failed on a given pr """
+        head = pr.get_commits().reversed[0]
+        failures = filter(
+            lambda status: status.state in ["failure", "error"],
+            head.get_combined_status().statuses
+        )
+        return map(lambda status: status.context, failures)
 
     def get_repo(self, target_repo):
         repos = self.github.get_user().get_repos()
