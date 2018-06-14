@@ -5,12 +5,12 @@ def toolbox = extension."build-flow-toolbox"
 def sha1 = build.environment.get("ghprbActualCommit")
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
-def toxEnv = build.environment.get("TOX_ENV") ?: ""
+def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
 
 // Any environment variables that you want to inject into the environment of
 // child jobs of this build flow should be added here (comma-separated,
 // in the format VARIABLE=VALUE)
-def envVarString = "TOX_ENV=${toxEnv}"
+def envVarString = "DJANGO_VERSION=${djangoVersion}"
 
 guard{
   parallel(
