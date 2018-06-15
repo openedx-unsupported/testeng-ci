@@ -7,14 +7,14 @@ def branch = build.environment.get("ghprbSourceBranch")
 def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset"
 def coverageJob = build.environment.get("COVERAGE_JOB") ?: "edx-platform-unit-coverage"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
-def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
+def toxEnv = build.environment.get("TOX_ENV") ?: " "
 def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
 def runCoverage = build.environment.get("RUN_COVERAGE") ?: "true"
 
 // Any environment variables that you want to inject into the environment of
 // child jobs of this build flow should be added here (comma-separated,
 // in the format VARIABLE=VALUE)
-def envVarString = "DJANGO_VERSION=${djangoVersion}, RUN_COVERAGE=${runCoverage}"
+def envVarString = "TOX_ENV=${toxEnv}, RUN_COVERAGE=${runCoverage}"
 
 guard{
     unit = parallel(
