@@ -8,12 +8,12 @@ def subsetJob = build.environment.get("SUBSET_JOB") ?: "edx-platform-test-subset
 def qualityDiffJob = build.environment.get("QUALITY_DIFF_JOB") ?: "edx-platform-quality-diff"
 def workerLabel = build.environment.get("WORKER_LABEL") ?: "jenkins-worker"
 def targetBranch = build.environment.get("TARGET_BRANCH") ?: "origin/master"
-def djangoVersion = build.environment.get("DJANGO_VERSION") ?: " "
+def toxEnv = build.environment.get("TOX_ENV") ?: " "
 
 // Any environment variables that you want to inject into the environment of
 // child jobs of this build flow should be added here (comma-separated,
 // in the format VARIABLE=VALUE)
-def envVarString = "DJANGO_VERSION=${djangoVersion}"
+def envVarString = "TOX_ENV=${toxEnv}"
 
 guard{
     quality = parallel(
