@@ -10,7 +10,7 @@ TASK_NAME = 'jenkins-worker-container' # Name of our Task Definition
 
 ecs_client = boto3.client('ecs', 'us-east-1')
 
-revision = client.describe_task_definition(taskDefinition=TASK_NAME)['taskDefinition']['revision']
+revision = ecs_client.describe_task_definition(taskDefinition=TASK_NAME)['taskDefinition']['revision']
 task_definition = TASK_NAME + ":{}".format(revision)
 
 networkConfiguration = {
