@@ -6,9 +6,9 @@ CLUSTER = 'jenkins-worker-containers' # Name of our cluster to run the container
 PUBLIC_IP_CHOICE = 'DISABLED' # Whether we want the container to have a public IP 'ENABLED' | 'DISABLED'
 SECURITY_GROUPS = [ 'sg-7ad8810f' ] # List of Security Groups for our container
 SUBNETS = [ 'subnet-40feb509' ] # List of Subnets for our container
-TASK_DEFINITION = 'jenkins-worker-container:latest' # Name of our Task Definition
+TASK_DEFINITION = 'jenkins-worker-container:10' # Name of our Task Definition
 
-ecs_client = boto3.client('ecs')
+ecs_client = boto3.client('ecs', 'us-east-1')
 
 networkConfiguration = {
     'awsvpcConfiguration': {
