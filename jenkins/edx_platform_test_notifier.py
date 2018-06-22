@@ -58,7 +58,7 @@ class EdxStatusBot:
         sys.exit()
 
     def ignore_marker(self, pr):
-        return self._action_str('ignore') in pr.body
+        return self._action_str('ignore') in unicode(pr.body)
 
     def delete_old_comments(self, pr):
         comments = pr.get_issue_comments()
