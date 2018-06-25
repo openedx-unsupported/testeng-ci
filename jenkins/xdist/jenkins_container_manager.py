@@ -93,17 +93,18 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--region', '-g', default='us-east-1',
-                        help="AWS region where ECS infrastructure lives")
+                        help="AWS region where ECS infrastructure lives. Defaults to us-east-1")
 
     parser.add_argument('--cluster', '-c', default='jenkins-worker-containers',
-                        help="AWS Cluster name where the containers live")
+                        help="AWS Cluster name where the containers live. Defaults to"
+                        "the testeng cluster: jenkins-worker-containers")
 
     parser.add_argument('--action', '-a', choices=['spin_up', 'terminate'], default=None,
                         help="Action for JenkinsContainerManager to perform. "
                         "Either spinning up or terminating AWS ECS workers")
 
     # Spinning up containers
-    parser.add_argument('--num_containers', '-n', type=int, default=1,
+    parser.add_argument('--num_containers', '-n', type=int, default=None,
                         help="Number of containers to spin up")
 
     parser.add_argument('--task_name', '-t', default=None,
@@ -119,7 +120,7 @@ if __name__ == "__main__":
                         default='DISABLED', help="Whether the containers should have a public IP")
 
     parser.add_argument('--launch_type', default='FARGATE', choices=['EC2', 'FARGATE'],
-                        help="ECS launch type of container.")
+                        help="ECS launch type of container. Defaults to FARGATE")
 
     # Terminating containers
     parser.add_argument('--task_arns', '-arns', action='append', default=None,
