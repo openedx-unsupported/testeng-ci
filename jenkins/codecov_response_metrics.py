@@ -47,13 +47,15 @@ REPOS = [
 ]
 
 
-def is_recent(activity_time, time_frame=3600):
+def is_recent(pull_request, time_frame=3600):
     """
-    determine if a timestamp occurred between now (UTC) and time_frame
+    determine if a pull request has been committed to between now (UTC)
+    and a given time frame
     """
-    activity_age = datetime.datetime.utcnow() - activity_time
-    answer = activity_age.total_seconds() < time_frame
-    return answer
+    newest_commit = pull_request.get_commits().reversed[0]
+    commit_pushed_at = get_commit_time(newest_commit)
+    activity_age = datetime.datetime.utcnow() - commit_pushed_at
+    return activity_age.total_seconds() < time_frame
 
 
 def get_recent_pull_requests(repo, time_frame=3600):
@@ -65,7 +67,7 @@ def get_recent_pull_requests(repo, time_frame=3600):
     logger.info(repo.full_name)
     num = repo.get_pulls()
     recent_pull_requests = [
-        pr for pr in repo.get_pulls() if is_recent(pr.updated_at, time_frame)
+        pr for pr in repo.get_pulls() if is_recent(pr, time_frame)
     ]
     logger.info("Found {} recent pull requests".format(len(recent_pull_requests)))
     return recent_pull_requests
@@ -151,7 +153,8 @@ def main():
                     'commit': newest_commit.sha,
                     'commit_pushed_at': str(get_commit_time(newest_commit)),
                     'codecov_received':  posted,
-                    'codecov_received_at': context_age
+                    'codecov_received_at': context_age,
+                    'context': context
                 }
                 results.append(result)
 
@@ -159,7 +162,7 @@ def main():
     outfile_name = 'codecov_metrics.json'
     try:
         logger.info('Writing results to {}'.format(outfile_name))
-        with open(outfile_name, 'a') as outfile:
+        with open(outfile_name, 'w') as outfile:
             json.dump(json_data, outfile, separators=(',', ':'))
             outfile.write('\n')
     except OSError:
