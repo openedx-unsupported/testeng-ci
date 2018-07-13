@@ -180,7 +180,7 @@ def gather_codecov_metrics(all_repos, time_frame):
 
         for pr in prs:
             pr_title = unicode(pr.title)
-            logger.info('Analyzing pr {}'.format(pr_title))
+            logger.info(u'Analyzing pr {}'.format(pr_title))
             head_commit = get_head_commit(pr)
             head_status = head_commit.get_combined_status().statuses
             # mapping of status contexts that generate code coverage data
