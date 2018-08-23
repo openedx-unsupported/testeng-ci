@@ -83,8 +83,16 @@ class EdxStatusBot:
         else:
             logger.info("Successfully commented on PR.")
 
+    def get_head_commit(self, pr):
+        commits = pr.get_commits()
+        if not list(commits):
+            logger.error("This pull request has no commits. Exiting.")
+            sys.exit()
+        head_commit = commits.reversed[0]
+        return head_commit
+
     def notify_tests_completed_marker(self, pr):
-        head_commit = pr.get_commits().reversed[0]
+        head_commit = self.get_head_commit(pr)
         for status in head_commit.get_combined_status().statuses:
             if status.state == 'pending':
                 logger.info(
@@ -109,10 +117,10 @@ class EdxStatusBot:
 
     def get_failures(self, pr):
         """ return a list of the contexts that recently failed on a given pr """
-        head = pr.get_commits().reversed[0]
+        head_commit = self.get_head_commit(pr)
         failures = filter(
             lambda status: status.state in ["failure", "error"],
-            head.get_combined_status().statuses
+            head_commit.get_combined_status().statuses
         )
         return map(lambda status: status.context, failures)
 
