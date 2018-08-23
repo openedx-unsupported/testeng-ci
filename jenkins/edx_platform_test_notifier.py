@@ -84,6 +84,11 @@ class EdxStatusBot:
             logger.info("Successfully commented on PR.")
 
     def get_head_commit(self, pr):
+        """
+        Return the HEAD commit from a given pull request. Occasionally, a pull
+        request can have no commits (for instance, if it has been reset). In
+        this case, exit the script, as there is nothing else to do.
+        """
         commits = pr.get_commits()
         if not list(commits):
             logger.error("This pull request has no commits. Exiting.")
