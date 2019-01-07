@@ -13,7 +13,7 @@ def toxEnv = build.environment.get("TOX_ENV") ?: " "
 // Any environment variables that you want to inject into the environment of
 // child jobs of this build flow should be added here (comma-separated,
 // in the format VARIABLE=VALUE)
-def envVarString = "TOX_ENV=${toxEnv}, TARGET_BRANCH=${ghprbTargetBranch}"
+def envVarString = "TOX_ENV=${toxEnv}, TARGET_BRANCH=${targetBranch}"
 
 guard{
     quality = parallel(
