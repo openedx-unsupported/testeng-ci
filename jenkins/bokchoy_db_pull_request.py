@@ -36,7 +36,7 @@ def _get_github_token():
     try:
         github_token = os.environ.get('GITHUB_TOKEN')
     except:
-        raise StandardError(
+        raise Exception(
             "Could not find env variable GITHUB_TOKEN. "
             "Please make sure the variable is set and try again."
         )
@@ -51,7 +51,7 @@ def _authenticate_with_github():
     try:
         github_instance = Github(github_token)
     except:
-        raise StandardError(
+        raise Exception(
             "Failed connecting to Github. " +
             "Please make sure the github token is accurate and try again."
         )
@@ -69,7 +69,7 @@ def _connect_to_repo(repo_name):
         if repo.name == repo_name:
             return repo
 
-    raise StandardError(
+    raise Exception(
         "Could not connect to the repository: {}. "
         "Please make sure you are using the correct "
         "credentials and try again.".format(repo_name)
@@ -85,7 +85,7 @@ def _read_local_file_contents(repo_root, db_file):
         with open(file_path, 'r') as opened_file:
             data = opened_file.read()
     except:
-        raise StandardError(
+        raise Exception(
             "Unable to read file: {}".format(file_path)
         )
     return data
@@ -149,7 +149,7 @@ def _create_branch(repository, branch_name, sha):
     try:
         branch_object = repository.create_git_ref(branch_name, sha)
     except:
-        raise StandardError(
+        raise Exception(
             "Unable to create git branch: {}. "
             "Check to make sure this branch doesn't already exist.".format(branch_name)
         )
@@ -163,7 +163,7 @@ def _update_file(repository, file_path, commit_message, contents, file_sha, bran
     try:
         repository.update_file(file_path, commit_message, contents, file_sha, branch_name)
     except:
-        raise StandardError(
+        raise Exception(
             "Error updating database file: {}".format(file_path)
         )
 
@@ -175,7 +175,7 @@ def _create_file(repository, file_path, commit_message, contents, branch_name):
     try:
         repository.create_file(file_path, commit_message, contents, branch_name)
     except:
-        raise StandardError(
+        raise Exception(
             "Error creating database file: {}".format(file_path)
         )
 
@@ -192,7 +192,7 @@ def _create_pull_request(repository, title, body, base, head):
             head=head
         )
     except:
-        raise StandardError(
+        raise Exception(
             "Could not create pull request"
         )
 
@@ -204,7 +204,7 @@ def _delete_branch(branch_object):
     try:
         branch_object.delete()
     except:
-        raise StandardError(
+        raise Exception(
             "Failed to delete branch"
         )
 

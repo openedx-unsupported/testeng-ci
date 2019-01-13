@@ -6,6 +6,8 @@ any further necessary information at the command line.
 import logging
 import sys
 
+from six.moves import input
+
 from .make_build import make_build
 from .utils import is_affirmative
 
@@ -21,7 +23,7 @@ def make_ios_build():
     options = {"CODE_REPO": "git@github.com:edx/edx-app-ios.git"}
 
     # force testflight builds to only be from prod
-    use_test_flight = raw_input("Send to Testflight [y/n]: ")
+    use_test_flight = input("Send to Testflight [y/n]: ")
     if is_affirmative(use_test_flight):
         options["CONFIG_REPO"] = "https://github.com/edx/edx-mobile-config"
         options["CONFIG_PATH"] = "prod"

@@ -90,7 +90,7 @@ def run_trigger_build(raw_args, environ):
         if value:
             items[variable] = value
 
-    with file(config_path, "w") as config_file:
+    with open(config_path, "w") as config_file:
         json.dump(items, config_file, indent=4, sort_keys=True)
 
     # commit and push

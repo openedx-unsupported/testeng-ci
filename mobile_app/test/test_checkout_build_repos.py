@@ -122,7 +122,7 @@ class CheckoutBuildReposTestCase(TestCase):
             CODE_CHECKOUT_DIRECTORY
         )
         properties_path = os.path.join(code_path, PROPERTIES_FILE)
-        with file(properties_path) as properties_file:
+        with open(properties_path) as properties_file:
             data = properties_file.read()
             self.assertEqual(data, "edx.dir = \"%s\"" % config_path)
 
@@ -143,7 +143,7 @@ class CheckoutBuildReposTestCase(TestCase):
         )
         properties_container = os.path.join(code_path, "NestedPath")
         properties_path = os.path.join(properties_container, PROPERTIES_FILE)
-        with file(properties_path) as properties_file:
+        with open(properties_path) as properties_file:
             data = properties_file.read()
             self.assertTrue(data, "edx.dir")
 

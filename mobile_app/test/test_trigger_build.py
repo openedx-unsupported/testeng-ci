@@ -88,7 +88,7 @@ class TriggerBuildTestCase(TestCase):
             self.repo_path,
             path_constants.CONFIG_FILE
         )
-        config = json.load(file(config_path))
+        config = json.load(open(config_path))
 
         for key, value in environ.iteritems():
             self.assertEqual(config[key], value)

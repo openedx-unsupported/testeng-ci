@@ -2,6 +2,7 @@ import base64
 import json
 import logging
 import os
+import sys
 
 import boto3
 from botocore.vendored.requests import post
@@ -30,7 +31,7 @@ def _get_target_queue():
     """
     queue_name = os.environ.get('TARGET_QUEUE')
     if not queue_name:
-        raise StandardError(
+        raise Exception(
             "Environment variable TARGET_QUEUE was not set"
         )
 
@@ -46,7 +47,7 @@ def _get_queue_object(queue_name):
         sqs_resource = boto3.resource('sqs')
         queue_object = sqs_resource.get_queue_by_name(QueueName=queue_name)
     except:
-        raise StandardError(
+        raise Exception(
             "Unable to connect to the SQS queue"
         )
 
@@ -99,7 +100,7 @@ def _is_queue_empty(queue_name):
         )
         queue_url = queue_url_response['QueueUrl']
     except:
-        raise StandardError(
+        raise Exception(
             "Unable to get the queue url"
         )
 
@@ -113,7 +114,7 @@ def _is_queue_empty(queue_name):
             response['Attributes']['ApproximateNumberOfMessages']
         )
     except:
-        raise StandardError(
+        raise Exception(
             "Unable to get ApproximateNumberOfMessages from queue"
         )
 
@@ -139,7 +140,7 @@ def _get_from_queue(queue_object):
 
         return message_list
     except:
-        raise StandardError(
+        raise Exception(
             "Unable to get messages from the queue"
         )
 
@@ -153,7 +154,7 @@ def _delete_from_queue(queue_object, message):
         msg_id = message.message_id
         entry = {'Id': msg_id, 'ReceiptHandle': msg_receipt}
     except:
-        raise StandardError(
+        raise Exception(
             'Unable to get necessary message attributes '
             'for deletion. message_id and '
             'ReceiptHandle are required'
@@ -162,7 +163,7 @@ def _delete_from_queue(queue_object, message):
     try:
         response = queue_object.delete_messages(Entries=[entry])
     except:
-        raise StandardError(
+        raise Exception(
             'Unable to delete message {} from queue'.format(msg_id)
         )
 
@@ -202,7 +203,7 @@ def lambda_handler(event, _context):
             if not payload or not headers:
                 # The hook is missing either the body or
                 # the headers. Throw an error
-                raise StandardError(
+                raise Exception(
                     "Unable to parse the body and headers "
                     "from the following webhook in the "
                     "queue. {}".format(message_body)

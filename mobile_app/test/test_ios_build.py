@@ -3,14 +3,10 @@ Tests for the iOS build launcher script
 """
 
 from mock import patch
-from sys import version_info
-
-if version_info.major == 2:
-    import __builtin__ as builtins  # pylint: disable=import-error
-else:
-    import builtins  # pylint: disable=import-error
 
 from unittest import TestCase
+
+import six
 
 from .. import make_ios_build
 
@@ -18,7 +14,7 @@ from .. import make_ios_build
 class MakeIOSBuildTestCase(TestCase):
     # pylint: disable=missing-docstring
 
-    @patch.object(builtins, 'raw_input', side_effect="y")
+    @patch.object(six.moves, 'input', side_effect="y")
     def test_with_testflight(self, _):
         def verify_build_arguments(trigger_repo, overrides):
             self.assertEqual(
@@ -35,7 +31,7 @@ class MakeIOSBuildTestCase(TestCase):
         ):
             make_ios_build.make_ios_build()
 
-    @patch.object(builtins, 'raw_input', side_effect="n")
+    @patch.object(six.moves, 'input', side_effect="n")
     def test_without_testflight(self, _):
         def verify_build_arguments(trigger_repo, overrides):
             self.assertEqual(

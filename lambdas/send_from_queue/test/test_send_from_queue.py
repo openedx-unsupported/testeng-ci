@@ -100,7 +100,7 @@ class LambdaHandlerTestCase(TestCase):
             'send_from_queue.send_from_queue.post',
             return_value=self.mock_response(500)
         ):
-            with self.assertRaises(StandardError):
+            with self.assertRaises(Exception):
                 lambda_handler(None, None)
             self.assertEqual(queue_empty_mock.call_count, 2)
             self.assertEqual(msg_from_queue_mock.call_count, 1)

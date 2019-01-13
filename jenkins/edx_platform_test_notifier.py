@@ -4,6 +4,8 @@ import logging
 import os
 import sys
 
+import six
+
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -58,7 +60,7 @@ class EdxStatusBot:
         sys.exit()
 
     def ignore_marker(self, pr):
-        return self._action_str('ignore') in unicode(pr.body)
+        return self._action_str('ignore') in six.text_type(pr.body)
 
     def delete_old_comments(self, pr):
         comments = pr.get_issue_comments()
