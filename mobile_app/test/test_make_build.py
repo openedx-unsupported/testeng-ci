@@ -6,8 +6,11 @@ import git
 from unittest import TestCase
 
 from mock import patch
-
-import six
+from sys import version_info
+if version_info.major == 2:
+    import __builtin__ as builtins  # pylint: disable=import-error
+else:
+    import builtins  # pylint: disable=import-error
 
 from . import utils
 from .. import make_build
@@ -36,7 +39,7 @@ class MakeBuildTestCase(TestCase):
         building. Or are passed as part of the argument list
         """
 
-        with patch.object(six.moves, 'input', side_effect=VALUES):
+        with patch.object(builtins, 'raw_input', side_effect=VALUES):
             (args, env) = make_build.collect_params()
         for item in INPUTS:
             if item.key:
@@ -65,7 +68,7 @@ class MakeBuildTestCase(TestCase):
             item.key != '--trigger-repo-path'
         ]
 
-        with patch.object(six.moves, 'input', side_effect=entries):
+        with patch.object(builtins, 'raw_input', side_effect=entries):
             with patch.object(
                 trigger_build,
                 'run_trigger_build',
