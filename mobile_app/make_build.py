@@ -13,8 +13,6 @@ import sys
 import tempfile
 import uuid
 
-from six.moves import input
-
 from . import trigger_build
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -75,7 +73,7 @@ def collect_params(questions=QUESTIONS):
     environ = {}
     args = []
     for question in questions:
-        value = input(question.prompt + ": ")
+        value = raw_input(question.prompt + ": ")
         if question.kind is "environ":
             environ[question.key] = value
         elif question.kind is "arg":
