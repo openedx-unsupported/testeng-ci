@@ -5,4 +5,3 @@ nick: teci
 oeps: {}
 openedx-release: {ref: master}
 owner: edx/testeng
-track-pulls: true
