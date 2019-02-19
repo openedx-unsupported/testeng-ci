@@ -31,7 +31,7 @@ def _get_target_url(headers):
     """
     url = os.environ.get('TARGET_URL')
     if not url:
-        raise StandardError(
+        raise Exception(
             "Environment variable TARGET_URL was not set"
         )
 
@@ -48,7 +48,7 @@ def _get_target_url(headers):
     elif event_type == "ping":
         return None
     else:
-        raise StandardError(
+        raise Exception(
             "The Spigot does not support webhooks of "
             "type: {}".format(event_type)
         )
@@ -65,7 +65,7 @@ def _get_target_queue():
     """
     queue_name = os.environ.get('TARGET_QUEUE')
     if not queue_name:
-        raise StandardError(
+        raise Exception(
             "Environment variable TARGET_QUEUE was not set"
         )
 
@@ -122,12 +122,12 @@ def _send_to_queue(event, queue_name):
         sqs = boto3.resource('sqs')
         queue = sqs.get_queue_by_name(QueueName=queue_name)
     except:
-        raise StandardError("Unable to find the target queue")
+        raise Exception("Unable to find the target queue")
 
     try:
         response = queue.send_message(MessageBody=json.dumps(event))
     except:
-        raise StandardError("The message could not be sent to queue")
+        raise Exception("The message could not be sent to queue")
 
     return response
 
@@ -174,7 +174,7 @@ def lambda_handler(event, _context):
                 # already in the queue, add it.
                 queue_name = _get_target_queue()
                 _response = _send_to_queue(event, queue_name)
-            raise StandardError(
+            raise Exception(
                 "There was an error sending the message "
                 "to the url: {}".format(url)
             )
@@ -187,7 +187,7 @@ def lambda_handler(event, _context):
         # if the message is already in the queue do
         # nothing.
         if from_queue:
-            raise StandardError(
+            raise Exception(
                 "The spigot is OFF. No messages should be "
                 "sent from the queue."
             )
@@ -199,7 +199,7 @@ def lambda_handler(event, _context):
                 "Webhook successfully sent to queue: {}".format(queue_name)
             )
     else:
-        raise StandardError(
+        raise Exception(
             "API Gateway stage variable spigot_state "
             "was not correctly set. Should be ON or OFF, "
             "was: {}".format(spigot_state)

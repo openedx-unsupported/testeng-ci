@@ -37,7 +37,7 @@ def checkout_repos(build_environment_path, environ, base_path):
     """
 
     # extract environment
-    config = json.load(file(build_environment_path))
+    config = json.load(open(build_environment_path))
 
     config_repo_url = config["CONFIG_REPO"]
     relative_config_path = config["CONFIG_PATH"]
@@ -119,7 +119,7 @@ def _write_properties(
 
     logger.info("Writing edx.properties to %s", absolute_config_path)
 
-    with file(properties_file_path, "w") as properties_file:
+    with open(properties_file_path, "w") as properties_file:
         properties_file.write(
             "edx.dir = \"{config_path}\"".format(
                 config_path=absolute_config_path

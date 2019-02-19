@@ -27,7 +27,7 @@ def _get_base_url():
     """Get the base URL from the OS environment variable. """
     url = os.environ.get('BASE_URL')
     if not url:
-        raise StandardError(
+        raise Exception(
             "Environment variable BASE_URL was not set"
         )
     # Let the URL be specified with or without a / at the end
@@ -53,7 +53,7 @@ def _get_credentials_from_s3():
     creds = json.loads(creds_file['Body'].read())
 
     if not creds.get('username') or not creds.get('api_token'):
-        raise StandardError(
+        raise Exception(
             'Credentials file needs both a '
             'username and api_token attribute'
         )

@@ -18,6 +18,7 @@ import datetime
 import logging
 import json
 
+import six
 from github import Github
 
 logging.basicConfig()
@@ -179,7 +180,7 @@ def gather_codecov_metrics(all_repos, time_frame):
             continue
 
         for pr in prs:
-            pr_title = unicode(pr.title)
+            pr_title = six.text_type(pr.title)
             logger.info(u'Analyzing pr {}'.format(pr_title))
             head_commit = get_head_commit(pr)
             head_status = head_commit.get_combined_status().statuses

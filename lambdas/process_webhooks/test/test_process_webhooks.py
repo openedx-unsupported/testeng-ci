@@ -44,7 +44,7 @@ class ProcessWebhooksTestCase(TestCase):
     @patch.dict(os.environ, {'TARGET_URL': 'http://www.example.com'})
     def test_get_target_url_error(self):
         self.headers['X-GitHub-Event'] = 'status'
-        with self.assertRaises(StandardError):
+        with self.assertRaises(Exception):
             url = _get_target_url(self.headers)
 
     def test_add_gh_header(self):
@@ -100,7 +100,7 @@ class ProcessWebhooksRequestTestCase(TestCase):
             'process_webhooks.process_webhooks.post',
             return_value=self.mock_response(500)
         ):
-            with self.assertRaises(StandardError):
+            with self.assertRaises(Exception):
                 response = _send_message('http://www.example.com', None, None)
                 self.assertEqual(response.message, '500 Server Error: None')
 
@@ -138,7 +138,7 @@ class LambdaHandlerTestCase(TestCase):
     @patch('process_webhooks.process_webhooks._get_target_url',
            return_value='http://www.example.com/endpoint/')
     @patch('process_webhooks.process_webhooks._send_message',
-           side_effect=StandardError("Error!"))
+           side_effect=Exception("Error!"))
     @patch('process_webhooks.process_webhooks._is_from_queue',
            return_value=False)
     @patch('process_webhooks.process_webhooks._get_target_queue',
@@ -150,7 +150,7 @@ class LambdaHandlerTestCase(TestCase):
         _from_queue_mock, send_msg_mock, _url_mock
     ):
         self.event['spigot_state'] = 'ON'
-        with self.assertRaises(StandardError):
+        with self.assertRaises(Exception):
             lambda_handler(self.event, None)
 
         send_msg_mock.assert_called_with(
@@ -198,6 +198,6 @@ class LambdaHandlerTestCase(TestCase):
         self, send_queue_mock, _from_queue_mock, _queue_mock
     ):
         self.event['spigot_state'] = 'OFF'
-        with self.assertRaises(StandardError):
+        with self.assertRaises(Exception):
             lambda_handler(self.event, None)
         assert not send_queue_mock.called
