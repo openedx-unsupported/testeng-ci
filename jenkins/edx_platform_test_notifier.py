@@ -1,26 +1,16 @@
-import click
-from github import Github
 import logging
 import os
 import sys
 
+import click
 import six
+from github import Github
+
+from github_helpers import connect_to_repo, get_github_token
 
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-
-def _get_github_token():
-    """
-    Get the github oauth token from
-    the environment variable GITHUB_TOKEN
-    """
-    token = os.environ.get('GITHUB_TOKEN')
-    if not token:
-        logger.error("No value found for environment variable GITHUB_TOKEN")
-        sys.exit(1)
-    return token
 
 
 class EdxStatusBot:
@@ -131,18 +121,6 @@ class EdxStatusBot:
         )
         return map(lambda status: status.context, failures)
 
-    def get_repo(self, target_repo):
-        repos = self.github.get_user().get_repos()
-        for repo in repos:
-            if repo.name == target_repo:
-                return repo
-        else:
-            logger.error(
-                "Could not access {}. Please make sure the "
-                "GITHUB_TOKEN is valid.".format(target_repo)
-            )
-            sys.exit(1)
-
     def _action_str(self, action):
         return '{}: {}'.format(self.name, action)
 
@@ -159,8 +137,8 @@ def main(pr_number):
     Checks a pull request on edx-platform to see if tests are finished. If they
     are, it comments on the PR to notify the user. If not, the script exits.
     """
-    bot = EdxStatusBot(token=_get_github_token())
-    repo = bot.get_repo('edx-platform')
+    bot = EdxStatusBot(token=get_github_token())
+    repo = connect_to_repo('edx-platform')
 
     try:
         pr = repo.get_pull(int(pr_number))
