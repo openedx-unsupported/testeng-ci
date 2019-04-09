@@ -9,6 +9,5 @@ This repo contains:
 * Scripts that do things like:
 	* Find all Travis builds on a given github org (like edx) and report on status + counts
 	* Clean up orphaned jenkins-worker nodes with whom we have lost contact
-	* release infrastructure for mobile builds
 
 * Job infrastructure for our Jenkins instance
