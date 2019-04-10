@@ -138,7 +138,7 @@ def main(pr_number):
     are, it comments on the PR to notify the user. If not, the script exits.
     """
     bot = EdxStatusBot(token=get_github_token())
-    repo = connect_to_repo('edx-platform')
+    repo = connect_to_repo(bot.github, 'edx-platform')
 
     try:
         pr = repo.get_pull(int(pr_number))
