@@ -11,7 +11,7 @@ import click
 
 from github_helpers import (authenticate_with_github, branch_exists,
                             connect_to_repo, create_branch, close_existing_pull_requests,
-                            create_pull_request, get_file_contents, delete_branch,
+                            create_pull_request, get_file_contents,
                             get_modified_files_list, update_list_of_files)
 
 logging.basicConfig()
@@ -95,7 +95,7 @@ def main(sha, repo_root):
             create_pull_request(
                 repository,
                 'Bokchoy Testing DB Cache update',
-                '@edx/testeng please review',
+                pr_body,
                 'master',
                 branch
             )
