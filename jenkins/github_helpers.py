@@ -126,6 +126,9 @@ def close_existing_pull_requests(repository, user_login, user_name):
             pr.create_issue_comment("Closing obsolete PR.")
             pr.edit(state="closed")
             deleted_pull_numbers.append(pr.number)
+
+            branch_name = pr.head.ref
+            delete_branch(repository, branch_name)
     return deleted_pull_numbers
 
 
@@ -146,11 +149,14 @@ def create_pull_request(repository, title, body, base, head):
         )
 
 
-def delete_branch(branch_object):
+def delete_branch(repository, branch_name):
     """
     Delete a branch from a repository.
     """
+    logger.info("Deleting Branch: {}".format(branch_name))
     try:
+        ref = "heads/{}".format(branch_name)
+        branch_object = repository.get_git_ref(ref)
         branch_object.delete()
     except:
         raise Exception(

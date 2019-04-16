@@ -28,7 +28,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request.create_pull_request',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.delete_branch',
+    @patch('jenkins.github_helpers.delete_branch',
            return_value=None)
     def test_no_changes(
         self, delete_branch_mock, create_pr_mock, create_branch_mock, update_files_mock,
@@ -66,7 +66,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=[])
     @patch('jenkins.bokchoy_db_pull_request.create_pull_request',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.delete_branch',
+    @patch('jenkins.github_helpers.delete_branch',
            return_value=None)
     def test_changes(
         self, delete_branch_mock, create_pr_mock, close_pr_mock, update_file_mock, read_local_db_mock,
@@ -99,7 +99,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request.create_pull_request',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.delete_branch',
+    @patch('jenkins.github_helpers.delete_branch',
            return_value=None)
     def test_branch_exists(
         self, delete_branch_mock, create_pr_mock, create_branch_mock, modified_list_mock,
