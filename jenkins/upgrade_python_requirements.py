@@ -90,7 +90,7 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
             if isinstance(team_reviewers, str) and len(team_reviewers) > 0:
                 print("hi")
                 team_reviewers = team_reviewers.split(',')
-            print(user_reviewer)
+            print(user_reviewers)
             print(team_reviewers)
             create_pull_request(
                 repository,
