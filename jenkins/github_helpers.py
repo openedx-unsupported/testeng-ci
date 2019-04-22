@@ -138,18 +138,18 @@ def create_pull_request(repository, title, body, base, head, user_reviewers=Gith
     Create a new pull request with the changes in head. And tag a list of teams
     for a review.
     """
-    try:
-        pull_request = repository.create_pull(
-            title=title,
-            body=body,
-            base=base,
-            head=head
-        )
-        pull_request.create_review_request(reviewers=user_reviewers, team_reviewers=team_reviewers)
-    except:
-        raise Exception(
-            "Could not create pull request"
-        )
+    # try:
+    pull_request = repository.create_pull(
+        title=title,
+        body=body,
+        base=base,
+        head=head
+    )
+    pull_request.create_review_request(reviewers=user_reviewers, team_reviewers=team_reviewers)
+    # except:
+    #     raise Exception(
+    #         "Could not create pull request"
+    #     )
 
 
 def delete_branch(repository, branch_name):
