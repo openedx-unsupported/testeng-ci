@@ -45,10 +45,6 @@ logger.setLevel(logging.INFO)
     default=GithubObject.NotSet
 )
 def main(sha, repo_root, org, user_reviewers, team_reviewers):
-    print(type(team_reviewers))
-    print(isinstance(team_reviewers, str))
-    print(len(team_reviewers) > 0)
-
     logger.info("Authenticating with Github")
     github_instance = authenticate_with_github()
 
@@ -89,13 +85,12 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
             logger.info("Creating a new pull request")
 
             # If there are reviewers to be added, split them into python lists
-            if isinstance(user_reviewers, str) and len(user_reviewers) > 0:
+            if not isinstance(user_reviewers, GithubObject.NotSet) and len(user_reviewers) > 0:
                 user_reviewers = user_reviewers.split(',')
-            if isinstance(team_reviewers, str) and len(team_reviewers) > 0:
+            if not isinstance(team_reviewers, GithubObject.NotSet) and len(team_reviewers) > 0:
                 print("hi")
                 team_reviewers = team_reviewers.split(',')
-            print(user_reviewers)
-            print(team_reviewers)
+
             create_pull_request(
                 repository,
                 'Python Requirements Update',
