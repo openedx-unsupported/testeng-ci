@@ -132,7 +132,8 @@ def close_existing_pull_requests(repository, user_login, user_name):
     return deleted_pull_numbers
 
 
-def create_pull_request(repository, title, body, base, head, user_reviewers=GithubObject.NotSet, team_reviewers=GithubObject.NotSet):
+def create_pull_request(repository, title, body, base, head, user_reviewers=GithubObject.NotSet,
+                        team_reviewers=GithubObject.NotSet):
     """
     Create a new pull request with the changes in head. And tag a list of teams
     for a review.

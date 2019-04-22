@@ -36,12 +36,12 @@ logger.setLevel(logging.INFO)
 )
 @click.option(
     '--user_reviewers',
-    help="Comma seperated list of Github users to be tagged on PR's",
+    help="Comma seperated list of Github users to be tagged on pull requests",
     default=GithubObject.NotSet
 )
 @click.option(
     '--team_reviewers',
-    help="Comma seperated list of Github teams to be tagged on PR's",
+    help="Comma seperated list of Github teams to be tagged on pull requests",
     default=GithubObject.NotSet
 )
 def main(sha, repo_root, org, user_reviewers, team_reviewers):
