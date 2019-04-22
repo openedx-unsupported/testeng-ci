@@ -85,10 +85,9 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
             logger.info("Creating a new pull request")
 
             # If there are reviewers to be added, split them into python lists
-            if not isinstance(user_reviewers, GithubObject.NotSet) and len(user_reviewers) > 0:
+            if (isinstance(user_reviewers, str) or isinstance(user_reviewers, str)) and len(user_reviewers) > 0:
                 user_reviewers = user_reviewers.split(',')
-            if not isinstance(team_reviewers, GithubObject.NotSet) and len(team_reviewers) > 0:
-                print("hi")
+            if (isinstance(team_reviewers, str) or isinstance(team_reviewers, str)) and len(team_reviewers) > 0:
                 team_reviewers = team_reviewers.split(',')
 
             create_pull_request(
