@@ -37,15 +37,14 @@ logger.setLevel(logging.INFO)
 @click.option(
     '--user_reviewers',
     help="Comma seperated list of Github users to be tagged on pull requests",
-    default=GithubObject.NotSet
+    default=None
 )
 @click.option(
     '--team_reviewers',
     help="Comma seperated list of Github teams to be tagged on pull requests",
-    default=GithubObject.NotSet
+    default=None
 )
 def main(sha, repo_root, org, user_reviewers, team_reviewers):
-    print(isinstance(team_reviewers, (str, unicode)))
     logger.info("Authenticating with Github")
     github_instance = authenticate_with_github()
 
@@ -88,8 +87,13 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
             # If there are reviewers to be added, split them into python lists
             if isinstance(user_reviewers, (str, unicode)) and len(user_reviewers) > 0:
                 user_reviewers = user_reviewers.split(',')
+            else:
+                user_reviewers = GithubObject.NotSet
+
             if isinstance(team_reviewers, (str, unicode)) and len(team_reviewers) > 0:
                 team_reviewers = team_reviewers.split(',')
+            else:
+                team_reviewers = GithubObject.NotSet
 
             create_pull_request(
                 repository,
