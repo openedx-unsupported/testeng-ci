@@ -98,7 +98,7 @@ def main(sha, repo_root):
                 pr_body,
                 'master',
                 branch,
-                ['testeng']
+                team_reviewers=['testeng']
             )
     else:
         logger.info("No changes needed")

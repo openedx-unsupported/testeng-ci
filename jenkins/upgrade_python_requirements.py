@@ -5,11 +5,12 @@ a Jenkins job that first runs `make upgrade`
 import logging
 
 import click
+from github import GithubObject
 
 from github_helpers import (authenticate_with_github, branch_exists,
-                            connect_to_repo, create_branch, close_existing_pull_requests,
-                            create_pull_request, get_modified_files_list,
-                            update_list_of_files)
+                            close_existing_pull_requests, connect_to_repo,
+                            create_branch, create_pull_request,
+                            get_modified_files_list, update_list_of_files)
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -33,7 +34,17 @@ logger.setLevel(logging.INFO)
     help="The github organization for the repository to run make upgrade on.",
     required=True,
 )
-def main(sha, repo_root, org):
+@click.option(
+    '--user_reviewers',
+    help="Comma seperated list of Github users to be tagged on PR's",
+    default=GithubObject.NotSet
+)
+@click.option(
+    '--team_reviewers',
+    help="Comma seperated list of Github teams to be tagged on PR's",
+    default=GithubObject.NotSet
+)
+def main(sha, repo_root, org, user_reviewers, team_reviewers):
     logger.info("Authenticating with Github")
     github_instance = authenticate_with_github()
 
@@ -72,13 +83,21 @@ def main(sha, repo_root, org):
                 pr_body += "\nhttps://github.com/{}/{}/pull/{}".format(org, repository_name, deleted_pull_number)
 
             logger.info("Creating a new pull request")
+
+            # If there are reviewers to be added, split them into python lists
+            if isinstance(user_reviewers, str) and len(user_reviewers) > 0:
+                user_reviewers = user_reviewers.split(',')
+            if isinstance(team_reviewers, str) and len(team_reviewers) > 0:
+                team_reviewers = team_reviewers.split(',')
+
             create_pull_request(
                 repository,
                 'Python Requirements Update',
                 pr_body,
                 'master',
                 branch,
-                ['testeng']
+                user_reviewers=user_reviewers,
+                team_reviewers=team_reviewers
             )
     else:
         logger.info("No changes needed")
