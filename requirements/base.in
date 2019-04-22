@@ -1,6 +1,6 @@
 -r aws.txt
 
-GitPython==2.1.8
-PyGithub==1.35
-requests==2.18.4
+GitPython
+PyGithub
+requests
 click

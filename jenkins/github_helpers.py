@@ -132,9 +132,10 @@ def close_existing_pull_requests(repository, user_login, user_name):
     return deleted_pull_numbers
 
 
-def create_pull_request(repository, title, body, base, head):
+def create_pull_request(repository, title, body, base, head, team_reviewers):
     """
-    Create a new pull request with the changes in head.
+    Create a new pull request with the changes in head. And tag a list of teams
+    for a review.
     """
     try:
         pull_request = repository.create_pull(
@@ -143,6 +144,7 @@ def create_pull_request(repository, title, body, base, head):
             base=base,
             head=head
         )
+        pull_request.create_review_request(team_reviewers=team_reviewers)
     except:
         raise Exception(
             "Could not create pull request"

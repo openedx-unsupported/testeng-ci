@@ -65,7 +65,7 @@ def main(sha, repo_root, org):
             logger.info("Checking if there's any old pull requests to delete")
             deleted_pulls = close_existing_pull_requests(repository, user.login, user.name)
 
-            pr_body = "@edx/testeng please review"
+            pr_body = "Python requirements update"
             for num, deleted_pull_number in enumerate(deleted_pulls):
                 if num == 0:
                     pr_body += "\n\nDeleted obsolete pull_requests:"
@@ -77,7 +77,8 @@ def main(sha, repo_root, org):
                 'Python Requirements Update',
                 pr_body,
                 'master',
-                branch
+                branch,
+                ['testeng']
             )
     else:
         logger.info("No changes needed")
