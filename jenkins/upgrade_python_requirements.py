@@ -45,6 +45,9 @@ logger.setLevel(logging.INFO)
     default=GithubObject.NotSet
 )
 def main(sha, repo_root, org, user_reviewers, team_reviewers):
+    print(isinstance(team_reviewers, str))
+    print(len(team_reviewers) > 0)
+
     logger.info("Authenticating with Github")
     github_instance = authenticate_with_github()
 
