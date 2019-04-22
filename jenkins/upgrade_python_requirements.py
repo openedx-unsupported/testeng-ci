@@ -5,11 +5,12 @@ a Jenkins job that first runs `make upgrade`
 import logging
 
 import click
+from github import GithubObject
 
 from github_helpers import (authenticate_with_github, branch_exists,
-                            connect_to_repo, create_branch, close_existing_pull_requests,
-                            create_pull_request, get_modified_files_list,
-                            update_list_of_files)
+                            close_existing_pull_requests, connect_to_repo,
+                            create_branch, create_pull_request,
+                            get_modified_files_list, update_list_of_files)
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -33,7 +34,17 @@ logger.setLevel(logging.INFO)
     help="The github organization for the repository to run make upgrade on.",
     required=True,
 )
-def main(sha, repo_root, org):
+@click.option(
+    '--user_reviewers',
+    help="Comma seperated list of Github users to be tagged on pull requests",
+    default=None
+)
+@click.option(
+    '--team_reviewers',
+    help="Comma seperated list of Github teams to be tagged on pull requests",
+    default=None
+)
+def main(sha, repo_root, org, user_reviewers, team_reviewers):
     logger.info("Authenticating with Github")
     github_instance = authenticate_with_github()
 
@@ -65,19 +76,33 @@ def main(sha, repo_root, org):
             logger.info("Checking if there's any old pull requests to delete")
             deleted_pulls = close_existing_pull_requests(repository, user.login, user.name)
 
-            pr_body = "@edx/testeng please review"
+            pr_body = "Python requirements update"
             for num, deleted_pull_number in enumerate(deleted_pulls):
                 if num == 0:
                     pr_body += "\n\nDeleted obsolete pull_requests:"
                 pr_body += "\nhttps://github.com/{}/{}/pull/{}".format(org, repository_name, deleted_pull_number)
 
             logger.info("Creating a new pull request")
+
+            # If there are reviewers to be added, split them into python lists
+            if isinstance(user_reviewers, (str, unicode)) and len(user_reviewers) > 0:
+                user_reviewers = user_reviewers.split(',')
+            else:
+                user_reviewers = GithubObject.NotSet
+
+            if isinstance(team_reviewers, (str, unicode)) and len(team_reviewers) > 0:
+                team_reviewers = team_reviewers.split(',')
+            else:
+                team_reviewers = GithubObject.NotSet
+
             create_pull_request(
                 repository,
                 'Python Requirements Update',
                 pr_body,
                 'master',
-                branch
+                branch,
+                user_reviewers=user_reviewers,
+                team_reviewers=team_reviewers
             )
     else:
         logger.info("No changes needed")

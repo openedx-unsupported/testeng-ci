@@ -1,3 +1,4 @@
+upgrade: export CUSTOM_COMPILE_COMMAND=make upgrade
 upgrade:
 	pip install -qr requirements/pip-tools.txt
 	pip-compile --upgrade -o requirements/base.txt requirements/base.in
