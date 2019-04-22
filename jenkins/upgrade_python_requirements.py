@@ -88,8 +88,10 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
             if isinstance(user_reviewers, str) and len(user_reviewers) > 0:
                 user_reviewers = user_reviewers.split(',')
             if isinstance(team_reviewers, str) and len(team_reviewers) > 0:
+                print("hi")
                 team_reviewers = team_reviewers.split(',')
-
+            print(user_reviewer)
+            print(team_reviewers)
             create_pull_request(
                 repository,
                 'Python Requirements Update',
