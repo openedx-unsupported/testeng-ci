@@ -185,10 +185,12 @@ def get_file_contents(repo_root, file_path):
 def update_list_of_files(repository, repo_root, file_path_list, commit_message, sha, username):
     input_trees_list = []
     base_git_tree = repository.get_git_tree(sha)
+    print(base_git_tree)
     for file_path in file_path_list:
         content = get_file_contents(repo_root, file_path)
         input_tree = InputGitTreeElement(file_path, "100644", "blob", content=content)
         input_trees_list.append(input_tree)
+    print(input_trees_list)
     if len(input_trees_list) > 0:
         new_git_tree = repository.create_git_tree(input_trees_list, base_tree=base_git_tree)
         parents = [repository.get_git_commit(sha)]
