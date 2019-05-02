@@ -26,7 +26,7 @@ gitdb2==2.0.5
 gitpython==2.1.11
 httpretty==0.9.6          # via moto
 idna==2.8
-isort==4.3.17             # via pylint
+isort==4.3.18             # via pylint
 itsdangerous==1.1.0       # via flask
 jinja2==2.10.1            # via flask, moto
 jmespath==0.9.4
