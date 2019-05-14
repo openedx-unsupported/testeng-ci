@@ -163,14 +163,27 @@ def crawl(path, TARGET_FILE_NUMBER):
 
 def main():
     path = sys.argv[1]
+    ticket_number_seed = int(sys.argv[2])
     batches = crawl(path, TARGET_FILE_NUMBER)
-    with open('output.csv', 'w') as out:
-        out.write('BLOCKED, NUMBER OF PYTHON FILES, DIRECTORIES')
-        out.write('\n')
-        for b in batches:
+
+    blocked_batches = [b for b in batches if b.blocked]
+    ready_batches = [b for b in batches if not b.blocked]
+
+    with open('ready_batches.csv', 'w') as out:
+        for b in ready_batches:
             dirs = ':'.join(b.top_level_directories)
-            out.write('{},{},{}'.format(b.blocked, b.file_count(), dirs))
+            ticket_number = "INCR-{}".format(ticket_number_seed)
+            out.write('{},{},{},{}'.format(ticket_number, b.blocked, b.file_count(), dirs))
             out.write('\n')
+            ticket_number_seed += 1
+
+    with open('blocked_batches.csv', 'w') as out:
+        for b in blocked_batches:
+            dirs = ':'.join(b.top_level_directories)
+            ticket_number = "INCR-{}".format(ticket_number_seed)
+            out.write('{},{},{},{}'.format(ticket_number, b.blocked, b.file_count(), dirs))
+            out.write('\n')
+            ticket_number_seed += 1
 
 if __name__ == '__main__':
     main()
