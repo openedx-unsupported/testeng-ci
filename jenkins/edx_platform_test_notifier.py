@@ -127,18 +127,23 @@ class EdxStatusBot:
 
 @click.command()
 @click.option(
+    '--repo',
+    help="Repository of pull request. Defaults to edx-platform",
+    default="edx-platform"
+)
+@click.option(
     '--pr_number',
-    help="The PR number of a pull request on edx-platform. "
-         "This PR will receive a comment when its tests finish. ",
+    help="The PR number of a pull request. "
+         "This PR will receive a comment when its tests finish.",
     required=True,
 )
-def main(pr_number):
+def main(repo, pr_number):
     """
-    Checks a pull request on edx-platform to see if tests are finished. If they
+    Checks a pull request in Github to see if tests are finished. If they
     are, it comments on the PR to notify the user. If not, the script exits.
     """
     bot = EdxStatusBot(token=get_github_token())
-    repo = connect_to_repo(bot.github, 'edx-platform')
+    repo = connect_to_repo(bot.github, repo)
 
     try:
         pr = repo.get_pull(int(pr_number))
