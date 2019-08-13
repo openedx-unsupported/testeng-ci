@@ -120,7 +120,11 @@ def get_average_duration_org(org, num=5):
         key=itemgetter("average duration"),
         reverse=True
     )
-    logger.info(avg_duration_org)
+    message = '['
+    for entry in avg_duration_org:
+        message += "{'repo': '%s', 'average duration': %s}" % (entry['repo'], entry['average duration'])
+    message += ']'
+    logger.info(message)
     return avg_duration_org
 
 
