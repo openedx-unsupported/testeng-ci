@@ -6,14 +6,15 @@ branches:
       - master
 python:
   - "2.7"
+  - "3.5"
+  - "3.6"
+matrix:
+  allow_failures:
+  - python: 3.5
+  - python: 3.6
 before_install:
   - export BOTO_CONFIG=/dev/null
 install:
   - pip install -r requirements/testing.txt
 script:
-  - pep8 .
-  - pylint travis/
-  - pytest --cov-report term-missing --cov=jenkins jenkins
-  - pytest --cov-report term-missing --cov=aws aws
-  - pytest --cov-report term-missing --cov=travis travis
-  - pytest --cov-report term-missing --cov=lambdas lambdas
+  - tox

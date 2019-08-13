@@ -1,2 +1,4 @@
+-c constraints.txt
+
 boto>=2.38.0
 boto3

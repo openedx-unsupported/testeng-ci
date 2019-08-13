@@ -4,15 +4,15 @@
 #
 #    make upgrade
 #
-boto3==1.9.163
+boto3==1.9.207
 boto==2.49.0
-botocore==1.12.163
+botocore==1.12.207
 certifi==2019.6.16        # via requests
 chardet==3.0.4            # via requests
 click==7.0
 deprecated==1.2.6         # via pygithub
 docutils==0.14
-futures==3.2.0
+futures==3.3.0 ; python_version == "2.7"
 gitdb2==2.0.5             # via gitpython
 gitpython==2.1.13
 idna==2.8                 # via requests

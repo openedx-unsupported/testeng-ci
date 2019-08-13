@@ -175,4 +175,4 @@ class CodeCovTest(TestCase):
                 'context': 'codecov/project'
             }
         ]
-        self.assertEqual(metrics, expected_results)
+        self.assertItemsEqual(metrics, expected_results)

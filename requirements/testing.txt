@@ -6,9 +6,9 @@
 #
 astroid==1.5.2            # via edx-lint, pylint, pylint-celery
 backports.functools-lru-cache==1.5  # via astroid, isort, pylint
-boto3==1.9.163
+boto3==1.9.207
 boto==2.49.0
-botocore==1.12.163
+botocore==1.12.207
 certifi==2019.6.16
 chardet==3.0.4
 click-log==0.1.8          # via edx-lint
@@ -21,7 +21,7 @@ docutils==0.14
 edx-lint==0.5.5
 enum34==1.1.6             # via astroid
 flask==1.1.1              # via moto
-futures==3.2.0
+futures==3.3.0 ; python_version == "2.7"
 gitdb2==2.0.5
 gitpython==2.1.13
 httpretty==0.9.6          # via moto
