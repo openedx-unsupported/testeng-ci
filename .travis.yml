@@ -15,6 +15,6 @@ matrix:
 before_install:
   - export BOTO_CONFIG=/dev/null
 install:
-  - pip install -r requirements/testing.txt
+  - pip install -r requirements/ci.txt
 script:
   - tox
