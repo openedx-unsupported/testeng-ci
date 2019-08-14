@@ -2,15 +2,18 @@
 Script to help create a PR with python library upgrades. To be run inside
 a Jenkins job that first runs `make upgrade`
 """
+from __future__ import absolute_import
+
 import logging
 
 import click
 from github import GithubObject
 
-from github_helpers import (authenticate_with_github, branch_exists,
-                            close_existing_pull_requests, connect_to_repo,
-                            create_branch, create_pull_request,
-                            get_modified_files_list, update_list_of_files)
+from .github_helpers import (authenticate_with_github, branch_exists,
+                             close_existing_pull_requests, connect_to_repo,
+                             create_branch, create_pull_request,
+                             get_modified_files_list, update_list_of_files)
+import six
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -85,12 +88,12 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
             logger.info("Creating a new pull request")
 
             # If there are reviewers to be added, split them into python lists
-            if isinstance(user_reviewers, (str, unicode)) and len(user_reviewers) > 0:
+            if isinstance(user_reviewers, (str, six.text_type)) and len(user_reviewers) > 0:
                 user_reviewers = user_reviewers.split(',')
             else:
                 user_reviewers = GithubObject.NotSet
 
-            if isinstance(team_reviewers, (str, unicode)) and len(team_reviewers) > 0:
+            if isinstance(team_reviewers, (str, six.text_type)) and len(team_reviewers) > 0:
                 team_reviewers = team_reviewers.split(',')
             else:
                 team_reviewers = GithubObject.NotSet

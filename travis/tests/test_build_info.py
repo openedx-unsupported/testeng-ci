@@ -1,6 +1,8 @@
 """
 Tests for testeng-ci/travis/build_info
 """
+from __future__ import absolute_import
+
 from unittest import TestCase
 import os
 from ddt import ddt, data

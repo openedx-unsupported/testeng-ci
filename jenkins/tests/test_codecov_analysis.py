@@ -1,8 +1,8 @@
+from __future__ import absolute_import
+
 from unittest import TestCase
 
 import datetime
-
-from mock import patch, Mock
 
 from jenkins.codecov_response_metrics import (
     get_recent_pull_requests,

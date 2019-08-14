@@ -5,7 +5,7 @@ This only applies to travis instances that do not require
 authorization (e.g., travis-ci.org). Auth is a #TODO
 
 """
-from __future__ import division
+from __future__ import absolute_import, division
 
 import argparse
 import logging

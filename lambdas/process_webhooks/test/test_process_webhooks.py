@@ -1,5 +1,5 @@
-import base64
-import json
+from __future__ import absolute_import
+
 import os
 from unittest import TestCase
 

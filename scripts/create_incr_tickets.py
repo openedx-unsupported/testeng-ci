@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import os
 import sys
 from collections import namedtuple
+from six.moves import zip
 
 # We should aspire to create batches of less than 15 python files
 # although this is not a strict limit. Setting a target of 10 files,
@@ -61,11 +64,7 @@ class Batch(object):
         files, that is, all of the directories that are not contained in other
         directories in this batch
         """
-        top_level_directories = filter(
-            lambda d: len([x for x in self.directories if x in d]) == 1,
-            self.directories
-        )
-        return top_level_directories
+        return [d for d in self.directories if len([x for x in self.directories if x in d]) == 1]
 
     def rebalance_root(self):
         """
@@ -75,10 +74,10 @@ class Batch(object):
         if this batch had a root of /a/b/c and we add a file from /a/b/d,
         the newly balanced root should be /a/b
         """
-        split_dirs = map(lambda d: d.split('/'), self.directories)
+        split_dirs = [d.split('/') for d in self.directories]
         new_root = []
         for level in zip(*split_dirs):
-            if not(all(map(lambda d: d == level[0], level))):
+            if not(all([d == level[0] for d in level])):
                 break
             new_root.append(level[0])
         self.root = '/'.join(new_root)
@@ -92,7 +91,7 @@ class Batch(object):
         files. This is the case when a path (contained in this
         batch) is a child of a directory in the list `dirs`.
         """
-        return any(map(lambda d: d in self.directories, dirs))
+        return any([d in self.directories for d in dirs])
 
     def base_similar(self, other_root):
         """
@@ -116,7 +115,7 @@ def check_if_blocked(batches, root, dirs):
     directories
     """
     paths = [os.path.join(root, d) for d in dirs]
-    return any(map(lambda b: b.blocks(paths), batches))
+    return any([b.blocks(paths) for b in batches])
 
 
 def filter_python_files(files):

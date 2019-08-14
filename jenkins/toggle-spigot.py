@@ -1,7 +1,8 @@
+from __future__ import absolute_import
+
 import boto3
 import sys
 import logging
-import json
 import click
 from time import sleep
 

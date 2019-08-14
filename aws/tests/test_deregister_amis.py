@@ -1,6 +1,8 @@
 """
 Tests for testeng-ci/aws.
 """
+from __future__ import absolute_import
+
 import boto
 from boto.exception import EC2ResponseError
 from aws.deregister_amis import(

@@ -1,6 +1,7 @@
+from __future__ import absolute_import
+
 from unittest import TestCase
 
-import click
 from click.testing import CliRunner
 from mock import MagicMock, Mock, patch
 

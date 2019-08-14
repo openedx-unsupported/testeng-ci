@@ -17,6 +17,8 @@ Usage:
     you'd deregister if you ran the command, then use the --dry-run switch.
 
 """
+from __future__ import absolute_import
+
 import argparse
 import boto
 from boto.exception import EC2ResponseError

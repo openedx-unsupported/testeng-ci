@@ -25,3 +25,7 @@ cover/
 cover_html/
 .cache
 .tox/
+
+### Local development artifacts
+requirements/private.in
+requirements/private.txt

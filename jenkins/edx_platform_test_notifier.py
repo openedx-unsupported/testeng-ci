@@ -1,12 +1,13 @@
+from __future__ import absolute_import
+
 import logging
-import os
 import sys
 
 import click
 import six
 from github import Github
 
-from github_helpers import connect_to_repo, get_github_token
+from .github_helpers import connect_to_repo, get_github_token
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -115,11 +116,8 @@ class EdxStatusBot:
     def get_failures(self, pr):
         """ return a list of the contexts that recently failed on a given pr """
         head_commit = self.get_head_commit(pr)
-        failures = filter(
-            lambda status: status.state in ["failure", "error"],
-            head_commit.get_combined_status().statuses
-        )
-        return map(lambda status: status.context, failures)
+        return [status.context for status in head_commit.get_combined_status().statuses if status.state in ["failure",
+                                                                                                            "error"]]
 
     def _action_str(self, action):
         return '{}: {}'.format(self.name, action)

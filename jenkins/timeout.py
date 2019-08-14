@@ -2,12 +2,14 @@
 This script is intended to be used to abort builds that are assumed to be
 stuck because they have exceeded the expected max time.
 """
+from __future__ import absolute_import
+
 import argparse
 import datetime
 import logging
 import sys
 
-from job import JenkinsJob
+from .job import JenkinsJob
 
 
 logger = logging.getLogger(__name__)
@@ -92,7 +94,7 @@ class BuildTimeout:
                 self.job.stop_build(b)
                 self.job.update_build_desc(b, desc)
             except Exception as e:
-                logger.error(e.message)
+                logger.error(e)
 
         if lines:
             out = ("\n---------------------------------"
