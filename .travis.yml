@@ -5,9 +5,6 @@ branches:
     only:
       - master
 matrix:
-  allow_failures:
-    - python: "3.5"
-    - python: "3.6"
   include:
     - python: "2.7"
     - python: "3.5"
