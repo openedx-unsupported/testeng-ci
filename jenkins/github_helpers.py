@@ -2,7 +2,7 @@
 Helper methods for connecting with Github
 """
 from __future__ import absolute_import
-
+import io
 import logging
 import os
 
@@ -175,7 +175,7 @@ def get_file_contents(repo_root, file_path):
     """
     try:
         full_file_path = os.path.join(repo_root, file_path)
-        with open(full_file_path, 'r') as opened_file:
+        with io.open(full_file_path, 'r') as opened_file:
             data = opened_file.read()
     except:
         raise Exception(

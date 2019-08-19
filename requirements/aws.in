@@ -1,4 +1,3 @@
 -c constraints.txt
 
-boto>=2.38.0
-boto3
+boto3                               # Used in deregister_amis

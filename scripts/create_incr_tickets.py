@@ -184,5 +184,6 @@ def main():
             out.write('\n')
             ticket_number_seed += 1
 
+
 if __name__ == '__main__':
     main()

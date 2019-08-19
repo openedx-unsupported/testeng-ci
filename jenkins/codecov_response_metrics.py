@@ -216,7 +216,7 @@ def gather_codecov_metrics(all_repos, time_frame):
                     'pull_request': pr_title,
                     'commit': head_commit.sha,
                     'trigger_context_posted_at': str(trigger_posted_at),
-                    'codecov_received':  posted,
+                    'codecov_received': posted,
                     'codecov_received_after': context_age,
                     'context': codecov_context
                 }
@@ -248,6 +248,7 @@ def main():
     except OSError:
         logger.error('Unable to write data to {}'.format(outfile_name))
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

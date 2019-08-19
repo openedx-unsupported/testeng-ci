@@ -11,9 +11,9 @@ import os
 import click
 
 from .github_helpers import (authenticate_with_github, branch_exists,
-                            connect_to_repo, create_branch, close_existing_pull_requests,
-                            create_pull_request, get_file_contents,
-                            get_modified_files_list, update_list_of_files)
+                             connect_to_repo, create_branch, close_existing_pull_requests,
+                             create_pull_request, get_file_contents,
+                             get_modified_files_list, update_list_of_files)
 
 logging.basicConfig()
 logger = logging.getLogger()

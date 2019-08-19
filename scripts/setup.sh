@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 mkdir -p happy_path
 touch happy_path/a.py
 touch happy_path/b.py

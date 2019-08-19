@@ -65,7 +65,7 @@ class TimeoutTestCase(TestCase):
 
         stop_build.assert_has_calls([call(3), call(2)], any_order=True)
 
-        update_desc.assert_hass_calls(
+        update_desc.assert_has_calls(
             [call(2, mock_desc()), call(3, mock_desc())],
             any_order=True
         )

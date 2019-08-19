@@ -120,10 +120,10 @@ def get_average_duration_org(org, num=5):
         key=itemgetter("average duration"),
         reverse=True
     )
-    message = '['
+    message = u'['
     for entry in avg_duration_org:
-        message += "{'repo': '%s', 'average duration': %s}" % (entry['repo'], entry['average duration'])
-    message += ']'
+        message += u"{'repo': '%s', 'average duration': %s}" % (entry['repo'], entry['average duration'])
+    message += u']'
     logger.info(message)
     return avg_duration_org
 
@@ -214,7 +214,7 @@ def get_job_counts(org):
             repo_jobs += total
             repo_started_jobs += started
         logger.debug("----> " + repo)
-        debug_msg = "total jobs: {total}, started jobs: {started}".format(
+        debug_msg = u"total jobs: {total}, started jobs: {started}".format(
             total=repo_jobs,
             started=repo_started_jobs
         )
@@ -239,7 +239,7 @@ def get_build_counts(org):
 
         repo_build_total, num_started = repo_active_build_count(repo_builds)
 
-        debug_string = "total: {builds}, started: {builds_started}".format(
+        debug_string = u"total: {builds}, started: {builds_started}".format(
             builds=repo_build_total,
             builds_started=num_started,
         )
@@ -269,7 +269,7 @@ def main(raw_args):
         dest='org',
         help='Travis org',
         required=True
-        )
+    )
     parser.add_argument(
         '--task-class',  # this is not doing anything for now.
         dest='task_class',
@@ -305,6 +305,7 @@ def main(raw_args):
     else:
         get_build_counts(org=args.org)
 
+
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format=u'%(asctime)s [%(levelname)s] %(message)s')
     main(sys.argv[1:])

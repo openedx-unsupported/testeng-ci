@@ -72,7 +72,7 @@ class TestTravisBuildRepoInfo(TestCase):
             httpretty.GET,
             BASE_URL + 'v3/owner/foo/repos',
             body="""{"repositories": [{"no-name": "no"}]}""",
-            )
+        )
         with self.assertRaises(KeyError):
             get_repos('foo')
 
@@ -93,7 +93,7 @@ class TestTravisActiveBuildInfo(TestCase):
             self.url_endpoint,
             body="""[{"id": 1, "state": "created"},
                 {"id": 2, "state": "started"}]""",
-            )
+        )
         builds = get_builds('foo', 'bar-repo')
         self.assertEqual(2, len(builds))
 
@@ -104,7 +104,7 @@ class TestTravisActiveBuildInfo(TestCase):
             self.url_endpoint,
             body="""[{"id": 1, "state": "created"},
                 {"id": 2, "state": "finished"}]""",
-            )
+        )
         builds = get_builds('foo', 'bar-repo')
         self.assertEqual(1, len(builds))
 
@@ -115,7 +115,7 @@ class TestTravisActiveBuildInfo(TestCase):
             self.url_endpoint,
             body="""[{"id": 1, "state": "finished"},
                 {"id": 2, "state": "finished"}]""",
-            )
+        )
         builds = get_builds('foo', 'bar-repo')
         self.assertEqual(0, len(builds))
 
@@ -126,7 +126,7 @@ class TestTravisActiveBuildInfo(TestCase):
             self.url_endpoint,
             body="""[{"id": 1, "state": "started"},
                 {"id": 2, "state": "created"}]""",
-            )
+        )
         builds = get_builds('foo', 'bar-repo')
         total_count, started_count = repo_active_build_count(builds)
         self.assertEqual(2, total_count)
@@ -139,7 +139,7 @@ class TestTravisActiveBuildInfo(TestCase):
             self.url_endpoint,
             body="""[{"id": 1, "state": "created"},
                 {"id": 2, "state": "created"}]""",
-            )
+        )
         builds = get_builds('foo', 'bar-repo')
         total_count, started_count = repo_active_build_count(builds)
         self.assertEqual(2, total_count)
@@ -240,7 +240,7 @@ class TestTravisBuildInfoJobs(TestCase):
                     ]
                 }
                 """,
-            )
+        )
         jobs = get_active_jobs(11122)
         expected_job_list = [
             {u'id': 1, u'state': u'received'},
@@ -262,7 +262,7 @@ class TestTravisBuildInfoJobs(TestCase):
                     ]
                 }
                 """,
-            )
+        )
         jobs = get_active_jobs(11122)
         self.assertEqual(1, len(jobs))
 
@@ -280,7 +280,7 @@ class TestTravisBuildInfoJobs(TestCase):
                     ]
                 }
                 """,
-            )
+        )
         jobs = get_active_jobs(11122)
         self.assertEqual(0, len(jobs))
 
@@ -292,7 +292,7 @@ class TestTravisBuildInfoJobs(TestCase):
         jobs_list = [
             {"id": 1, "state": "queued"},
             {"id": 1, "state": "started"},
-            ]
+        ]
         job_count, started_jobs_count = active_job_counts(jobs_list)
         self.assertEqual(2, job_count)
         self.assertEqual(1, started_jobs_count)
@@ -302,7 +302,7 @@ class TestTravisBuildInfoJobs(TestCase):
             {"id": 1, "state": "queued"},
             {"id": 1, "state": "created"},
             {"id": 1, "state": "received"},
-            ]
+        ]
         job_count, started_jobs_count = active_job_counts(jobs_list)
         self.assertEqual(3, job_count)
         self.assertEqual(0, started_jobs_count)
@@ -312,7 +312,7 @@ class TestTravisBuildInfoJobs(TestCase):
             {"id": 1, "state": "queued"},
             {"id": 1, "state": "started"},
             {"id": 1, "state": "started"},
-            ]
+        ]
         job_count, started_jobs_count = active_job_counts(jobs_list)
         self.assertEqual(3, job_count)
         self.assertEqual(2, started_jobs_count)
@@ -348,7 +348,7 @@ class TestTravisSuccessfulBuilds(TestCase):
             'bar-repo',
             test_data['requested']
         )
-        self.assertEquals(len(successful_builds), test_data['expected'])
+        self.assertEqual(len(successful_builds), test_data['expected'])
 
     def _load_mock_builds_response_file(self, filename):
         """
@@ -453,7 +453,7 @@ class TestTravisBuildInfoMain(TestCase):
                 "duration": 600
             }
         ]
-        )
+    )
     def test_main_duration(self, _mock_builds):
         args = [
             '--org', self.org,
@@ -465,7 +465,7 @@ class TestTravisBuildInfoMain(TestCase):
                 (
                     'travis.build_info',
                     'INFO',
-                    "[{'repo': 'bar', 'average duration': 10}]"
+                    u"[{'repo': 'bar', 'average duration': 10}]"
                 )
             )
 
