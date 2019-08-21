@@ -1,8 +1,10 @@
-import json
+from __future__ import absolute_import
+
 import datetime
 import functools
 from mock import Mock
 from requests import Response
+from six.moves import range
 
 
 def mock_response(status_code, data=None):

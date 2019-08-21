@@ -1,5 +1,6 @@
 """
-Use boto to deregister AMIs that match a given tag key-value pair.
+Use boto3 to deregister AMIs that match a given tag key-value pair.
+This is used by the clean-up-AMIs Jenkins job.
 
 That tag key-value pair is hardcoded to:
     delete_or_keep: delete
@@ -17,21 +18,20 @@ Usage:
     you'd deregister if you ran the command, then use the --dry-run switch.
 
 """
+from __future__ import absolute_import
+
 import argparse
-import boto
-from boto.exception import EC2ResponseError
 import logging
 import os
 import sys
 
+import boto3
+from botocore.exceptions import ClientError
+
 logger = logging.getLogger(__name__)
 
 
-def get_ec2_connection(aws_access_key_id, aws_secret_access_key):
-    return boto.connect_ec2(aws_access_key_id, aws_secret_access_key)
-
-
-def deregister_amis_by_tag(tag_key, tag_value, dry_run, connection):
+def deregister_amis_by_tag(tag_key, tag_value, dry_run, ec2):
     """
     Deregisters AMIs that are found according to tag key/value pairs.
     """
@@ -43,13 +43,13 @@ def deregister_amis_by_tag(tag_key, tag_value, dry_run, connection):
         value=tag_value,
     ))
     try:
-        amis = connection.get_all_images(filters={tag_key_string: tag_value})
-    except EC2ResponseError:
-        logger.error("An error occurred gathering images.")
-        logger.error(EC2ResponseError.message)
+        filters = [{'Name': tag_key_string, 'Values': [tag_value]}]
+        amis = ec2.images.filter(Filters=filters)
+    except ClientError:
+        logger.exception("An error occurred gathering images.")
         raise
 
-    if len(amis) == 0:
+    if len(list(amis)) == 0:
         logger.info('No images found matching criteria.')
         return
     for i in amis:
@@ -66,18 +66,6 @@ def main(raw_args):
         "'delete' as the tag value."
     )
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument(
-        '--aws-access-key-id', '-i',
-        dest='aws_access_key_id',
-        help='aws access key id',
-        default=os.environ.get("AWS_ACCESS_KEY_ID"),
-        )
-    parser.add_argument(
-        '--aws-secret-access-key', '-s',
-        dest='aws_secret_access_key',
-        help='aws secret access key',
-        default=os.environ.get("AWS_SECRET_ACCESS_KEY"),
-    )
     parser.add_argument(
         '--dry-run',
         action='store_true',
@@ -104,11 +92,12 @@ def main(raw_args):
 
     # Set logging level
     logging.getLogger(__name__).setLevel(args.log_level.upper())
-    conn = get_ec2_connection(
-        args.aws_access_key_id,
-        args.aws_secret_access_key
-    )
-    deregister_amis_by_tag("delete_or_keep", "delete", args.dry_run, conn)
+    logging.getLogger('boto3').setLevel(logging.INFO)
+    logging.getLogger('botocore').setLevel(logging.INFO)
+    region = os.environ.get('AWS_DEFAULT_REGION', 'us-east-1')
+    ec2 = boto3.resource('ec2', region_name=region)
+    deregister_amis_by_tag("delete_or_keep", "delete", args.dry_run, ec2)
+
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s')

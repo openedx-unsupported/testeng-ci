@@ -1,6 +1,7 @@
+from __future__ import absolute_import
+
 from unittest import TestCase
 
-import click
 from click.testing import CliRunner
 from mock import MagicMock, Mock, patch
 
@@ -65,7 +66,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     def test_changes(
         self, delete_branch_mock, create_pr_mock, close_pr_mock, update_file_mock,
-        create_branch_mock,  modified_list_mock, branch_exists_mock, repo_mock, authenticate_mock
+        create_branch_mock, modified_list_mock, branch_exists_mock, repo_mock, authenticate_mock
     ):
         """
         Ensure a merge with changes to db files will result in the proper updates, a new branch, and a PR.

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from unittest import TestCase
 
 from mock import MagicMock, Mock, mock_open, patch
@@ -96,7 +98,7 @@ class HelpersTestCase(TestCase):
         assert return_sha is not None
 
     def test_get_file_contents(self):
-        with patch("__builtin__.open", mock_open(read_data="data")) as mock_file:
+        with patch("io.open", mock_open(read_data="data")) as mock_file:
             contents = get_file_contents("../../edx-platform", "path/to/file")
             mock_file.assert_called_with("../../edx-platform/path/to/file", "r")
             assert contents == "data"

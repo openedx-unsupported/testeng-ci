@@ -1,8 +1,9 @@
-from unittest import TestCase
+from __future__ import absolute_import
 
 import datetime
+from unittest import TestCase
 
-from mock import patch, Mock
+import six
 
 from jenkins.codecov_response_metrics import (
     get_recent_pull_requests,
@@ -161,7 +162,7 @@ class CodeCovTest(TestCase):
                 'pull_request': 'pr #2',
                 'commit': 2222,
                 'trigger_context_posted_at': str(now - datetime.timedelta(seconds=2000)),
-                'codecov_received':  True,
+                'codecov_received': True,
                 'codecov_received_after': 1500,
                 'context': 'codecov/patch'
             },
@@ -170,9 +171,9 @@ class CodeCovTest(TestCase):
                 'pull_request': 'pr #2',
                 'commit': 2222,
                 'trigger_context_posted_at': str(now - datetime.timedelta(seconds=1000)),
-                'codecov_received':  True,
+                'codecov_received': True,
                 'codecov_received_after': 900,
                 'context': 'codecov/project'
             }
         ]
-        self.assertEqual(metrics, expected_results)
+        six.assertCountEqual(self, metrics, expected_results)

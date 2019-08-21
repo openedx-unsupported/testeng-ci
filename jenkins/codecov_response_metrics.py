@@ -12,6 +12,8 @@
 # This script should be run periodically in order to get a good understanding
 # of the state of codecov response times.
 
+from __future__ import absolute_import
+
 import os
 import sys
 import datetime
@@ -105,13 +107,11 @@ def has_context_posted(context_name, statuses):
 
 
 def get_context_update_time(context, statuses):
-    return filter(
-        lambda x: x.context == context, statuses
-    )[0].updated_at.replace(microsecond=0)
+    return [status for status in statuses if status.context == context][0].updated_at.replace(microsecond=0)
 
 
 def get_context_state(context, statuses):
-    return filter(lambda s: s.context == context, statuses)[0].state
+    return [status for status in statuses if status.context == context][0].state
 
 
 def get_context_age(statuses, codecov_context, trigger_context):
@@ -192,7 +192,7 @@ def gather_codecov_metrics(all_repos, time_frame):
                 'continuous-integration/travis-ci/push': 'codecov/project',
                 'jenkins/python': 'codecov/project'
             }
-            for trigger_context, codecov_context in context_map.iteritems():
+            for trigger_context, codecov_context in six.iteritems(context_map):
                 # skip prs that have not been posted to by their trigger status
                 if not has_context_posted(trigger_context, head_status):
                     logger.info(
@@ -216,7 +216,7 @@ def gather_codecov_metrics(all_repos, time_frame):
                     'pull_request': pr_title,
                     'commit': head_commit.sha,
                     'trigger_context_posted_at': str(trigger_posted_at),
-                    'codecov_received':  posted,
+                    'codecov_received': posted,
                     'codecov_received_after': context_age,
                     'context': codecov_context
                 }
@@ -248,6 +248,7 @@ def main():
     except OSError:
         logger.error('Unable to write data to {}'.format(outfile_name))
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

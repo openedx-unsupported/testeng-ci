@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import json
 import logging
 import os
@@ -96,6 +98,7 @@ def lambda_handler(_event, _context):
     # responses, but not that one.
     if response.status_code != 503:
         response.raise_for_status()
+
 
 if __name__ == "__main__":
     lambda_handler(None, None)

@@ -1,47 +1,63 @@
 """
 Tests for testeng-ci/aws.
 """
-import boto
-from boto.exception import EC2ResponseError
-from aws.deregister_amis import(
-    main, get_ec2_connection, deregister_amis_by_tag)
-from moto import mock_ec2
-from testfixtures import LogCapture
+from __future__ import absolute_import
+
+import os
 from unittest import TestCase
 
+import boto3
+from botocore.exceptions import ClientError
+from mock import MagicMock, patch
+from testfixtures import LogCapture
 
-@mock_ec2
+from aws.deregister_amis import deregister_amis_by_tag, main
+
+
+class MockImages(object):
+    """
+    Mock boto3 EC2 AMI collection for use in test cases.
+    """
+    def __init__(self, matching_image_exists, filter_raises_error):
+        self.matching_image_exists = matching_image_exists
+        self.filter_raises_error = filter_raises_error
+        self.image = MagicMock()
+        self.image.__str__.return_value = 'test_ami'
+
+    def filter(self, *args, **kwargs):
+        if self.filter_raises_error:
+            raise ClientError(MagicMock(), 'filter')
+        if self.matching_image_exists:
+            return [self.image]
+        return []
+
+
+class MockEC2(object):
+    """
+    Mock boto3 EC2 resource implementation for use in test cases.
+    """
+    def __init__(self, matching_image_exists=True, filter_raises_error=False):
+        self.images = MockImages(matching_image_exists, filter_raises_error)
+
+
 class DeregisterAmisTestCase(TestCase):
     """
     TestCase class for testing get_running_instances.py.
     """
 
     def setUp(self):
-        self.key_id = 'my-key-id'
-        self.secret_key = 'my-secret-key'
-        self.conn = boto.connect_ec2(self.key_id, self.secret_key)
         self.args = [
-            '-i', self.key_id,
-            '-s', self.secret_key,
             '--log-level', 'INFO',
         ]
 
-    def _get_test_image(self):
-        test_image_id = 'ami-11122278'
-        reservation = self.conn.run_instances(test_image_id)
-        self.conn.create_image(
-            name='test-ami',
-            instance_id=reservation.instances[0].id
-        )
-        return self.conn.get_all_images()[0]
-
-    def test_main(self):
+    @patch('boto3.resource', return_value=MockEC2(matching_image_exists=False))
+    def test_main(self, mock_ec2):
         """
         Test output of main
         """
-        with LogCapture() as l:
+        with LogCapture() as capture:
             main(self.args)
-            l.check(
+            capture.check(
                 ('aws.deregister_amis',
                  'INFO',
                  'Finding AMIs tagged with delete_or_keep: delete'),
@@ -51,39 +67,33 @@ class DeregisterAmisTestCase(TestCase):
                  'No images found matching criteria.')
             )
 
-    def test_main_deregister(self):
+    @patch('boto3.resource', return_value=MockEC2())
+    def test_main_deregister(self, mock_ec2):
         """
         Test that a correctly-tagged AMI is deregistered
         """
-
-        test_ami = self._get_test_image()
-        test_ami.add_tag('delete_or_keep', 'delete')
-        with LogCapture() as l:
+        with LogCapture() as capture:
             main(self.args)
 
-            l.check(
+            capture.check(
                 ('aws.deregister_amis',
                  'INFO',
                  'Finding AMIs tagged with delete_or_keep: delete'),
 
                 ('aws.deregister_amis',
                  'INFO',
-                 'Deregistering {image_id}'.format(image_id=test_ami))
+                 'Deregistering test_ami')
             )
-        self.assertEqual(len(self.conn.get_all_images()), 0)
 
-    def test_main_no_deregister(self):
+    @patch('boto3.resource', return_value=MockEC2(matching_image_exists=False))
+    def test_main_no_deregister(self, mock_ec2):
         """
         Test that an AMI without proper tags is not de-registered
         """
-        test_ami = self._get_test_image()
-        # Flag AMI as 'keep'
-        test_ami.add_tag('delete_or_keep', 'keep')
-
-        with LogCapture() as l:
+        with LogCapture() as capture:
             main(self.args)
 
-            l.check(
+            capture.check(
                 ('aws.deregister_amis',
                  'INFO',
                  'Finding AMIs tagged with delete_or_keep: delete'),
@@ -92,37 +102,30 @@ class DeregisterAmisTestCase(TestCase):
                  'INFO',
                  'No images found matching criteria.')
             )
-        self.assertEqual(len(self.conn.get_all_images()), 1)
 
     def test_main_dry_run(self):
         """
         Test that a correctly-tagged AMI is NOT deregistered
         """
-        test_ami = self._get_test_image()
-        test_ami.add_tag('delete_or_keep', 'delete')
-
         self.args.append('--dry-run')
-        main(self.args)
-        self.assertEqual(len(self.conn.get_all_images()), 1)
+        mock_ec2 = MockEC2()
+        with patch('boto3.resource', return_value=mock_ec2):
+            main(self.args)
+            mock_ec2.images.image.deregister.assert_not_called()
 
 
-class DergisterExceptionTestCase(TestCase):
+class DeregisterExceptionTestCase(TestCase):
     """
-    Test exceptions that would be thrown from the script. Note that boto is
-    not mocked in this class. It will make actual network calls.
-
+    Test exceptions that would be thrown from the script.
     """
-
-    def setUp(self):
-        self.key_id = 'FAKEBADKEY'
-        self.secret_key = 'FAKEBADSECRET'
-
-    def test_cant_get_instances(self):
-        conn = get_ec2_connection(self.key_id, self.secret_key)
-        with self.assertRaises(EC2ResponseError):
+    @patch('boto3.resource', return_value=MockEC2(filter_raises_error=True))
+    def test_cant_get_instances(self, mock_ec2):
+        region = os.environ.get('AWS_DEFAULT_REGION', 'us-east-1')
+        ec2 = boto3.resource('ec2', region_name=region)
+        with self.assertRaises(ClientError):
             deregister_amis_by_tag(
                 "foo_tag",
                 "foo_tag_value",
                 dry_run=False,
-                connection=conn
+                ec2=ec2
             )
