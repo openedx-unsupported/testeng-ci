@@ -31,7 +31,7 @@ idna==2.8
 importlib-metadata==0.19  # via pluggy, pytest
 isort==4.3.21             # via pylint
 jmespath==0.9.4
-lazy-object-proxy==1.4.1  # via astroid
+lazy-object-proxy==1.4.2  # via astroid
 mccabe==0.6.1             # via pylint
 mock==3.0.5
 more-itertools==5.0.0     # via pytest
