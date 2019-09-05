@@ -7,17 +7,17 @@ from __future__ import absolute_import
 import logging
 
 import click
+import six
 from github import GithubObject
 
 from .github_helpers import (authenticate_with_github, branch_exists,
                              close_existing_pull_requests, connect_to_repo,
                              create_branch, create_pull_request,
                              get_modified_files_list, update_list_of_files)
-import six
 
 logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.INFO)
 
 
 @click.command()
@@ -48,23 +48,26 @@ logger.setLevel(logging.INFO)
     default=None
 )
 def main(sha, repo_root, org, user_reviewers, team_reviewers):
-    logger.info("Authenticating with Github")
+    """
+    Inspect the results of running ``make upgrade`` and create a PR with the
+    changes if appropriate.
+    """
+    LOGGER.info("Authenticating with Github")
     github_instance = authenticate_with_github()
 
     # Last folder in repo_root should be the repository
     directory_list = repo_root.split("/")
     repository_name = directory_list[-1]
-    logger.info("Trying to connect to repo: {}".format(repository_name))
+    LOGGER.info(u"Trying to connect to repo: {}".format(repository_name))
     repository = connect_to_repo(github_instance, repository_name)
 
     modified_files_list = get_modified_files_list(repo_root)
-    if len(modified_files_list) > 0:
-        branch = "refs/heads/jenkins/upgrade-python-requirements-{}".format(sha[:7])
+    if modified_files_list:
+        branch = u"refs/heads/jenkins/upgrade-python-requirements-{}".format(sha[:7])
         if branch_exists(repository, branch):
-            logger.info("Branch for this sha already exists")
+            LOGGER.info("Branch for this sha already exists")
         else:
-            git_tree = repository.get_git_tree(sha)
-            logger.info("modified files: {}".format(modified_files_list))
+            LOGGER.info(u"modified files: {}".format(modified_files_list))
             user = github_instance.get_user()
             commit_sha = update_list_of_files(
                 repository,
@@ -76,24 +79,26 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
             )
             create_branch(repository, branch, commit_sha)
 
-            logger.info("Checking if there's any old pull requests to delete")
+            LOGGER.info("Checking if there's any old pull requests to delete")
             deleted_pulls = close_existing_pull_requests(repository, user.login, user.name)
 
-            pr_body = "Python requirements update"
+            pr_body = "Python requirements update.  Please review the [changelogs](" \
+                      "https://openedx.atlassian.net/wiki/spaces/TE/pages/1001521320/Python+Package+Changelogs" \
+                      ") for the upgraded packages."
             for num, deleted_pull_number in enumerate(deleted_pulls):
                 if num == 0:
                     pr_body += "\n\nDeleted obsolete pull_requests:"
                 pr_body += "\nhttps://github.com/{}/{}/pull/{}".format(org, repository_name, deleted_pull_number)
 
-            logger.info("Creating a new pull request")
+            LOGGER.info("Creating a new pull request")
 
             # If there are reviewers to be added, split them into python lists
-            if isinstance(user_reviewers, (str, six.text_type)) and len(user_reviewers) > 0:
+            if isinstance(user_reviewers, (str, six.text_type)) and user_reviewers:
                 user_reviewers = user_reviewers.split(',')
             else:
                 user_reviewers = GithubObject.NotSet
 
-            if isinstance(team_reviewers, (str, six.text_type)) and len(team_reviewers) > 0:
+            if isinstance(team_reviewers, (str, six.text_type)) and team_reviewers:
                 team_reviewers = team_reviewers.split(',')
             else:
                 team_reviewers = GithubObject.NotSet
@@ -108,8 +113,8 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
                 team_reviewers=team_reviewers
             )
     else:
-        logger.info("No changes needed")
+        LOGGER.info("No changes needed")
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter
