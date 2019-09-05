@@ -4,8 +4,8 @@
 #
 #    make upgrade
 #
-boto3==1.9.210
-botocore==1.12.210
+boto3==1.9.214
+botocore==1.12.214
 certifi==2019.6.16        # via requests
 chardet==3.0.4            # via requests
 click==7.0
