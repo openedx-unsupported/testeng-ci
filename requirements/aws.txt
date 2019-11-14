@@ -4,12 +4,12 @@
 #
 #    make upgrade
 #
-boto3==1.9.222
-botocore==1.12.222        # via boto3, s3transfer
+boto3==1.10.18
+botocore==1.13.18         # via boto3, s3transfer
 docutils==0.15.2          # via botocore
 futures==3.3.0 ; python_version == "2.7"  # via s3transfer
 jmespath==0.9.4           # via boto3, botocore
 python-dateutil==2.8.0    # via botocore
 s3transfer==0.2.1         # via boto3
-six==1.12.0               # via python-dateutil
-urllib3==1.25.3           # via botocore
+six==1.13.0               # via python-dateutil
+urllib3==1.25.7           # via botocore
