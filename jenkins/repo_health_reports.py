@@ -1,6 +1,7 @@
 """
-Script to help create a PR with python library upgrades. To be run inside
-a Jenkins job that first runs `make upgrade`
+Script to help create a PR with Repo health report. To be run inside
+a Jenkins job that first runs the health checks on a target repo
+(see pytest-repo-health and edx-repo-health repos)
 """
 from __future__ import absolute_import
 
