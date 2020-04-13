@@ -66,11 +66,11 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
 
     modified_files_list = get_modified_files_list(repo_root)
     if modified_files_list:
-        branch = u"refs/heads/jenkins/repo_health-{}".format(sha[:7])
+        branch = "refs/heads/jenkins/repo_health-{}".format(sha[:7])
         if branch_exists(repository, branch):
             LOGGER.info("Branch for this sha already exists")
         else:
-            LOGGER.info(u"modified files: {}".format(modified_files_list))
+            LOGGER.info("modified files: {}".format(modified_files_list))
             user = github_instance.get_user()
             commit_sha = update_list_of_files(
                 repository,
