@@ -30,7 +30,11 @@ LOGGER.setLevel(logging.INFO)
 @click.option(
     '--repo_root',
     help="Path to local repository to run repo health on. "
-    "Make sure the path includes the repo name",
+    required=True,
+)
+@click.option(
+    '--repo_name',
+    help="Name of Repo in Github "
     required=True,
 )
 @click.option(
@@ -48,7 +52,7 @@ LOGGER.setLevel(logging.INFO)
     help="Comma seperated list of Github teams to be tagged on pull requests",
     default=None
 )
-def main(sha, repo_root, org, user_reviewers, team_reviewers):
+def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
     """
     Inspect the results of running ``make upgrade`` and create a PR with the
     changes if appropriate.
@@ -58,9 +62,7 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
 
     # Last folder in repo_root should be the repository
     directory_list = repo_root.split("/")
-    repository_name = directory_list[-1]
-    LOGGER.info(u"Trying to connect to repo: {}".format(repository_name))
-    repository = connect_to_repo(github_instance, repository_name)
+    repository = connect_to_repo(github_instance, repo_name)
 
     modified_files_list = get_modified_files_list(repo_root)
     if modified_files_list:
