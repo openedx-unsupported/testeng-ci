@@ -29,12 +29,12 @@ LOGGER.setLevel(logging.INFO)
 )
 @click.option(
     '--repo_root',
-    help="Path to local repository to run repo health on. "
+    help="Path to local repository to run repo health on.",
     required=True,
 )
 @click.option(
     '--repo_name',
-    help="Name of Repo in Github "
+    help="Name of Repo in Github",
     required=True,
 )
 @click.option(
@@ -60,8 +60,6 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
     LOGGER.info("Authenticating with Github")
     github_instance = authenticate_with_github()
 
-    # Last folder in repo_root should be the repository
-    directory_list = repo_root.split("/")
     repository = connect_to_repo(github_instance, repo_name)
 
     modified_files_list = get_modified_files_list(repo_root)
