@@ -62,8 +62,12 @@ def connect_to_repo(github_instance, repo_name):
     """
     Get the repository object of the desired repo.
     """
-    repos_list = github_instance.get_user().get_repos()
     pp = pprint.PrettyPrinter(indent=4)
+
+
+    user = github_instance.get_user()
+    pp.print([user.name, user.bio, user.email])
+    repos_list = github_instance.get_user().get_repos()
     pp.pprint(dir(repos_list))
     logger.info("Number of repos: {num_of_repo}".format(num_of_repo=repos_list.totalCount))
     repos = ', '.join([repo.name for repo in repos_list])
