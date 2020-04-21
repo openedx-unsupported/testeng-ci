@@ -61,8 +61,10 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
     github_instance = authenticate_with_github()
     LOGGER.info("Successfully Authenticated with Github")
     repository = connect_to_repo(github_instance, repo_name)
+    LOGGER.info("Successfully connected to repo")
 
     modified_files_list = get_modified_files_list(repo_root)
+    LOGGER.info("Got list of modified files")
     if modified_files_list:
         branch = "refs/heads/jenkins/repo_health-{}".format(sha[:7])
         if branch_exists(repository, branch):
