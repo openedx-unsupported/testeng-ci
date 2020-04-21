@@ -65,9 +65,8 @@ def connect_to_repo(github_instance, repo_name):
     repos_list = github_instance.get_user().get_repos()
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(dir(repos_list))
-    logger.info(dir(repos_list))
-    logger.info("Number of repos: {num_of_repo}".format(num_of_repo=len(repos_list.__elements)))
-    repos = ', '.join([str(repo) for repo in repos_list])
+    logger.info("Number of repos: {num_of_repo}".format(num_of_repo=repos_list.totalCount))
+    repos = ', '.join([repo.name for repo in repos_list])
     logger.info("repo_list: {repo_list}".format(repo_list=repos))
     repository = None
     for repo in repos_list:
