@@ -14,6 +14,8 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+pp = pprint.PrettyPrinter(indent=4)
+
 
 def get_github_token():
     """
@@ -48,6 +50,7 @@ def authenticate_with_github():
     Authenticate with Github using a token and return the instance.
     """
     github_token = get_github_token()
+    pp.pprint(github_token)
     try:
         github_instance = Github(github_token)
     except:
@@ -62,7 +65,7 @@ def connect_to_repo(github_instance, repo_name):
     """
     Get the repository object of the desired repo.
     """
-    pp = pprint.PrettyPrinter(indent=4)
+
     pp.pprint(dir(github_instance))
     user = github_instance.get_user()
     pp.pprint([user.name, user.bio, user.email])
