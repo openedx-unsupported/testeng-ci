@@ -62,8 +62,8 @@ def connect_to_repo(github_instance, repo_name):
     Get the repository object of the desired repo.
     """
     repos_list = github_instance.get_user().get_repos()
-
-    repos = ', '.join(repos_list)
+    logger.info("Number of repos: {num_of_repo}".format(num_of_repo=len(repos_list)))
+    repos = ', '.join([str(repo) for repo in repos_list])
     logger.info("repo_list: {repo_list}".format(repo_list=repos))
     repository = None
     for repo in repos_list:
