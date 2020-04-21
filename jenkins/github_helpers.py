@@ -63,8 +63,7 @@ def connect_to_repo(github_instance, repo_name):
     Get the repository object of the desired repo.
     """
     pp = pprint.PrettyPrinter(indent=4)
-
-
+    pp.pprint(dir(github_instance))
     user = github_instance.get_user()
     pp.pprint([user.name, user.bio, user.email])
     repos_list = github_instance.get_user().get_repos()
