@@ -50,7 +50,7 @@ def authenticate_with_github():
     Authenticate with Github using a token and return the instance.
     """
     github_token = get_github_token()
-    pp.pprint(github_token)
+    print("github_token: {github_token}".format(github_token=github_token))
     try:
         github_instance = Github(github_token)
     except:
