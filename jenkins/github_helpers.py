@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import io
 import logging
 import os
-import pprint
 
 from git import Git
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
@@ -13,8 +12,6 @@ from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-pp = pprint.PrettyPrinter(indent=4)
 
 
 def get_github_token():
