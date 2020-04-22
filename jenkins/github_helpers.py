@@ -95,13 +95,6 @@ def get_modified_files_list(repo_root):
     git_instance = Git(repo_root)
     git_instance.init()
     modified_files = git_instance.ls_files("--modified")
-    pp.pprint("modified files: {}".format(modified_files))
-    others_files = git_instance.ls_files("--others")
-    pp.pprint("others files: {}".format(others_files))
-    directory_files = git_instance.ls_files("--directory")
-    pp.pprint("directory files: {}".format(directory_files))
-    unmerged_files = git_instance.ls_files("--unmerged")
-    pp.pprint("unmerged files: {}".format(unmerged_files))
 
     if len(modified_files) > 0:
         return modified_files.split("\n")
