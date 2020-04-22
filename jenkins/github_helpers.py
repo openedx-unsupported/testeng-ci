@@ -102,6 +102,8 @@ def get_modified_files_list(repo_root):
     pp.pprint("directory files: {}".format(directory_files))
     unmerged_files = git_instance.ls_files("--unmerged")
     pp.pprint("unmerged files: {}".format(unmerged_files))
+    status = git_instance.
+
     if len(modified_files) > 0:
         return modified_files.split("\n")
     else:
@@ -156,6 +158,7 @@ def create_pull_request(repository, title, body, base, head, user_reviewers=Gith
             head=head
         )
         pull_request.create_review_request(reviewers=user_reviewers, team_reviewers=team_reviewers)
+        return pull_request
     except:
         raise Exception(
             "Could not create pull request"
