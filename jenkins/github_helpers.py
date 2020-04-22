@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import io
 import logging
 import os
-import pprint
 
 from git import Git
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
@@ -13,8 +12,6 @@ from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-pp = pprint.PrettyPrinter(indent=4)
 
 
 def get_github_token():
@@ -50,7 +47,6 @@ def authenticate_with_github():
     Authenticate with Github using a token and return the instance.
     """
     github_token = get_github_token()
-    print("github_token: {github_token}".format(github_token=github_token))
     try:
         github_instance = Github(github_token)
     except:
@@ -65,16 +61,7 @@ def connect_to_repo(github_instance, repo_name):
     """
     Get the repository object of the desired repo.
     """
-
-    pp.pprint(dir(github_instance))
-    user = github_instance.get_user()
-    pp.pprint([user.name, user.bio, user.email])
     repos_list = github_instance.get_user().get_repos()
-    pp.pprint(dir(repos_list))
-    logger.info("Number of repos: {num_of_repo}".format(num_of_repo=repos_list.totalCount))
-    repos = ', '.join([repo.name for repo in repos_list])
-    logger.info("repo_list: {repo_list}".format(repo_list=repos))
-    repository = None
     for repo in repos_list:
         if repo.name == repo_name:
             return repo
@@ -84,7 +71,6 @@ def connect_to_repo(github_instance, repo_name):
         "Please make sure you are using the correct "
         "credentials and try again.".format(repo_name)
     )
-    return repo
 
 
 def branch_exists(repository, branch_name):
