@@ -114,7 +114,7 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
                 team_reviewers=team_reviewers
             )
             LOGGER.info("Merging pull request")
-            pull_request.merge(commit_message="merging new repo data")
+            pull_request.merge(commit_message="merging new repo data", merge_method="squash")
     else:
         LOGGER.info("No changes needed")
 
