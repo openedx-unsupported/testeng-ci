@@ -62,7 +62,6 @@ def connect_to_repo(github_instance, repo_name):
     Get the repository object of the desired repo.
     """
     repos_list = github_instance.get_user().get_repos()
-    repository = None
     for repo in repos_list:
         if repo.name == repo_name:
             return repo
@@ -72,7 +71,6 @@ def connect_to_repo(github_instance, repo_name):
         "Please make sure you are using the correct "
         "credentials and try again.".format(repo_name)
     )
-    return repo
 
 
 def branch_exists(repository, branch_name):
@@ -94,6 +92,7 @@ def get_modified_files_list(repo_root):
     git_instance = Git(repo_root)
     git_instance.init()
     modified_files = git_instance.ls_files("--modified")
+
     if len(modified_files) > 0:
         return modified_files.split("\n")
     else:
@@ -148,6 +147,7 @@ def create_pull_request(repository, title, body, base, head, user_reviewers=Gith
             head=head
         )
         pull_request.create_review_request(reviewers=user_reviewers, team_reviewers=team_reviewers)
+        return pull_request
     except:
         raise Exception(
             "Could not create pull request"
