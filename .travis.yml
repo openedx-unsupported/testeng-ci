@@ -4,11 +4,9 @@ language: python
 branches:
     only:
       - master
-matrix:
-  include:
-    - python: "2.7"
-    - python: "3.5"
-    - python: "3.6"
+python:
+  - 3.5
+  - 3.8
 before_install:
   - export BOTO_CONFIG=/dev/null
 install:
