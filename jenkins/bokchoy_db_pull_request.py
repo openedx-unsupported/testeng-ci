@@ -99,7 +99,7 @@ def main(sha, repo_root):
                 pr_body,
                 'master',
                 branch,
-                team_reviewers=['testeng']
+                team_reviewers=['arch-bom']
             )
     else:
         logger.info("No changes needed")
