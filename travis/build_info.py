@@ -47,7 +47,7 @@ def get_builds(org, repo, is_finished=False):
     """
     Returns list of active builds for a given repo slug
     """
-    logger.debug('getting builds for repo: ' + repo)
+    logger.debug(u'getting builds for repo: %s', repo)
     repo_slug = '{org}/{repo}'.format(org=org, repo=repo)
     req = requests.get(
         BASE_URL + 'repos/{repo_slug}/builds'.format(repo_slug=repo_slug)
@@ -112,7 +112,7 @@ def get_average_duration_org(org, num=5):
     avg_duration_org = []
     for repo in repos:
         builds = get_last_n_successful_builds(org, repo, num)
-        logger.debug('getting average duration for: ' + repo)
+        logger.debug(u'getting average duration for: %s', repo)
         avg = get_average_build_duration(builds)
         avg_duration_org.append({"repo": repo, "average duration": avg})
     avg_duration_org = sorted(
@@ -213,15 +213,12 @@ def get_job_counts(org):
             total_started_job_count += started
             repo_jobs += total
             repo_started_jobs += started
-        logger.debug("----> " + repo)
-        debug_msg = u"total jobs: {total}, started jobs: {started}".format(
-            total=repo_jobs,
-            started=repo_started_jobs
-        )
-        logger.debug(debug_msg)
+        logger.debug(u"----> %s", repo)
+        debug_msg = u"total jobs: %d, started jobs: %d"
+        logger.debug(debug_msg, repo_jobs, repo_started_jobs)
     logger.debug('--------')
-    logger.info('overall_jobs_total=' + str(total_job_count))
-    logger.info('overall_jobs_started=' + str(total_started_job_count))
+    logger.info('overall_jobs_total=%d', total_job_count)
+    logger.info('overall_jobs_started=%d', total_started_job_count)
 
 
 def get_build_counts(org):
@@ -235,24 +232,21 @@ def get_build_counts(org):
 
     for repo in repos:
         repo_builds = get_builds(org, repo)
-        logger.debug("--->" + repo)
+        logger.debug(u"--->%s", repo)
 
         repo_build_total, num_started = repo_active_build_count(repo_builds)
 
-        debug_string = u"total: {builds}, started: {builds_started}".format(
-            builds=repo_build_total,
-            builds_started=num_started,
-        )
-        logger.debug(debug_string)
+        debug_string = u"total: %d, started: %d"
+        logger.debug(debug_string, repo_build_total, num_started)
 
         org_build_count += repo_build_total
         org_build_started_count += num_started
 
     logger.debug('--------')
-    logger.info("overall_total=" + str(org_build_count))
-    logger.info("overall_started=" + str(org_build_started_count))
+    logger.info(u"overall_total=%d", org_build_count)
+    logger.info("overall_started=%d", org_build_started_count)
     logger.info(
-        "overall_queued=" + str(org_build_count - org_build_started_count)
+        "overall_queued=%d", org_build_count - org_build_started_count
     )
 
 

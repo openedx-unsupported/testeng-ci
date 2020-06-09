@@ -5,7 +5,7 @@ import logging
 import os
 
 import botocore.session
-from botocore.vendored.requests import get, post
+from requests import get, post
 
 CREDENTIALS_BUCKET = "edx-tools-credentials"
 CREDENTIALS_FILE = "jenkins_safe_restart_credentials.json"

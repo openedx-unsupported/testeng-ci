@@ -6,7 +6,7 @@ import os
 import sys
 
 import boto3
-from botocore.vendored.requests import post
+from requests import post
 
 logger = logging.getLogger()
 

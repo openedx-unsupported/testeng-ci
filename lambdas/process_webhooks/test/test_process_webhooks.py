@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import os
 from unittest import TestCase
 
-from botocore.vendored.requests import Response
+from requests import Response
 from mock import patch, Mock
 
 from ..process_webhooks import _send_message, _add_gh_header
