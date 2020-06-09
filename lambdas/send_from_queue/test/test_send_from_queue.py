@@ -4,7 +4,7 @@ import json
 import os
 from unittest import TestCase
 
-from botocore.vendored.requests import Response
+from requests import Response
 from mock import patch, Mock
 
 from ..send_from_queue import _get_target_queue, _get_api_url
