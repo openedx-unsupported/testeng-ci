@@ -4,67 +4,75 @@
 #
 #    make upgrade
 #
-astroid==1.6.6
-atomicwrites==1.3.0
-attrs==19.3.0
-backports.functools-lru-cache==1.6.1
-boto3==1.10.18
-botocore==1.13.18
-certifi==2019.9.11
-chardet==3.0.4
-click-log==0.3.2
-click==7.0
-configparser==4.0.2
-contextlib2==0.6.0.post1
-coverage==4.5.4
-ddt==1.2.1
-deprecated==1.2.7
-docutils==0.15.2
-edx-lint==1.4.1
-enum34==1.1.6
-filelock==3.0.12
-funcsigs==1.0.2
-futures==3.3.0 ; python_version == "2.7"
-gitdb2==2.0.6
-gitpython==2.1.14
-httpretty==0.9.7
-idna==2.8
-importlib-metadata==0.23
-isort==4.3.21
-jmespath==0.9.4
-lazy-object-proxy==1.4.3
-mccabe==0.6.1
-mock==3.0.5
-more-itertools==5.0.0
-packaging==19.2
-pathlib2==2.3.5
-pip-tools==4.2.0
-pluggy==0.13.0
-py==1.8.0
-pycodestyle==2.5.0
-pygithub==1.44.1
-pyjwt==1.7.1
-pylint-celery==0.3
-pylint-django==0.11.1
-pylint-plugin-utils==0.6
-pylint==1.9.5
-pyparsing==2.4.5
-pytest-cov==2.8.1
-pytest==4.6.6
-python-dateutil==2.8.0
-requests==2.22.0
-s3transfer==0.2.1
-scandir==1.10.0
-singledispatch==3.4.0.3
-six==1.13.0
-smmap2==2.0.5
-testfixtures==6.10.1
-toml==0.10.0
-tox-battery==0.5.1
-tox-travis==0.12
-tox==3.14.1
-urllib3==1.25.7
-virtualenv==16.7.7
-wcwidth==0.1.7
-wrapt==1.11.2
-zipp==0.6.0
+appdirs==1.4.4            # via -r requirements/ci.txt, virtualenv
+astroid==1.6.6            # via -r requirements/testing.txt, pylint, pylint-celery
+atomicwrites==1.4.0       # via -r requirements/testing.txt, pytest
+attrs==19.3.0             # via -r requirements/testing.txt, pytest
+backports.functools-lru-cache==1.6.1  # via -r requirements/testing.txt, astroid, isort, pylint, wcwidth
+boto3==1.14.1             # via -r requirements/testing.txt
+botocore==1.17.1          # via -r requirements/testing.txt, boto3, s3transfer
+certifi==2020.4.5.2       # via -r requirements/testing.txt, requests
+chardet==3.0.4            # via -r requirements/testing.txt, requests
+click-log==0.3.2          # via -r requirements/testing.txt, edx-lint
+click==7.1.2              # via -r requirements/pip-tools.txt, -r requirements/testing.txt, click-log, edx-lint, pip-tools
+configparser==4.0.2       # via -r requirements/ci.txt, -r requirements/testing.txt, importlib-metadata, pylint
+contextlib2==0.6.0.post1  # via -r requirements/ci.txt, -r requirements/testing.txt, importlib-metadata, importlib-resources, virtualenv, zipp
+coverage==5.1             # via -r requirements/testing.txt, pytest-cov
+ddt==1.4.1                # via -r requirements/testing.txt
+deprecated==1.2.10        # via -r requirements/testing.txt, pygithub
+distlib==0.3.0            # via -r requirements/ci.txt, virtualenv
+docutils==0.15.2          # via -r requirements/testing.txt, botocore
+edx-lint==1.4.1           # via -r requirements/testing.txt
+enum34==1.1.10            # via -r requirements/testing.txt, astroid, ddt
+filelock==3.0.12          # via -r requirements/ci.txt, tox, virtualenv
+funcsigs==1.0.2           # via -r requirements/testing.txt, mock, pytest
+futures==3.3.0 ; python_version == "2.7"  # via -c requirements/constraints.txt, -r requirements/testing.txt, isort, s3transfer
+gitdb2==2.0.6             # via -r requirements/testing.txt, gitpython
+gitpython==2.1.15         # via -r requirements/testing.txt
+httpretty==0.9.7          # via -r requirements/testing.txt
+idna==2.9                 # via -r requirements/testing.txt, requests
+importlib-metadata==1.6.1  # via -r requirements/ci.txt, -r requirements/testing.txt, importlib-resources, pluggy, pytest, tox, virtualenv
+importlib-resources==1.5.0  # via -r requirements/ci.txt, virtualenv
+isort==4.3.21             # via -r requirements/testing.txt, pylint
+jmespath==0.10.0          # via -r requirements/testing.txt, boto3, botocore
+lazy-object-proxy==1.5.0  # via -r requirements/testing.txt, astroid
+mccabe==0.6.1             # via -r requirements/testing.txt, pylint
+mock==3.0.5               # via -r requirements/testing.txt
+more-itertools==5.0.0     # via -c requirements/constraints.txt, -r requirements/testing.txt, pytest
+packaging==20.4           # via -r requirements/ci.txt, -r requirements/testing.txt, pytest, tox
+pathlib2==2.3.5           # via -r requirements/ci.txt, -r requirements/testing.txt, importlib-metadata, importlib-resources, pytest, virtualenv
+pip-tools==5.2.1          # via -r requirements/pip-tools.txt
+pluggy==0.13.1            # via -r requirements/ci.txt, -r requirements/testing.txt, pytest, tox
+py==1.8.1                 # via -r requirements/ci.txt, -r requirements/testing.txt, pytest, tox
+pycodestyle==2.6.0        # via -r requirements/testing.txt
+pygithub==1.45            # via -r requirements/testing.txt
+pyjwt==1.7.1              # via -r requirements/testing.txt, pygithub
+pylint-celery==0.3        # via -r requirements/testing.txt, edx-lint
+pylint-django==0.11.1     # via -r requirements/testing.txt, edx-lint
+pylint-plugin-utils==0.6  # via -r requirements/testing.txt, pylint-celery, pylint-django
+pylint==1.9.5             # via -r requirements/testing.txt, edx-lint, pylint-celery, pylint-django, pylint-plugin-utils
+pyparsing==2.4.7          # via -r requirements/ci.txt, -r requirements/testing.txt, packaging
+pytest-cov==2.9.0         # via -r requirements/testing.txt
+pytest==4.6.11            # via -r requirements/testing.txt, pytest-cov
+python-dateutil==2.8.1    # via -r requirements/testing.txt, botocore
+requests==2.23.0          # via -r requirements/testing.txt, pygithub
+s3transfer==0.3.3         # via -r requirements/testing.txt, boto3
+scandir==1.10.0           # via -r requirements/ci.txt, -r requirements/testing.txt, pathlib2
+singledispatch==3.4.0.3   # via -r requirements/ci.txt, -r requirements/testing.txt, astroid, importlib-resources, pylint
+six==1.15.0               # via -r requirements/ci.txt, -r requirements/pip-tools.txt, -r requirements/testing.txt, astroid, edx-lint, httpretty, mock, more-itertools, packaging, pathlib2, pip-tools, pygithub, pylint, pytest, python-dateutil, singledispatch, tox, virtualenv
+smmap2==3.0.1             # via -r requirements/testing.txt, gitdb2
+smmap==3.0.4              # via -r requirements/testing.txt, smmap2
+testfixtures==6.14.1      # via -r requirements/testing.txt
+toml==0.10.1              # via -r requirements/ci.txt, tox
+tox-battery==0.6.1        # via -r requirements/ci.txt
+tox-travis==0.12          # via -r requirements/ci.txt
+tox==3.15.2               # via -r requirements/ci.txt, tox-battery, tox-travis
+typing==3.7.4.1           # via -r requirements/ci.txt, importlib-resources
+urllib3==1.25.9           # via -r requirements/testing.txt, botocore, requests
+virtualenv==20.0.21       # via -r requirements/ci.txt, tox
+wcwidth==0.2.4            # via -r requirements/testing.txt, pytest
+wrapt==1.12.1             # via -r requirements/testing.txt, astroid, deprecated
+zipp==1.2.0               # via -r requirements/ci.txt, -r requirements/testing.txt, importlib-metadata, importlib-resources
+
+# The following packages are considered to be unsafe in a requirements file:
+# pip
