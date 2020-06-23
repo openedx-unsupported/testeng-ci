@@ -146,7 +146,15 @@ def create_pull_request(repository, title, body, base, head, user_reviewers=Gith
             base=base,
             head=head
         )
-        pull_request.create_review_request(reviewers=user_reviewers, team_reviewers=team_reviewers)
+        any_reviewers = (
+            user_reviewers is not GithubObject.NotSet or
+            team_reviewers is not GithubObject.NotSet
+        )
+        if any_reviewers:
+            pull_request.create_review_request(
+                reviewers=user_reviewers,
+                team_reviewers=team_reviewers,
+            )
         return pull_request
     except:
         raise Exception(
