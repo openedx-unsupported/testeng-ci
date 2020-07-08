@@ -11,10 +11,7 @@ import click
 import six
 from github import GithubObject
 
-from .github_helpers import (authenticate_with_github, branch_exists,
-                             close_existing_pull_requests, connect_to_repo,
-                             create_branch, create_pull_request,
-                             get_modified_files_list, update_list_of_files)
+from .github_helpers import GitHubHelper
 
 logging.basicConfig()
 LOGGER = logging.getLogger()
@@ -57,22 +54,24 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
     Inspect the results of running ``make upgrade`` and create a PR with the
     changes if appropriate.
     """
+    github_helper = GitHubHelper()
+
     LOGGER.info("Authenticating with Github")
-    github_instance = authenticate_with_github()
+    github_instance = github_helper.get_github_instance()
     LOGGER.info("Successfully Authenticated with Github")
     LOGGER.info("Connecting to repo: {repo_name}".format(repo_name=repo_name))
-    repository = connect_to_repo(github_instance, repo_name)
+    repository = github_helper.connect_to_repo(github_instance, repo_name)
     LOGGER.info("Successfully connected to repo")
 
-    modified_files_list = get_modified_files_list(repo_root)
+    modified_files_list = github_helper.get_modified_files_list(repo_root)
     LOGGER.info("modified files: {}".format(modified_files_list))
     if modified_files_list:
         branch = "refs/heads/jenkins/repo_health-{}".format(sha[:7])
-        if branch_exists(repository, branch):
+        if github_helper.branch_exists(repository, branch):
             LOGGER.info("Branch for this sha already exists")
         else:
             user = github_instance.get_user()
-            commit_sha = update_list_of_files(
+            commit_sha = github_helper.update_list_of_files(
                 repository,
                 repo_root,
                 modified_files_list,
@@ -80,16 +79,16 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
                 sha,
                 user.name
             )
-            create_branch(repository, branch, commit_sha)
+            github_helper.create_branch(repository, branch, commit_sha)
 
             LOGGER.info("Checking if there's any old pull requests to delete")
-            deleted_pulls = close_existing_pull_requests(repository, user.login, user.name)
+            deleted_pulls = github_helper.close_existing_pull_requests(repository, user.login, user.name)
 
             pr_body = "Review Repo Health Report."
             for num, deleted_pull_number in enumerate(deleted_pulls):
                 if num == 0:
                     pr_body += "\n\nDeleted obsolete pull_requests:"
-                pr_body += "\nhttps://github.com/{}/{}/pull/{}".format(org, repository_name, deleted_pull_number)
+                pr_body += "\nhttps://github.com/{}/{}/pull/{}".format(org, repo_name, deleted_pull_number)
 
             LOGGER.info("Creating a new pull request")
 
@@ -104,7 +103,7 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
             else:
                 team_reviewers = GithubObject.NotSet
 
-            pull_request = create_pull_request(
+            pull_request = github_helper.create_pull_request(
                 repository,
                 'Repo Health Report',
                 pr_body,

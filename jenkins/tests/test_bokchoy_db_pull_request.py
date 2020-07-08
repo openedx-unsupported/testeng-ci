@@ -16,26 +16,25 @@ class BokchoyPullRequestTestCase(TestCase):
     # Create the Cli runner to run the main function with click arguments
     runner = CliRunner()
 
-    @patch('jenkins.bokchoy_db_pull_request.authenticate_with_github',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_github_instance',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.connect_to_repo',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.connect_to_repo',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.get_modified_files_list',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_modified_files_list',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.branch_exists',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.branch_exists',
            return_value=False)
-    @patch('jenkins.bokchoy_db_pull_request.create_branch',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_branch',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.update_list_of_files',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.update_list_of_files',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.create_pull_request',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request',
            return_value=None)
-    @patch('jenkins.github_helpers.delete_branch',
+    @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_no_changes(
-        self, delete_branch_mock, create_pr_mock, create_branch_mock, update_files_mock,
-        branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock
-    ):
+            self, delete_branch_mock, create_pr_mock, create_branch_mock, update_files_mock,
+            branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
@@ -47,32 +46,32 @@ class BokchoyPullRequestTestCase(TestCase):
         assert not update_files_mock.called
         assert not create_pr_mock.called
 
-    @patch('jenkins.bokchoy_db_pull_request.authenticate_with_github',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_github_instance',
            return_value=Mock())
-    @patch('jenkins.bokchoy_db_pull_request.connect_to_repo',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.connect_to_repo',
            return_value=Mock())
-    @patch('jenkins.bokchoy_db_pull_request.get_modified_files_list',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_modified_files_list',
            return_value=[
                "common/test/db_cache/bok_choy_data_default.json",
                "common/test/db_cache/bok_choy_schema_default.sql"
            ])
-    @patch('jenkins.bokchoy_db_pull_request.branch_exists',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.branch_exists',
            return_value=False)
-    @patch('jenkins.bokchoy_db_pull_request.create_branch',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_branch',
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request._read_local_db_file_contents',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.update_list_of_files',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.update_list_of_files',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.close_existing_pull_requests',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.close_existing_pull_requests',
            return_value=[])
-    @patch('jenkins.bokchoy_db_pull_request.create_pull_request',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request',
            return_value=None)
-    @patch('jenkins.github_helpers.delete_branch',
+    @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_changes(
-        self, delete_branch_mock, create_pr_mock, close_pr_mock, update_file_mock, read_local_db_mock,
-        create_branch_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock
+            self, delete_branch_mock, create_pr_mock, close_pr_mock, update_file_mock, read_local_db_mock,
+            create_branch_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock
     ):
         """
         Ensure a merge with changes to db files will result in the proper updates, a new branch, and a PR.
@@ -88,24 +87,24 @@ class BokchoyPullRequestTestCase(TestCase):
         assert create_pr_mock.called
         assert not delete_branch_mock.called
 
-    @patch('jenkins.bokchoy_db_pull_request.authenticate_with_github',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_github_instance',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.connect_to_repo',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.connect_to_repo',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.branch_exists',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.branch_exists',
            return_value=True)
-    @patch('jenkins.bokchoy_db_pull_request.get_modified_files_list',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_modified_files_list',
            return_value="common/test/db_cache/bok_choy_data_default.json\n"
-           "common/test/db_cache/bok_choy_schema_default.sql")
-    @patch('jenkins.bokchoy_db_pull_request.create_branch',
+                        "common/test/db_cache/bok_choy_schema_default.sql")
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_branch',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.create_pull_request',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request',
            return_value=None)
-    @patch('jenkins.github_helpers.delete_branch',
+    @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_branch_exists(
-        self, delete_branch_mock, create_pr_mock, create_branch_mock, modified_list_mock,
-        get_branch_mock, repo_mock, authenticate_mock
+            self, delete_branch_mock, create_pr_mock, create_branch_mock, modified_list_mock,
+            get_branch_mock, repo_mock, authenticate_mock
     ):
         """
         If the branch for a given fingerprint already exists, make sure the script
