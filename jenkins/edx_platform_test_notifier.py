@@ -7,7 +7,7 @@ import click
 import six
 from github import Github
 
-from .github_helpers import connect_to_repo, get_github_token
+from .github_helpers import GitHubHelper
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -140,8 +140,9 @@ def main(repo, pr_number):
     Checks a pull request in Github to see if tests are finished. If they
     are, it comments on the PR to notify the user. If not, the script exits.
     """
-    bot = EdxStatusBot(token=get_github_token())
-    repo = connect_to_repo(bot.github, repo)
+    github_helper = GitHubHelper()
+    bot = EdxStatusBot(token=github_helper.get_github_token())
+    repo = github_helper.connect_to_repo(bot.github, repo)
 
     try:
         pr = repo.get_pull(int(pr_number))

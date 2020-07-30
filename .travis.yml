@@ -12,6 +12,7 @@ matrix:
 before_install:
   - export BOTO_CONFIG=/dev/null
 install:
+  - pip install pip==19.0.3
   - pip install -r requirements/ci.txt
 script:
   - tox
