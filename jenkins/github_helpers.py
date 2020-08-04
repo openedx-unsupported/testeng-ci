@@ -155,9 +155,10 @@ class GitHubHelper:
                 self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
 
             return pull_request
-        except:
+        except Exception as e:
             raise Exception(
-                "Either pull request was not created or some reviewers were not tagged on PR"
+                "Either pull request was not created or some reviewers were not tagged on PR\n"
+                "Original Exception : {}".format(e)
             )
 
     @staticmethod
