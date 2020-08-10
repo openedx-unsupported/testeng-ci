@@ -152,11 +152,29 @@ class GitHubHelper:
                     reviewers=user_reviewers,
                     team_reviewers=team_reviewers,
                 )
+                self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
+
             return pull_request
-        except:
+        except Exception as e:
             raise Exception(
-                "Could not create pull request"
+                "Either pull request was not created or some reviewers were not tagged on PR\n"
+                "Original Exception : {}".format(e)
             )
+
+    @staticmethod
+    def verify_reviewers_tagged(pull_request, requested_users, requested_teams):
+        """
+        Assert if the reviewers we requested were tagged on the PR for review
+        """
+        tagged_for_review = pull_request.get_review_requests()
+
+        tagged_users = [user.login for user in tagged_for_review[0]]
+        if requested_users is not GithubObject.NotSet and sorted(requested_users) != sorted(tagged_users):
+            raise Exception('Some of the requested reviewers were not tagged on PR for review')
+
+        tagged_teams = [team.name for team in tagged_for_review[1]]
+        if requested_teams is not GithubObject.NotSet and sorted(requested_teams) != sorted(tagged_teams):
+            raise Exception('Some of the requested teams were not tagged on PR for review')
 
     def delete_branch(self, repository, branch_name):
         """
