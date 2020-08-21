@@ -161,11 +161,12 @@ class GitHubHelper:
                 "Original Exception : {}".format(e)
             )
 
-    @staticmethod
-    def verify_reviewers_tagged(pull_request, requested_users, requested_teams):
+    def verify_reviewers_tagged(self, pull_request, requested_users, requested_teams):
         """
         Assert if the reviewers we requested were tagged on the PR for review
         """
+        if self.is_cleanup_pr(pull_request.head.ref):
+            return
         tagged_for_review = pull_request.get_review_requests()
 
         tagged_users = [user.login for user in tagged_for_review[0]]
