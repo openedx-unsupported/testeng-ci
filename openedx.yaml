@@ -3,10 +3,6 @@
 
 nick: teci
 openedx-release: {ref: master}
-owner: jmbowman
-supporting_teams:
-    - edx/testeng
-
 oeps:
     oep-2: true
     oep-7: false
