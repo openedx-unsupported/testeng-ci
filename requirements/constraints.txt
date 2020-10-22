@@ -14,9 +14,3 @@ futures ; python_version == "2.7"
 # A dependency of pytest.  Pytest doesn't constrain it and 6.0.0 onward
 # only works with python 3
 more-itertools<6.0.0
-
-# Newer versions dropped support for Python 2.7
-edx-lint<1.5.0
-
-# Newer versions dropped support for Python 2.7
-tox-battery<0.6.0
