@@ -6,10 +6,10 @@
 #
 appdirs==1.4.4            # via -r requirements/ci.txt, virtualenv
 astroid==2.3.3            # via -r requirements/testing.txt, pylint, pylint-celery
-attrs==20.2.0             # via -r requirements/testing.txt, pytest
-boto3==1.16.9             # via -r requirements/testing.txt
-botocore==1.19.9          # via -r requirements/testing.txt, boto3, s3transfer
-certifi==2020.6.20        # via -r requirements/testing.txt, requests
+attrs==20.3.0             # via -r requirements/testing.txt, pytest
+boto3==1.16.14            # via -r requirements/testing.txt
+botocore==1.19.14         # via -r requirements/testing.txt, boto3, s3transfer
+certifi==2020.11.8        # via -r requirements/testing.txt, requests
 chardet==3.0.4            # via -r requirements/testing.txt, requests
 click-log==0.3.2          # via -r requirements/testing.txt, edx-lint
 click==7.1.2              # via -r requirements/pip-tools.txt, -r requirements/testing.txt, click-log, edx-lint, pip-tools
