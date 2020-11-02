@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring,missing-class-docstring
 from unittest import TestCase
 
 from mock import MagicMock, Mock, mock_open, patch

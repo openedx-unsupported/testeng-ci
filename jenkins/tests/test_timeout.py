@@ -1,8 +1,8 @@
-from __future__ import absolute_import
+# pylint: disable=missing-module-docstring
+from unittest import TestCase
 
 from mock import patch, call
 from requests.exceptions import HTTPError
-from unittest import TestCase
 
 from jenkins.tests.helpers import sample_data, mock_utcnow, Pr
 from jenkins.timeout import BuildTimeout, timeout_main
@@ -15,7 +15,7 @@ class TimeoutTestCase(TestCase):
     TestCase class for testing timeout.py.
     """
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=super-method-not-called
         self.job_url = 'http://localhost:8080/fakejenkins'
         self.user = 'ausername'
         self.api_key = 'apikey'
@@ -47,7 +47,7 @@ class TimeoutTestCase(TestCase):
     def test_description(self):
         expected = ("Build #1 automatically aborted because it has "
                     "exceeded the timeout of 3 minutes.")
-        returned = self.timer._aborted_description(3, 1)
+        returned = self.timer._aborted_description(3, 1)  # pylint: disable=protected-access
         self.assertEqual(expected, returned)
 
     @mock_utcnow

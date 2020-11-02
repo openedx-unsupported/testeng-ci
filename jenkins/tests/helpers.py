@@ -1,10 +1,8 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring,missing-function-docstring
 import datetime
 import functools
 from mock import Mock
 from requests import Response
-from six.moves import range
 
 
 def mock_response(status_code, data=None):
@@ -32,7 +30,7 @@ def mock_utcnow(func):
     return wrapper
 
 
-class Pr(object):
+class Pr:
 
     """
     Sample PR dict to use as test data
@@ -79,7 +77,7 @@ def sample_data(running_builds, not_running_builds):
         build_time = first_time - (minutes_ago * 60000)
         return build_time
 
-    for i in range(0, len(running_builds)):
+    for i, _ in enumerate(running_builds):
         parameters = [
             {'name': 'ghprbPullId', 'value': running_builds[i].get('prnum')},
             {'name': 'ghprbActualCommitAuthorEmail', 'value': running_builds[i].get('author')}
@@ -97,7 +95,7 @@ def sample_data(running_builds, not_running_builds):
             'timestamp': mktimestamp(i)
         })
 
-    for i in range(0, len(not_running_builds)):
+    for i, _ in enumerate(not_running_builds):
         num = i + len(running_builds)
         parameters = [
             {'name': 'ghprbPullId', 'value': not_running_builds[i].get('prnum')},

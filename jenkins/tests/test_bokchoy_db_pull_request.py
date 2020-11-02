@@ -1,10 +1,8 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring,unused-variable
 from unittest import TestCase
 
-import click
 from click.testing import CliRunner
-from mock import MagicMock, Mock, patch
+from mock import Mock, patch
 
 from jenkins.bokchoy_db_pull_request import main
 

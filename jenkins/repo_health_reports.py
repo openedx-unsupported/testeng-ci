@@ -3,12 +3,9 @@ Script to help create a PR with Repo health report. To be run inside
 a Jenkins job that first runs the health checks on a target repo
 (see pytest-repo-health and edx-repo-health repos)
 """
-from __future__ import absolute_import
-
 import logging
 
 import click
-import six
 from github import GithubObject
 
 from .github_helpers import GitHubHelper
@@ -93,12 +90,12 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
             LOGGER.info("Creating a new pull request")
 
             # If there are reviewers to be added, split them into python lists
-            if isinstance(user_reviewers, (str, six.text_type)) and user_reviewers:
+            if isinstance(user_reviewers, (str, str)) and user_reviewers:
                 user_reviewers = user_reviewers.split(',')
             else:
                 user_reviewers = GithubObject.NotSet
 
-            if isinstance(team_reviewers, (str, six.text_type)) and team_reviewers:
+            if isinstance(team_reviewers, (str, str)) and team_reviewers:
                 team_reviewers = team_reviewers.split(',')
             else:
                 team_reviewers = GithubObject.NotSet

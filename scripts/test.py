@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring
 import os
 from create_incr_tickets import Batch, crawl
 

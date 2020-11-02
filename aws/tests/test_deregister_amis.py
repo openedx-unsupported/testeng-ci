@@ -1,8 +1,6 @@
 """
 Tests for testeng-ci/aws.
 """
-from __future__ import absolute_import
-
 import os
 from unittest import TestCase
 
@@ -14,7 +12,7 @@ from testfixtures import LogCapture
 from aws.deregister_amis import deregister_amis_by_tag, main
 
 
-class MockImages(object):
+class MockImages:
     """
     Mock boto3 EC2 AMI collection for use in test cases.
     """
@@ -24,7 +22,7 @@ class MockImages(object):
         self.image = MagicMock()
         self.image.__str__.return_value = 'test_ami'
 
-    def filter(self, *args, **kwargs):
+    def filter(self, *args, **kwargs):  # pylint: disable=missing-function-docstring
         if self.filter_raises_error:
             raise ClientError(MagicMock(), 'filter')
         if self.matching_image_exists:
@@ -32,7 +30,7 @@ class MockImages(object):
         return []
 
 
-class MockEC2(object):
+class MockEC2:
     """
     Mock boto3 EC2 resource implementation for use in test cases.
     """
@@ -45,7 +43,7 @@ class DeregisterAmisTestCase(TestCase):
     TestCase class for testing get_running_instances.py.
     """
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=super-method-not-called
         self.args = [
             '--log-level', 'INFO',
         ]

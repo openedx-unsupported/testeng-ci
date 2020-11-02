@@ -1,8 +1,6 @@
 """
 A class to interact with a jenkins job API
 """
-from __future__ import absolute_import
-
 import logging
 import requests
 

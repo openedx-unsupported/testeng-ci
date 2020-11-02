@@ -1,9 +1,6 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring,missing-class-docstring
 import datetime
 from unittest import TestCase
-
-import six
 
 from jenkins.codecov_response_metrics import (
     get_recent_pull_requests,
@@ -12,7 +9,7 @@ from jenkins.codecov_response_metrics import (
 )
 
 
-class MockRepo(object):
+class MockRepo:
 
     def __init__(self, full_name, prs):
         self.full_name = full_name
@@ -22,9 +19,9 @@ class MockRepo(object):
         return self.prs
 
 
-class MockPR(object):
+class MockPR:
 
-    def __init__(self, title, commits=[], age=10000):
+    def __init__(self, title, commits=None, age=10000):
         self.title = title
         self.commits = commits
         self.updated_at = datetime.datetime.utcnow() - datetime.timedelta(seconds=age)
@@ -37,7 +34,7 @@ class MockPR(object):
         return self.commits[::-1]
 
 
-class MockCommit(object):
+class MockCommit:
 
     def __init__(self, combined_status, sha=123):
         self.combined_status = combined_status
@@ -47,13 +44,13 @@ class MockCommit(object):
         return self.combined_status
 
 
-class MockCombinedStatus(object):
+class MockCombinedStatus:
 
     def __init__(self, statuses):
         self.statuses = statuses
 
 
-class MockStatus(object):
+class MockStatus:
 
     def __init__(self, context, age, state='success'):
         self.context = context
@@ -176,4 +173,4 @@ class CodeCovTest(TestCase):
                 'context': 'codecov/project'
             }
         ]
-        six.assertCountEqual(self, metrics, expected_results)
+        self.assertCountEqual(metrics, expected_results)

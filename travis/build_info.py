@@ -5,7 +5,6 @@ This only applies to travis instances that do not require
 authorization (e.g., travis-ci.org). Auth is a #TODO
 
 """
-from __future__ import absolute_import, division
 
 import argparse
 import logging
@@ -47,7 +46,7 @@ def get_builds(org, repo, is_finished=False):
     """
     Returns list of active builds for a given repo slug
     """
-    logger.debug(u'getting builds for repo: %s', repo)
+    logger.debug('getting builds for repo: %s', repo)
     repo_slug = '{org}/{repo}'.format(org=org, repo=repo)
     req = requests.get(
         BASE_URL + 'repos/{repo_slug}/builds'.format(repo_slug=repo_slug)
@@ -112,7 +111,7 @@ def get_average_duration_org(org, num=5):
     avg_duration_org = []
     for repo in repos:
         builds = get_last_n_successful_builds(org, repo, num)
-        logger.debug(u'getting average duration for: %s', repo)
+        logger.debug('getting average duration for: %s', repo)
         avg = get_average_build_duration(builds)
         avg_duration_org.append({"repo": repo, "average duration": avg})
     avg_duration_org = sorted(
@@ -120,10 +119,10 @@ def get_average_duration_org(org, num=5):
         key=itemgetter("average duration"),
         reverse=True
     )
-    message = u'['
+    message = '['
     for entry in avg_duration_org:
-        message += u"{'repo': '%s', 'average duration': %s}" % (entry['repo'], entry['average duration'])
-    message += u']'
+        message += "{'repo': '%s', 'average duration': %s}" % (entry['repo'], entry['average duration'])
+    message += ']'
     logger.info(message)
     return avg_duration_org
 
@@ -213,8 +212,8 @@ def get_job_counts(org):
             total_started_job_count += started
             repo_jobs += total
             repo_started_jobs += started
-        logger.debug(u"----> %s", repo)
-        debug_msg = u"total jobs: %d, started jobs: %d"
+        logger.debug("----> %s", repo)
+        debug_msg = "total jobs: %d, started jobs: %d"
         logger.debug(debug_msg, repo_jobs, repo_started_jobs)
     logger.debug('--------')
     logger.info('overall_jobs_total=%d', total_job_count)
@@ -232,18 +231,18 @@ def get_build_counts(org):
 
     for repo in repos:
         repo_builds = get_builds(org, repo)
-        logger.debug(u"--->%s", repo)
+        logger.debug("--->%s", repo)
 
         repo_build_total, num_started = repo_active_build_count(repo_builds)
 
-        debug_string = u"total: %d, started: %d"
+        debug_string = "total: %d, started: %d"
         logger.debug(debug_string, repo_build_total, num_started)
 
         org_build_count += repo_build_total
         org_build_started_count += num_started
 
     logger.debug('--------')
-    logger.info(u"overall_total=%d", org_build_count)
+    logger.info("overall_total=%d", org_build_count)
     logger.info("overall_started=%d", org_build_started_count)
     logger.info(
         "overall_queued=%d", org_build_count - org_build_started_count
@@ -301,5 +300,5 @@ def main(raw_args):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format=u'%(asctime)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s')
     main(sys.argv[1:])
