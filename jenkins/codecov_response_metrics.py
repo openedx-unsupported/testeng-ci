@@ -1,3 +1,4 @@
+"""
 # Occasionally, pull requests never get updated with codecov results, which
 # can create a lot of difficulty in getting the pr merged. However, this is
 # purely anecdotal.
@@ -9,7 +10,7 @@
 
 # This script should be run periodically in order to get a good understanding
 # of the state of codecov response times.
-# pylint: disable=missing-module-docstring
+"""
 import os
 import sys
 import datetime

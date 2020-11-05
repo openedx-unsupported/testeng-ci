@@ -69,7 +69,6 @@ def main(sha=None, repo_root=None):
             # for this fingerprint. To avoid excessive PR's, exit.
             logger.info("Branch name: {} already exists. Exiting.".format(branch))
         else:
-            git_tree = repository.get_git_tree(sha)  # pylint: disable=unused-variable
             user = github_instance.get_user()
             commit_sha = github_helper.update_list_of_files(
                 repository,

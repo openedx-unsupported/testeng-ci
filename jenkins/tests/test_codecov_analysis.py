@@ -21,7 +21,7 @@ class MockRepo:
 
 class MockPR:
 
-    def __init__(self, title, commits=None, age=10000):
+    def __init__(self, title, commits, age=10000):
         self.title = title
         self.commits = commits
         self.updated_at = datetime.datetime.utcnow() - datetime.timedelta(seconds=age)

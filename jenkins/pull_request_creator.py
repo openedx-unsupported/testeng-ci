@@ -73,12 +73,12 @@ class PullRequestCreator:
 
     def _create_new_pull_request(self):
         # If there are reviewers to be added, split them into python lists
-        if isinstance(self.user_reviewers, (str, str)) and self.user_reviewers:
+        if isinstance(self.user_reviewers, str) and self.user_reviewers:
             user_reviewers = self.user_reviewers.split(',')
         else:
             user_reviewers = GithubObject.NotSet
 
-        if isinstance(self.team_reviewers, (str, str)) and self.team_reviewers:
+        if isinstance(self.team_reviewers, str) and self.team_reviewers:
             team_reviewers = self.team_reviewers.split(',')
         else:
             team_reviewers = GithubObject.NotSet
