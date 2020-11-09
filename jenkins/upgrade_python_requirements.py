@@ -2,8 +2,6 @@
 Script to help create a PR with python library upgrades. To be run inside
 a Jenkins job that first runs `make upgrade`
 """
-from __future__ import absolute_import
-
 import click
 
 from jenkins.pull_request_creator import PullRequestCreator

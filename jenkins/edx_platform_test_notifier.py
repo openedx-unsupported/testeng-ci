@@ -1,10 +1,8 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring
 import logging
 import sys
 
 import click
-import six
 from github import Github
 
 from .github_helpers import GitHubHelper
@@ -51,9 +49,9 @@ class EdxStatusBot:
         sys.exit()
 
     def ignore_marker(self, pr):
-        return self._action_str('ignore') in six.text_type(pr.body)
+        return self._action_str('ignore') in str(pr.body)
 
-    def delete_old_comments(self, pr):
+    def delete_old_comments(self, pr):  # pylint: disable=missing-function-docstring
         comments = pr.get_issue_comments()
         for comment in comments:
             if comment.user.login == self.name:
@@ -70,7 +68,7 @@ class EdxStatusBot:
         comment = self.generate_notification_message(pr)
         try:
             pr.create_issue_comment(comment)
-        except:
+        except:  # pylint: disable=bare-except
             logger.error("Failed to add issue comment to PR.")
             sys.exit(1)
         else:
@@ -89,7 +87,7 @@ class EdxStatusBot:
         head_commit = commits.reversed[0]
         return head_commit
 
-    def notify_tests_completed_marker(self, pr):
+    def notify_tests_completed_marker(self, pr):  # pylint: disable=missing-function-docstring
         head_commit = self.get_head_commit(pr)
         for status in head_commit.get_combined_status().statuses:
             if status.state == 'pending':
@@ -100,7 +98,7 @@ class EdxStatusBot:
         else:
             return True
 
-    def generate_notification_message(self, pr):
+    def generate_notification_message(self, pr):  # pylint: disable=missing-function-docstring
         failing_contexts = self.get_failures(pr)
         if not failing_contexts:
             status_description = "There were no failures."
@@ -135,7 +133,7 @@ class EdxStatusBot:
          "This PR will receive a comment when its tests finish.",
     required=True,
 )
-def main(repo, pr_number):
+def main(repo=None, pr_number=None):
     """
     Checks a pull request in Github to see if tests are finished. If they
     are, it comments on the PR to notify the user. If not, the script exits.
@@ -146,7 +144,7 @@ def main(repo, pr_number):
 
     try:
         pr = repo.get_pull(int(pr_number))
-    except:
+    except:  # pylint: disable=bare-except
         logger.error("Invalid PR number given.")
         sys.exit(1)
     else:

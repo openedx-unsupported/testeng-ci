@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring
 from unittest import TestCase
 
 from jenkins.tests.helpers import sample_data, Pr
@@ -11,7 +10,7 @@ class BuildTestCase(TestCase):
     TestCase class for testing the Build class
     """
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=super-method-not-called
         self.sample_build_data = sample_data(
             [Pr('2', author='bar').dict],
             []

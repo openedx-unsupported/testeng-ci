@@ -2,9 +2,6 @@
 Script to help create a PR. To be run by
 a Jenkins job that cleans up python code base
 """
-
-from __future__ import absolute_import
-
 import click
 
 from jenkins.github_helpers import CODE_CLEANUP_BRANCH_NAME
@@ -43,6 +40,7 @@ from jenkins.pull_request_creator import PullRequestCreator
     help="Comma separated list of scripts/commands executed for the cleanup job",
     default=None
 )
+# pylint: disable=missing-function-docstring
 def main(sha, repo_root, user_reviewers, team_reviewers, packages, scripts):
     scripts = "\n".join(scripts.split(','))
     packages = "\n".join(packages.split(','))

@@ -1,9 +1,6 @@
-from __future__ import absolute_import
-
 import os
 import sys
 from collections import namedtuple
-from six.moves import zip
 
 # We should aspire to create batches of less than 15 python files
 # although this is not a strict limit. Setting a target of 10 files,
@@ -11,7 +8,7 @@ from six.moves import zip
 TARGET_FILE_NUMBER = 10
 
 
-class Batch(object):
+class Batch:
     """
     representation of a `batch` of python files for ticketing purposes
 
@@ -52,9 +49,9 @@ class Batch(object):
         return a list of all of the directories contained within this batch
         of files.
         """
-        directories = list(set([
+        directories = list({
             '/'.join(f.split('/')[:-1]) for f in self.files
-        ]))
+        })
         return sorted(directories)
 
     @property

@@ -1,10 +1,10 @@
-from __future__ import absolute_import
-
-import boto3
+# pylint: disable=missing-module-docstring,missing-function-docstring,bare-except
 import sys
 import logging
-import click
 from time import sleep
+
+import boto3
+import click
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -22,7 +22,7 @@ logger.setLevel(logging.INFO)
     required=True,
     type=click.Choice(['ON', 'OFF']),
 )
-def main(spigot_state):
+def main(spigot_state=None):
     # Connect to AWS API and Cloudwatch Events
     try:
         api_client = boto3.client('apigateway')

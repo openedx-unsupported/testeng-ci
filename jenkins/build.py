@@ -1,8 +1,6 @@
 """
 A class for working with the build info returned from the jenkins job API
 """
-from __future__ import absolute_import
-
 import logging
 
 
@@ -16,22 +14,22 @@ class Build(dict):
     :Args:
         build (dict): build data from Jenkins
     """
-    def __init__(self, build):
+    def __init__(self, build):  # pylint: disable=super-init-not-called
         self.isbuilding = build.get('building')
 
         author = None
         pr_id = None
         actions = build.get('actions', [])
-        ghprb_class_name = u'org.jenkinsci.plugins.ghprb.GhprbParametersAction'
+        ghprb_class_name = 'org.jenkinsci.plugins.ghprb.GhprbParametersAction'
 
         for action in actions:
             if action.get('_class') == ghprb_class_name:
                 action_parameters = action.get('parameters')
                 if action_parameters:
                     for p in action_parameters:
-                        if p.get('name') == u'ghprbActualCommitAuthorEmail':
+                        if p.get('name') == 'ghprbActualCommitAuthorEmail':
                             author = p.get('value')
-                        if p.get('name') == u'ghprbPullId':
+                        if p.get('name') == 'ghprbPullId':
                             pr_id = p.get('value')
                 else:
                     logger.debug(

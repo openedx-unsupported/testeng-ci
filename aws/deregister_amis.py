@@ -18,8 +18,6 @@ Usage:
     you'd deregister if you ran the command, then use the --dry-run switch.
 
 """
-from __future__ import absolute_import
-
 import argparse
 import logging
 import os
@@ -60,7 +58,7 @@ def deregister_amis_by_tag(tag_key, tag_value, dry_run, ec2):
             i.deregister()
 
 
-def main(raw_args):
+def main(raw_args):  # pylint: disable=missing-function-docstring
     desc = (
         "Deregister EC2 images that are tagged for 'delete_or_keep' with "
         "'delete' as the tag value."

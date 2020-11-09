@@ -1,7 +1,6 @@
 """
 Tests for testeng-ci/travis/build_info
 """
-from __future__ import absolute_import
 
 from unittest import TestCase
 import os
@@ -31,7 +30,7 @@ class TestTravisBuildRepoInfo(TestCase):
     """
 
     def setUp(self):
-        super(TestTravisBuildRepoInfo, self).setUp()
+        super().setUp()
         self.response_body = """{
           "@type": "repositories",
           "repositories": [
@@ -83,7 +82,7 @@ class TestTravisActiveBuildInfo(TestCase):
     """
 
     def setUp(self):
-        super(TestTravisActiveBuildInfo, self).setUp()
+        super().setUp()
         self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
 
     @httpretty.activate
@@ -158,7 +157,7 @@ class TestTravisFinishedBuildInfo(TestCase):
     """
 
     def setUp(self):
-        super(TestTravisFinishedBuildInfo, self).setUp()
+        super().setUp()
         self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
 
     @httpretty.activate
@@ -224,7 +223,7 @@ class TestTravisBuildInfoJobs(TestCase):
     """
 
     def setUp(self):
-        super(TestTravisBuildInfoJobs, self).setUp()
+        super().setUp()
         self.url_endpoint = BASE_URL + 'v3/build/11122/jobs'
 
     @httpretty.activate
@@ -243,8 +242,8 @@ class TestTravisBuildInfoJobs(TestCase):
         )
         jobs = get_active_jobs(11122)
         expected_job_list = [
-            {u'id': 1, u'state': u'received'},
-            {u'id': 2, u'state': u'created'}
+            {'id': 1, 'state': 'received'},
+            {'id': 2, 'state': 'created'}
         ]
         self.assertListEqual(expected_job_list, jobs)
 
@@ -325,7 +324,7 @@ class TestTravisSuccessfulBuilds(TestCase):
     """
 
     def setUp(self):
-        super(TestTravisSuccessfulBuilds, self).setUp()
+        super().setUp()
         self.url_endpoint = BASE_URL + 'repos/foo/bar-repo/builds'
 
     @data(
@@ -356,7 +355,7 @@ class TestTravisSuccessfulBuilds(TestCase):
         """
         test_dir = os.path.dirname(__file__)
         abs_file = os.path.join(test_dir, filename)
-        with open(abs_file, 'r') as test_file:
+        with open(abs_file) as test_file:
             contents = test_file.read()
 
         return contents
@@ -393,7 +392,7 @@ class TestTravisBuildInfoMain(TestCase):
     """
 
     def setUp(self):
-        super(TestTravisBuildInfoMain, self).setUp()
+        super().setUp()
         self.org = 'foo'
         self.mock_repos = patch(
             'travis.build_info.get_repos', return_value=['bar']
@@ -465,7 +464,7 @@ class TestTravisBuildInfoMain(TestCase):
                 (
                     'travis.build_info',
                     'INFO',
-                    u"[{'repo': 'bar', 'average duration': 10}]"
+                    "[{'repo': 'bar', 'average duration': 10}]"
                 )
             )
 

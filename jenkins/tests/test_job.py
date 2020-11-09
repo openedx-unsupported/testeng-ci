@@ -1,8 +1,8 @@
-from __future__ import absolute_import
+# pylint: disable=missing-module-docstring
+from unittest import TestCase
 
 from mock import patch
 from requests.exceptions import HTTPError
-from unittest import TestCase
 
 from jenkins.tests.helpers import mock_response, sample_data, Pr
 from jenkins.job import JenkinsJob
@@ -14,7 +14,7 @@ class JenkinsJobTestCase(TestCase):
     TestCase class for testing deduper.py.
     """
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=super-method-not-called
         self.job_url = 'http://localhost:8080/fakejenkins'
         self.user = 'ausername'
         self.api_key = 'apikey'

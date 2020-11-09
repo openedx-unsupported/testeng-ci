@@ -2,8 +2,6 @@
 This script is intended to be used to abort builds that are assumed to be
 stuck because they have exceeded the expected max time.
 """
-from __future__ import absolute_import
-
 import argparse
 import datetime
 import logging
@@ -93,7 +91,7 @@ class BuildTimeout:
             try:
                 self.job.stop_build(b)
                 self.job.update_build_desc(b, desc)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.error(e)
 
         if lines:
@@ -106,7 +104,7 @@ class BuildTimeout:
             logger.info("No stuck builds found.")
 
 
-def timeout_main(raw_args):
+def timeout_main(raw_args):  # pylint: disable=missing-function-docstring
     # Get args
     parser = argparse.ArgumentParser(
         description="Programatically abort builds that have been running"

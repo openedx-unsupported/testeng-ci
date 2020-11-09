@@ -1,11 +1,8 @@
 """
 Class helps create GitHub Pull requests
 """
-
-from __future__ import absolute_import
-
+# pylint: disable=missing-class-docstring,missing-function-docstring,attribute-defined-outside-init
 import logging
-import six
 from github import GithubObject
 
 from .github_helpers import GitHubHelper
@@ -54,16 +51,16 @@ class PullRequestCreator:
         # Last folder in repo_root should be the repository
         directory_list = self.repo_root.split("/")
         self.repository_name = directory_list[-1]
-        LOGGER.info(u"Trying to connect to repo: {}".format(self.repository_name))
+        LOGGER.info("Trying to connect to repo: {}".format(self.repository_name))
         self._set_repository()
         self._set_modified_files_list()
 
     def _branch_exists(self):
-        self.branch = u"refs/heads/jenkins/{0}-{1}".format(self.branch_name, self.sha[:7])
+        self.branch = "refs/heads/jenkins/{}-{}".format(self.branch_name, self.sha[:7])
         return self.github_helper.branch_exists(self.repository, self.branch)
 
     def _create_new_branch(self):
-        LOGGER.info(u"modified files: {}".format(self.modified_files_list))
+        LOGGER.info("modified files: {}".format(self.modified_files_list))
         commit_sha = self.github_helper.update_list_of_files(
             self.repository,
             self.repo_root,
@@ -76,12 +73,12 @@ class PullRequestCreator:
 
     def _create_new_pull_request(self):
         # If there are reviewers to be added, split them into python lists
-        if isinstance(self.user_reviewers, (str, six.text_type)) and self.user_reviewers:
+        if isinstance(self.user_reviewers, str) and self.user_reviewers:
             user_reviewers = self.user_reviewers.split(',')
         else:
             user_reviewers = GithubObject.NotSet
 
-        if isinstance(self.team_reviewers, (str, six.text_type)) and self.team_reviewers:
+        if isinstance(self.team_reviewers, str) and self.team_reviewers:
             team_reviewers = self.team_reviewers.split(',')
         else:
             team_reviewers = GithubObject.NotSet

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os
 from unittest import TestCase
 
@@ -132,7 +130,7 @@ class LambdaHandlerTestCase(TestCase):
         send_msg_mock.assert_called_with(
             'http://www.example.com/endpoint/',
             self.event.get('body'),
-            {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
+            {'Content-Type': 'application/json', 'X-GitHub-Event': 'ping'}
         )
 
     @patch('process_webhooks.process_webhooks._get_target_url',
@@ -156,7 +154,7 @@ class LambdaHandlerTestCase(TestCase):
         send_msg_mock.assert_called_with(
             'http://www.example.com/endpoint/',
             self.event.get('body'),
-            {'Content-Type': 'application/json', 'X-GitHub-Event': u'ping'}
+            {'Content-Type': 'application/json', 'X-GitHub-Event': 'ping'}
         )
         send_queue_mock.assert_called_with(
             self.event,

@@ -1,5 +1,4 @@
-# -*- coding: UTF-8 -*-
-
+"""
 # Occasionally, pull requests never get updated with codecov results, which
 # can create a lot of difficulty in getting the pr merged. However, this is
 # purely anecdotal.
@@ -11,16 +10,13 @@
 
 # This script should be run periodically in order to get a good understanding
 # of the state of codecov response times.
-
-from __future__ import absolute_import
-
+"""
 import os
 import sys
 import datetime
 import logging
 import json
 
-import six
 from github import Github
 
 logging.basicConfig()
@@ -161,6 +157,7 @@ def gather_codecov_metrics(all_repos, time_frame):
     to report back following a 'triggering' context posting back to a
     pull request. Return a list of JSON objects storing this data.
     """
+    # pylint: disable=logging-not-lazy
     logger.info(
         'Gathering codecov response metrics on pull requests ' +
         'updated within the last {} seconds'.format(time_frame)
@@ -180,8 +177,8 @@ def gather_codecov_metrics(all_repos, time_frame):
             continue
 
         for pr in prs:
-            pr_title = six.text_type(pr.title)
-            logger.info(u'Analyzing pr {}'.format(pr_title))
+            pr_title = str(pr.title)
+            logger.info('Analyzing pr {}'.format(pr_title))
             head_commit = get_head_commit(pr)
             head_status = head_commit.get_combined_status().statuses
             # mapping of status contexts that generate code coverage data
@@ -192,7 +189,7 @@ def gather_codecov_metrics(all_repos, time_frame):
                 'continuous-integration/travis-ci/push': 'codecov/project',
                 'jenkins/python': 'codecov/project'
             }
-            for trigger_context, codecov_context in six.iteritems(context_map):
+            for trigger_context, codecov_context in context_map.items():
                 # skip prs that have not been posted to by their trigger status
                 if not has_context_posted(trigger_context, head_status):
                     logger.info(
@@ -224,6 +221,7 @@ def gather_codecov_metrics(all_repos, time_frame):
     return results
 
 
+# pylint: disable=missing-function-docstring
 def main():
     try:
         token = os.environ.get('GITHUB_TOKEN')

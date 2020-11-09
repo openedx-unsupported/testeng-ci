@@ -1,10 +1,10 @@
-from __future__ import absolute_import
-
+# pylint: disable=missing-module-docstring
 from unittest import TestCase
 
 from jenkins.helpers import append_url
 
 
+# pylint: disable=missing-class-docstring
 class HelpersTestCase(TestCase):
 
     def test_append_url(self):

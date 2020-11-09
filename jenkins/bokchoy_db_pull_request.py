@@ -3,8 +3,6 @@ This script is to be run inside a Jenkins job after updating bokchoy
 db cache files through paver commands on edx-platform. If changes have
 been made, this script will generate a PR into master with the updates.
 """
-from __future__ import absolute_import
-
 import logging
 import os
 
@@ -40,6 +38,7 @@ def _read_local_db_file_contents(repo_root, db_file):
     return github_helper.get_file_contents(repo_root, file_path)
 
 
+# pylint: disable=missing-function-docstring
 @click.command()
 @click.option(
     '--sha',
@@ -52,7 +51,7 @@ def _read_local_db_file_contents(repo_root, db_file):
          "hold updated database files",
     required=True,
 )
-def main(sha, repo_root):
+def main(sha=None, repo_root=None):
     logger.info("Authenticating with Github")
     github_instance = github_helper.get_github_instance()
     repository = github_helper.connect_to_repo(github_instance, "edx-platform")
@@ -70,7 +69,6 @@ def main(sha, repo_root):
             # for this fingerprint. To avoid excessive PR's, exit.
             logger.info("Branch name: {} already exists. Exiting.".format(branch))
         else:
-            git_tree = repository.get_git_tree(sha)
             user = github_instance.get_user()
             commit_sha = github_helper.update_list_of_files(
                 repository,

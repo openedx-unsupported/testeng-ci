@@ -1,7 +1,6 @@
 """
 Helper methods for connecting with Github
 """
-from __future__ import absolute_import
 import io
 import logging
 import os
@@ -17,7 +16,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-class GitHubHelper:
+class GitHubHelper:  # pylint: disable=missing-class-docstring
 
     def __init__(self):
         self._set_github_token()
@@ -78,7 +77,7 @@ class GitHubHelper:
         """
         try:
             repository.get_branch(branch_name)
-        except:
+        except:  # pylint: disable=bare-except
             return False
         return True
 
@@ -110,7 +109,7 @@ class GitHubHelper:
         return branch_object
 
     def is_cleanup_pr(self, branch_name):
-        return re.match("(jenkins/{0})-[a-zA-Z0-9]*".format(CODE_CLEANUP_BRANCH_NAME), branch_name)
+        return re.match("(jenkins/{})-[a-zA-Z0-9]*".format(CODE_CLEANUP_BRANCH_NAME), branch_name)
 
     def close_existing_pull_requests(self, repository, user_login, user_name):
         """
@@ -205,6 +204,7 @@ class GitHubHelper:
             )
         return data
 
+    # pylint: disable=missing-function-docstring
     def update_list_of_files(self, repository, repo_root, file_path_list, commit_message, sha, username):
         input_trees_list = []
         base_git_tree = repository.get_git_tree(sha)
@@ -220,3 +220,5 @@ class GitHubHelper:
                 commit_message, new_git_tree, parents, author=author, committer=author
             ).sha
             return commit_sha
+
+        return None
