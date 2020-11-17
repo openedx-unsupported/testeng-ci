@@ -10,8 +10,7 @@ from jenkins.pull_request_creator import PullRequestCreator
 @click.command()
 @click.option(
     '--sha',
-    help="Sha of the merge commit to base the new PR off of",
-    required=True,
+    help="DEPRECATED: Ignored, current SHA is read from repo now",
 )
 @click.option(
     '--repo_root',
@@ -21,8 +20,7 @@ from jenkins.pull_request_creator import PullRequestCreator
 )
 @click.option(
     '--org',
-    help="The github organization for the repository to run make upgrade on.",
-    required=True,
+    help="DEPRECATED: Ignored, org is read from repo's remotes now"
 )
 @click.option(
     '--user_reviewers',
@@ -44,10 +42,10 @@ def main(sha, repo_root, org, user_reviewers, team_reviewers):
               "https://openedx.atlassian.net/wiki/spaces/TE/pages/1001521320/Python+Package+Changelogs" \
               ") for the upgraded packages."
 
-    pull_request_creator = PullRequestCreator(sha=sha, repo_root=repo_root, branch_name="upgrade-python-requirements",
+    pull_request_creator = PullRequestCreator(repo_root=repo_root, branch_name="upgrade-python-requirements",
                                               user_reviewers=user_reviewers, team_reviewers=team_reviewers,
                                               commit_message="Updating Python Requirements",
-                                              pr_title="Python Requirements Update", pr_body=pr_body, org=org)
+                                              pr_title="Python Requirements Update", pr_body=pr_body)
 
     pull_request_creator.create(delete_old_pull_requests=True)
 

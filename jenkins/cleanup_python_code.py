@@ -11,8 +11,7 @@ from jenkins.pull_request_creator import PullRequestCreator
 @click.command()
 @click.option(
     '--sha',
-    help="Sha of the merge commit to base the new PR off of",
-    required=True,
+    help="DEPRECATED: Ignored, current SHA is read from repo now",
 )
 @click.option(
     '--repo_root',
@@ -54,7 +53,7 @@ def main(sha, repo_root, user_reviewers, team_reviewers, packages, scripts):
         "{1}"
     ).format(scripts, packages)
 
-    pull_request_creator = PullRequestCreator(sha=sha, repo_root=repo_root, branch_name=CODE_CLEANUP_BRANCH_NAME,
+    pull_request_creator = PullRequestCreator(repo_root=repo_root, branch_name=CODE_CLEANUP_BRANCH_NAME,
                                               user_reviewers=user_reviewers, team_reviewers=team_reviewers,
                                               commit_message=message, pr_title="Python Code Cleanup",
                                               pr_body=message)
