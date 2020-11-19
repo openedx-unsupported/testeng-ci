@@ -75,19 +75,19 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             "credentials and try again.".format(repo_name)
         )
 
-    def repo_from_remote(self, repo_root, remote_name_filter=None):
+    def repo_from_remote(self, repo_root, remote_name_allow_list=None):
         """
         Get the repository object for a repository with a Github remote.
 
         Optionally restrict the remotes under consideration by passing a list
-        of names as``remote_name_filter``.
+        of names as``remote_name_allow_list``, e.g. ``['origin']``.
         """
         patterns = [
             r"git@github\.com:(?P<name>[^/?#]+/[^/?#]+).git",
             r"https?://(www\.)?github\.com/(?P<name>[^/?#]+/[^/?#]+)/?"
         ]
         for remote in Repo(repo_root).remotes:
-            if remote_name_filter and remote.name not in remote_name_filter:
+            if remote_name_allow_list and remote.name not in remote_name_allow_list:
                 continue
             for url in remote.urls:
                 for pattern in patterns:
