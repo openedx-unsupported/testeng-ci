@@ -60,6 +60,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
     # FIXME: Probably can end up picking repo from wrong org if two
     # repos have the same name in different orgs.
+    #
+    # Use repo_from_remote instead, and delete this when no longer in use.
     def connect_to_repo(self, github_instance, repo_name):
         """
         Get the repository object of the desired repo.
