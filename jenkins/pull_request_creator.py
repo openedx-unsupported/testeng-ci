@@ -139,13 +139,15 @@ class PullRequestCreator:
 @click.option('--pr-body', required=True)
 @click.option(
     '--user-reviewers',
-    multiple=True,
-    required=True
+    default='',
+    help="Comma separated list of Github users to be tagged on pull requests"
 )
 @click.option(
     '--team-reviewers',
-    multiple=True,
-    required=True
+    default='',
+    help=("Comma separated list of Github teams to be tagged on pull requests. "
+          "NOTE: Teams must have explicit write access to the repo, or "
+          "Github will refuse to tag them.")
 )
 @click.option(
     '--delete-old-pull-requests/--no-delete-old-pull-requests',
@@ -170,9 +172,8 @@ def main(
         repo_root=repo_root,
         branch_name=base_branch_name, commit_message=commit_message,
         pr_title=pr_title, pr_body=pr_body,
-        # TODO: Accept lists in constructor, too (requires changes to existing callers)
-        user_reviewers=','.join(user_reviewers),
-        team_reviewers=','.join(team_reviewers)
+        user_reviewers=user_reviewers,
+        team_reviewers=team_reviewers
     )
     creator.create(delete_old_pull_requests)
 
