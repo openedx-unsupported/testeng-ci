@@ -83,8 +83,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         of names as``remote_name_filter``.
         """
         patterns = [
-            r"git@github\.com:([^/?#]+/[^/?#]+).git",
-            r"https?://(?:www\.)?github\.com/([^/?#]+/[^/?#]+)/?"
+            r"git@github\.com:(?P<name>[^/?#]+/[^/?#]+).git",
+            r"https?://(www\.)?github\.com/(?P<name>[^/?#]+/[^/?#]+)/?"
         ]
         for remote in Repo(repo_root).remotes:
             if remote_name_filter and remote.name not in remote_name_filter:
@@ -93,7 +93,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 for pattern in patterns:
                     m = re.fullmatch(pattern, url)
                     if m:
-                        fullname = m.group(1)
+                        fullname = m.group('name')
                         logger.info("Discovered repo %s in remotes", fullname)
                         return self.github_instance.get_repo(fullname)
         raise Exception("Could not find a Github URL among repo's remotes")
