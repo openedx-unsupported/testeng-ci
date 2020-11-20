@@ -86,7 +86,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         patterns = [
             r"git@github\.com:(?P<name>[^/?#]+/[^/?#]+).git",
-            r"https?://(www\.)?github\.com/(?P<name>[^/?#]+/[^/?#]+)/?"
+            r"https?://(www\.)?github\.com/(?P<name>[^/?#]+/[^/?#]+)(/|\.git)?"
         ]
         for remote in Repo(repo_root).remotes:
             if remote_name_allow_list and remote.name not in remote_name_allow_list:
