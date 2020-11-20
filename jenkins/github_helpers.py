@@ -85,8 +85,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         of names as``remote_name_allow_list``, e.g. ``['origin']``.
         """
         patterns = [
-            r"git@github\.com:(?P<name>[^/?#]+/[^/?#]+).git",
-            r"https?://(www\.)?github\.com/(?P<name>[^/?#]+/[^/?#]+)(/|\.git)?"
+            r"git@github\.com:(?P<name>[^/?#]+/[^/?#]+?).git",
+            # Non-greedy match for repo name so that optional .git on
+            # end is not included in repo name match.
+            r"https?://(www\.)?github\.com/(?P<name>[^/?#]+/[^/?#]+?)(/|\.git)?"
         ]
         for remote in Repo(repo_root).remotes:
             if remote_name_allow_list and remote.name not in remote_name_allow_list:
