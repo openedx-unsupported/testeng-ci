@@ -6,7 +6,7 @@ import logging
 import os
 import re
 
-from git import Git
+from git import Git, Repo
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
 
 CODE_CLEANUP_BRANCH_NAME = "cleanup-python-code"
@@ -23,6 +23,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         self._set_user_email()
         self._set_github_instance()
 
+    # FIXME: Does nothing, sets variable to None if env var missing
     def _set_github_token(self):
         try:
             self.github_token = os.environ.get('GITHUB_TOKEN')
@@ -32,6 +33,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 "Please make sure the variable is set and try again."
             )
 
+    # FIXME: Does nothing, sets variable to None if env var missing
     def _set_user_email(self):
         try:
             self.github_user_email = os.environ.get('GITHUB_USER_EMAIL')
@@ -56,6 +58,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
     def get_github_token(self):
         return self.github_token
 
+    # FIXME: Probably can end up picking repo from wrong org if two
+    # repos have the same name in different orgs.
+    #
+    # Use repo_from_remote instead, and delete this when no longer in use.
     def connect_to_repo(self, github_instance, repo_name):
         """
         Get the repository object of the desired repo.
@@ -71,6 +77,31 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             "credentials and try again.".format(repo_name)
         )
 
+    def repo_from_remote(self, repo_root, remote_name_allow_list=None):
+        """
+        Get the repository object for a repository with a Github remote.
+
+        Optionally restrict the remotes under consideration by passing a list
+        of names as``remote_name_allow_list``, e.g. ``['origin']``.
+        """
+        patterns = [
+            r"git@github\.com:(?P<name>[^/?#]+/[^/?#]+?).git",
+            # Non-greedy match for repo name so that optional .git on
+            # end is not included in repo name match.
+            r"https?://(www\.)?github\.com/(?P<name>[^/?#]+/[^/?#]+?)(/|\.git)?"
+        ]
+        for remote in Repo(repo_root).remotes:
+            if remote_name_allow_list and remote.name not in remote_name_allow_list:
+                continue
+            for url in remote.urls:
+                for pattern in patterns:
+                    m = re.fullmatch(pattern, url)
+                    if m:
+                        fullname = m.group('name')
+                        logger.info("Discovered repo %s in remotes", fullname)
+                        return self.github_instance.get_repo(fullname)
+        raise Exception("Could not find a Github URL among repo's remotes")
+
     def branch_exists(self, repository, branch_name):
         """
         Checks to see if this branch name already exists
@@ -80,6 +111,12 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         except:  # pylint: disable=bare-except
             return False
         return True
+
+    def get_current_commit(self, repo_root):
+        """
+        Get current commit ID of repo at repo_root.
+        """
+        return Git(repo_root).rev_parse('HEAD')
 
     def get_modified_files_list(self, repo_root):
         """

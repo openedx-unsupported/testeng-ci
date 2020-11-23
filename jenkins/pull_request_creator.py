@@ -3,6 +3,8 @@ Class helps create GitHub Pull requests
 """
 # pylint: disable=missing-class-docstring,missing-function-docstring,attribute-defined-outside-init
 import logging
+
+import click
 from github import GithubObject
 
 from .github_helpers import GitHubHelper
@@ -14,17 +16,15 @@ LOGGER.setLevel(logging.INFO)
 
 class PullRequestCreator:
 
-    def __init__(self, sha, repo_root, branch_name, user_reviewers, team_reviewers, commit_message, pr_title,
-                 pr_body, org=''):
+    def __init__(self, repo_root, branch_name, user_reviewers, team_reviewers, commit_message, pr_title,
+                 pr_body):
         self.branch_name = branch_name
         self.pr_body = pr_body
         self.pr_title = pr_title
         self.commit_message = commit_message
         self.team_reviewers = team_reviewers
         self.user_reviewers = user_reviewers
-        self.org = org
         self.repo_root = repo_root
-        self.sha = sha
 
     github_helper = GitHubHelper()
 
@@ -35,7 +35,7 @@ class PullRequestCreator:
         return self.github_instance.get_user()
 
     def _set_repository(self):
-        self.repository = self.github_helper.connect_to_repo(self.github_instance, self.repository_name)
+        self.repository = self.github_helper.repo_from_remote(self.repo_root, ['origin'])
 
     def _set_modified_files_list(self):
         self.modified_files_list = self.github_helper.get_modified_files_list(self.repo_root)
@@ -48,15 +48,14 @@ class PullRequestCreator:
         self.github_instance = self._get_github_instance()
         self.user = self._get_user()
 
-        # Last folder in repo_root should be the repository
-        directory_list = self.repo_root.split("/")
-        self.repository_name = directory_list[-1]
-        LOGGER.info("Trying to connect to repo: {}".format(self.repository_name))
+        LOGGER.info("Trying to connect to repo")
         self._set_repository()
+        LOGGER.info("Connected to {}".format(self.repository))
         self._set_modified_files_list()
+        self.base_sha = self.github_helper.get_current_commit(self.repo_root)
 
     def _branch_exists(self):
-        self.branch = "refs/heads/jenkins/{}-{}".format(self.branch_name, self.sha[:7])
+        self.branch = "refs/heads/jenkins/{}-{}".format(self.branch_name, self.base_sha[:7])
         return self.github_helper.branch_exists(self.repository, self.branch)
 
     def _create_new_branch(self):
@@ -66,7 +65,7 @@ class PullRequestCreator:
             self.repo_root,
             self.modified_files_list,
             self.commit_message,
-            self.sha,
+            self.base_sha,
             self.user.name
         )
         self._create_branch(commit_sha)
@@ -101,8 +100,8 @@ class PullRequestCreator:
         for num, deleted_pull_number in enumerate(deleted_pulls):
             if num == 0:
                 self.pr_body += "\n\nDeleted obsolete pull_requests:"
-            self.pr_body += "\nhttps://github.com/{}/{}/pull/{}".format(self.org, self.repository_name,
-                                                                        deleted_pull_number)
+            self.pr_body += "\nhttps://github.com/{}/pull/{}".format(self.repository.full_name,
+                                                                     deleted_pull_number)
 
     def create(self, delete_old_pull_requests):
         self._set_github_data()
@@ -121,3 +120,63 @@ class PullRequestCreator:
             self.delete_old_pull_requests()
 
         self._create_new_pull_request()
+
+
+@click.command()
+@click.option(
+    '--repo-root',
+    type=click.Path(exists=True, dir_okay=True, file_okay=False),
+    required=True,
+    help="Directory containing local copy of repository"
+)
+@click.option(
+    '--base-branch-name',
+    required=True,
+    help="Base name for branch to create. Full branch name will be like jenkins/BASENAME-1234567."
+)
+@click.option('--commit-message', required=True)
+@click.option('--pr-title', required=True)
+@click.option('--pr-body', required=True)
+@click.option(
+    '--user-reviewers',
+    default='',
+    help="Comma separated list of Github users to be tagged on pull requests"
+)
+@click.option(
+    '--team-reviewers',
+    default='',
+    help=("Comma separated list of Github teams to be tagged on pull requests. "
+          "NOTE: Teams must have explicit write access to the repo, or "
+          "Github will refuse to tag them.")
+)
+@click.option(
+    '--delete-old-pull-requests/--no-delete-old-pull-requests',
+    default=True,
+    help="If set, delete old branches with the same base branch name and close their PRs"
+)
+def main(
+    repo_root, base_branch_name,
+    commit_message, pr_title, pr_body,
+    user_reviewers, team_reviewers,
+    delete_old_pull_requests
+):
+    """
+    Create a pull request with these changes in the repo.
+
+    Required environment variables:
+
+    - GITHUB_TOKEN
+    - GITHUB_USER_EMAIL
+    """
+    creator = PullRequestCreator(
+        repo_root=repo_root,
+        branch_name=base_branch_name, commit_message=commit_message,
+        pr_title=pr_title, pr_body=pr_body,
+        user_reviewers=user_reviewers,
+        team_reviewers=team_reviewers
+    )
+    creator.create(delete_old_pull_requests)
+
+
+if __name__ == '__main__':
+    main(auto_envvar_prefix="PR_CREATOR")  # pylint: disable=no-value-for-parameter, unexpected-keyword-arg

@@ -14,8 +14,9 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.close_existing_pull_requests',
            return_value=[])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance', return_value=None)
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.connect_to_repo', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_modified_files_list', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request', return_value=None)
@@ -24,14 +25,15 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
     def test_no_changes(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
-                        update_files_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock,
+                        update_files_mock, branch_exists_mock, current_commit_mock,
+                        modified_list_mock, repo_mock, authenticate_mock,
                         close_existing_prs_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
-        pull_request_creator = PullRequestCreator('--sha=123', '--repo_root=../../edx-platform', 'upgrade-branch', [],
+        pull_request_creator = PullRequestCreator('--repo_root=../../edx-platform', 'upgrade-branch', [],
                                                   [], 'Upgrade python requirements', 'Update python requirements',
-                                                  'make upgrade PR', '--org=edx')
+                                                  'make upgrade PR')
         pull_request_creator.create(True)
 
         assert authenticate_mock.called
@@ -46,9 +48,10 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=[])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance',
            return_value=Mock())
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.connect_to_repo', return_value=Mock())
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=Mock())
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_modified_files_list',
            return_value=["requirements/edx/base.txt", "requirements/edx/coverage.txt"])
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=False)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request', return_value=None)
@@ -57,14 +60,15 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
     def test_changes(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
-                     update_files_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock,
+                     update_files_mock, branch_exists_mock, current_commit_mock,
+                     modified_list_mock, repo_mock, authenticate_mock,
                      close_existing_prs_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
-        pull_request_creator = PullRequestCreator('--sha=123', '--repo_root=../../edx-platform', 'upgrade-branch', [],
+        pull_request_creator = PullRequestCreator('--repo_root=../../edx-platform', 'upgrade-branch', [],
                                                   [], 'Upgrade python requirements', 'Update python requirements',
-                                                  'make upgrade PR', '--org=edx')
+                                                  'make upgrade PR')
         pull_request_creator.create(True)
 
         assert branch_exists_mock.called
@@ -78,9 +82,10 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.close_existing_pull_requests',
            return_value=[])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance', return_value=None)
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.connect_to_repo', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_modified_files_list',
            return_value=["requirements/edx/base.txt", "requirements/edx/coverage.txt"])
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=True)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request', return_value=None)
@@ -89,14 +94,15 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
     def test_branch_exists(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
-                           update_files_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock,
+                           update_files_mock, branch_exists_mock, current_commit_mock,
+                           modified_list_mock, repo_mock, authenticate_mock,
                            close_existing_prs_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
-        pull_request_creator = PullRequestCreator('--sha=123', '--repo_root=../../edx-platform', 'upgrade-branch', [],
+        pull_request_creator = PullRequestCreator('--repo_root=../../edx-platform', 'upgrade-branch', [],
                                                   [], 'Upgrade python requirements', 'Update python requirements',
-                                                  'make upgrade PR', '--org=edx')
+                                                  'make upgrade PR')
         pull_request_creator.create(True)
 
         assert branch_exists_mock.called
