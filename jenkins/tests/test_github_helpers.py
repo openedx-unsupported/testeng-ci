@@ -18,29 +18,41 @@ class HelpersTestCase(TestCase):
         incorrect_pr_one.user.login = "notJohn"
         incorrect_pr_one.number = 1
         incorrect_pr_one.head.ref = "incorrect-branch-name"
+        incorrect_pr_one.base.ref = "master"
 
         incorrect_pr_two = Mock()
         incorrect_pr_two.user.name = "John Smith"
         incorrect_pr_two.user.login = "johnsmithiscool100"
         incorrect_pr_two.number = 2
         incorrect_pr_two.head.ref = "incorrect-branch-name-2"
+        incorrect_pr_two.base.ref = "master"
+
+        incorrect_pr_three = Mock()
+        incorrect_pr_three.user.name = "John Smith"
+        incorrect_pr_three.user.login = "fakeuser100"
+        incorrect_pr_three.number = 5
+        incorrect_pr_three.head.ref = "jenkins/upgrade-python-requirements-ce0515e"
+        incorrect_pr_three.base.ref = "some-other-branch"
 
         correct_pr_one = Mock()
         correct_pr_one.user.name = "John Smith"
         correct_pr_one.user.login = "fakeuser100"
         correct_pr_one.number = 3
         correct_pr_one.head.ref = "jenkins/upgrade-python-requirements-ce0515e"
+        correct_pr_one.base.ref = "master"
 
         correct_pr_two = Mock()
         correct_pr_two.user.name = "John Smith"
         correct_pr_two.user.login = "fakeuser100"
         correct_pr_two.number = 4
         correct_pr_two.head.ref = "jenkins/upgrade-python-requirements-0c51f37"
+        correct_pr_two.base.ref = "master"
 
         mock_repo = Mock()
         mock_repo.get_pulls = MagicMock(return_value=[
             incorrect_pr_one,
             incorrect_pr_two,
+            incorrect_pr_three,
             correct_pr_one,
             correct_pr_two
         ])
@@ -49,6 +61,7 @@ class HelpersTestCase(TestCase):
         assert deleted_pulls == [3, 4]
         assert not incorrect_pr_one.edit.called
         assert not incorrect_pr_two.edit.called
+        assert not incorrect_pr_three.edit.called
         assert correct_pr_one.edit.called
         assert correct_pr_two.edit.called
 
