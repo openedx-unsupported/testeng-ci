@@ -148,7 +148,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
     def is_cleanup_pr(self, branch_name):
         return re.match("(jenkins/{})-[a-zA-Z0-9]*".format(CODE_CLEANUP_BRANCH_NAME), branch_name)
 
-    def close_existing_pull_requests(self, repository, user_login, user_name):
+    def close_existing_pull_requests(self, repository, user_login, user_name, target_branch='master'):
         """
         Close any existing PR's by the bot user in this PR. This will help
         reduce clutter, since any old PR's will be obsolete.
@@ -157,7 +157,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         deleted_pull_numbers = []
         for pr in pulls:
             user = pr.user
-            if user.login == user_login and user.name == user_name:
+            if user.login == user_login and user.name == user_name and pr.base.ref == target_branch:
                 branch_name = pr.head.ref
                 if self.is_cleanup_pr(branch_name):
                     continue
