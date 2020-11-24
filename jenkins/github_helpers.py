@@ -182,6 +182,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 base=base,
                 head=head
             )
+        except Exception as e:
+            raise Exception("Failed to create pull request") from e
+
+        try:
             any_reviewers = (user_reviewers is not GithubObject.NotSet or team_reviewers is not GithubObject.NotSet)
             if any_reviewers:
                 pull_request.create_review_request(
@@ -190,12 +194,13 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 )
                 self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
 
-            return pull_request
         except Exception as e:
             raise Exception(
-                "Either pull request was not created or some reviewers were not tagged on PR\n"
-                "Original Exception : {}".format(e)
-            )
+                "Some reviewers could not be tagged on new PR "
+                "https://github.com/{}/pull/{}".format(repository.full_name, pull_request.number)
+            ) from e
+
+        return pull_request
 
     def verify_reviewers_tagged(self, pull_request, requested_users, requested_teams):
         """
