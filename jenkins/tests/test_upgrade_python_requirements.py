@@ -8,7 +8,7 @@ from jenkins.pull_request_creator import PullRequestCreator
 
 class BokchoyPullRequestTestCase(TestCase):
     """
-    Test Case class for upgrade_python_requirements.py
+    Test Case class for PR creator.
     """
 
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.close_existing_pull_requests',
