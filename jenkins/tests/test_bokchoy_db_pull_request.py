@@ -26,8 +26,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request.github_helper.update_list_of_files',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request',
-           return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request')
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_no_changes(
@@ -63,8 +62,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request.github_helper.close_existing_pull_requests',
            return_value=[])
-    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request',
-           return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request')
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_changes(
@@ -96,8 +94,7 @@ class BokchoyPullRequestTestCase(TestCase):
                         "common/test/db_cache/bok_choy_schema_default.sql")
     @patch('jenkins.bokchoy_db_pull_request.github_helper.create_branch',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request',
-           return_value=None)
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.create_pull_request')
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_branch_exists(

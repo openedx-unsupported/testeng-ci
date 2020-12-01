@@ -8,7 +8,7 @@ from jenkins.pull_request_creator import PullRequestCreator
 
 class BokchoyPullRequestTestCase(TestCase):
     """
-    Test Case class for upgrade_python_requirements.py
+    Test Case class for PR creator.
     """
 
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.close_existing_pull_requests',
@@ -19,7 +19,7 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_branch', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
@@ -54,7 +54,7 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=False)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_branch', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
@@ -88,7 +88,7 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=True)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_branch', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))

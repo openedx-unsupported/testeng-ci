@@ -9,8 +9,6 @@ import re
 from git import Git, Repo
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
 
-CODE_CLEANUP_BRANCH_NAME = "cleanup-python-code"
-
 logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -146,7 +144,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         return branch_object
 
     def is_cleanup_pr(self, branch_name):
-        return re.match("(jenkins/{})-[a-zA-Z0-9]*".format(CODE_CLEANUP_BRANCH_NAME), branch_name)
+        return re.fullmatch("jenkins/cleanup-python-code-[a-zA-Z0-9]*", branch_name) is not None
 
     def close_existing_pull_requests(self, repository, user_login, user_name):
         """
@@ -159,8 +157,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             user = pr.user
             if user.login == user_login and user.name == user_name:
                 branch_name = pr.head.ref
-                if self.is_cleanup_pr(branch_name):
-                    continue
                 logger.info("Deleting PR: #{}".format(pr.number))
                 pr.create_issue_comment("Closing obsolete PR.")
                 pr.edit(state="closed")
@@ -182,6 +178,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 base=base,
                 head=head
             )
+        except Exception as e:
+            raise Exception("Failed to create pull request") from e
+
+        try:
             any_reviewers = (user_reviewers is not GithubObject.NotSet or team_reviewers is not GithubObject.NotSet)
             if any_reviewers:
                 pull_request.create_review_request(
@@ -190,17 +190,20 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 )
                 self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
 
-            return pull_request
         except Exception as e:
             raise Exception(
-                "Either pull request was not created or some reviewers were not tagged on PR\n"
-                "Original Exception : {}".format(e)
-            )
+                "Some reviewers could not be tagged on new PR "
+                "https://github.com/{}/pull/{}".format(repository.full_name, pull_request.number)
+            ) from e
+
+        return pull_request
 
     def verify_reviewers_tagged(self, pull_request, requested_users, requested_teams):
         """
         Assert if the reviewers we requested were tagged on the PR for review
         """
+        # TODO: Remove is_cleanup_pr in favor of a new CLI option on
+        # PullRequestCreator that makes tagging failures log-only
         if self.is_cleanup_pr(pull_request.head.ref):
             return
         tagged_for_review = pull_request.get_review_requests()

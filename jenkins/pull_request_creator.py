@@ -82,7 +82,7 @@ class PullRequestCreator:
         else:
             team_reviewers = GithubObject.NotSet
 
-        self.github_helper.create_pull_request(
+        pr = self.github_helper.create_pull_request(
             self.repository,
             self.pr_title,
             self.pr_body,
@@ -91,6 +91,9 @@ class PullRequestCreator:
             user_reviewers=user_reviewers,
             team_reviewers=team_reviewers
         )
+        LOGGER.info("Created PR: https://github.com/{}/pull/{}".format(
+            self.repository.full_name, pr.number
+        ))
 
     def delete_old_pull_requests(self):
         LOGGER.info("Checking if there's any old pull requests to delete")
