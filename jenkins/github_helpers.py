@@ -184,6 +184,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         try:
             any_reviewers = (user_reviewers is not GithubObject.NotSet or team_reviewers is not GithubObject.NotSet)
             if any_reviewers:
+                logger.info("Tagging reviewers: users=%s and teams=%s", user_reviewers, team_reviewers)
                 pull_request.create_review_request(
                     reviewers=user_reviewers,
                     team_reviewers=team_reviewers,
@@ -207,13 +208,16 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         if self.is_cleanup_pr(pull_request.head.ref):
             return
         tagged_for_review = pull_request.get_review_requests()
-
         tagged_users = [user.login for user in tagged_for_review[0]]
+        tagged_teams = [team.name for team in tagged_for_review[1]]
+        logger.info("Actually tagged on PR: users=%s teams=%s", tagged_users, tagged_teams)
+
         if requested_users is not GithubObject.NotSet and sorted(requested_users) != sorted(tagged_users):
+            logger.info("User taggging failure: Requested %s, actually tagged %s", requested_users, tagged_users)
             raise Exception('Some of the requested reviewers were not tagged on PR for review')
 
-        tagged_teams = [team.name for team in tagged_for_review[1]]
         if requested_teams is not GithubObject.NotSet and sorted(requested_teams) != sorted(tagged_teams):
+            logger.info("Team taggging failure: Requested %s, actually tagged %s", requested_teams, tagged_teams)
             raise Exception('Some of the requested teams were not tagged on PR for review')
 
     def delete_branch(self, repository, branch_name):
