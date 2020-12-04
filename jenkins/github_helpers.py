@@ -216,13 +216,13 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             return
         tagged_for_review = pull_request.get_review_requests()
 
-        tagged_users = {user.login for user in tagged_for_review[0]}
-        if not (requested_users is GithubObject.NotSet or tagged_users >= set(requested_users)):
+        tagged_users = [user.login for user in tagged_for_review[0]]
+        if not (requested_users is GithubObject.NotSet or set(tagged_users) >= set(requested_users)):
             logger.info("User taggging failure: Requested %s, actually tagged %s", requested_users, tagged_users)
             raise Exception('Some of the requested reviewers were not tagged on PR for review')
 
-        tagged_teams = {team.name for team in tagged_for_review[1]}
-        if not (requested_teams is GithubObject.NotSet or tagged_teams >= set(requested_teams)):
+        tagged_teams = [team.name for team in tagged_for_review[1]]
+        if not (requested_teams is GithubObject.NotSet or set(tagged_teams) >= set(requested_teams)):
             logger.info("Team taggging failure: Requested %s, actually tagged %s", requested_teams, tagged_teams)
             raise Exception('Some of the requested teams were not tagged on PR for review')
 
