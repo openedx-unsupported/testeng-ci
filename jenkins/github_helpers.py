@@ -201,22 +201,28 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
     def verify_reviewers_tagged(self, pull_request, requested_users, requested_teams):
         """
-        Assert if the reviewers we requested were tagged on the PR for review
+        Assert if the reviewers we requested were tagged on the PR for review.
+
+        Considerations:
+
+        - Teams cannot be tagged on a PR unless that team has explicit write
+          access to the repo.
+        - Github may have independently tagged additional users or teams
+          based on a CODEOWNERS file.
         """
         # TODO: Remove is_cleanup_pr in favor of a new CLI option on
         # PullRequestCreator that makes tagging failures log-only
         if self.is_cleanup_pr(pull_request.head.ref):
             return
         tagged_for_review = pull_request.get_review_requests()
-        tagged_users = [user.login for user in tagged_for_review[0]]
-        tagged_teams = [team.name for team in tagged_for_review[1]]
-        logger.info("Actually tagged on PR: users=%s teams=%s", tagged_users, tagged_teams)
 
-        if requested_users is not GithubObject.NotSet and sorted(requested_users) != sorted(tagged_users):
+        tagged_users = {user.login for user in tagged_for_review[0]}
+        if not (requested_users is GithubObject.NotSet or tagged_users >= set(requested_users)):
             logger.info("User taggging failure: Requested %s, actually tagged %s", requested_users, tagged_users)
             raise Exception('Some of the requested reviewers were not tagged on PR for review')
 
-        if requested_teams is not GithubObject.NotSet and sorted(requested_teams) != sorted(tagged_teams):
+        tagged_teams = {team.name for team in tagged_for_review[1]}
+        if not (requested_teams is GithubObject.NotSet or tagged_teams >= set(requested_teams)):
             logger.info("Team taggging failure: Requested %s, actually tagged %s", requested_teams, tagged_teams)
             raise Exception('Some of the requested teams were not tagged on PR for review')
 
