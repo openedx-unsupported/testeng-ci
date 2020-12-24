@@ -157,6 +157,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             user = pr.user
             if user.login == user_login and user.name == user_name and pr.base.ref == target_branch:
                 branch_name = pr.head.ref
+                if self.is_cleanup_pr(branch_name):
+                    continue
                 logger.info("Deleting PR: #{}".format(pr.number))
                 pr.create_issue_comment("Closing obsolete PR.")
                 pr.edit(state="closed")
