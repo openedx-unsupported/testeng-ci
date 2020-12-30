@@ -34,7 +34,7 @@ def deregister_amis_by_tag(tag_key, tag_value, dry_run, ec2):
     Deregisters AMIs that are found according to tag key/value pairs.
     """
 
-    tag_key_string = "tag:{tag_key}".format(tag_key=tag_key)
+    tag_key_string = f"tag:{tag_key}"
 
     logger.info("Finding AMIs tagged with {key}: {value}".format(
         key=tag_key,

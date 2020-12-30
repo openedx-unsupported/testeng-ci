@@ -2,10 +2,10 @@
 A class to interact with a jenkins job API
 """
 import logging
+
 import requests
 
 from .helpers import append_url
-
 
 logger = logging.getLogger(__name__)
 

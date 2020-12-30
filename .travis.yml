@@ -2,13 +2,11 @@
 sudo: false
 language: python
 branches:
-    only:
-      - master
+  only:
+    - master
 matrix:
   include:
-    - python: "3.5"
-    - python: "3.6"
-    - python: "3.8"
+    - python: '3.8'
 before_install:
   - export BOTO_CONFIG=/dev/null
 install:

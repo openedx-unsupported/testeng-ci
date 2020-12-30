@@ -16,7 +16,7 @@ logger.info('Loading function')
 log_level = os.environ.get('LOG_LEVEL', 'INFO').upper()
 numeric_level = getattr(logging, log_level, None)
 if not isinstance(numeric_level, int):
-    raise ValueError('Invalid log level: {}'.format(log_level))
+    raise ValueError(f'Invalid log level: {log_level}')
 logger.setLevel(numeric_level)
 
 
@@ -81,10 +81,10 @@ def _add_gh_header(event, headers):
     gh_headers = event.get('headers')
     gh_event = gh_headers.get('X-GitHub-Event')
     if not gh_event:
-        msg = 'X-GitHub-Event header was not found in {}'.format(gh_headers)
+        msg = f'X-GitHub-Event header was not found in {gh_headers}'
         raise ValueError(msg)
 
-    logger.debug('GitHub event was: {}'.format(gh_event))
+    logger.debug(f'GitHub event was: {gh_event}')
     headers['X-GitHub-Event'] = gh_event
     return headers
 
@@ -141,12 +141,12 @@ def lambda_handler(event, _context):
 
     # Add the headers from the event
     headers = _add_gh_header(event, header)
-    logger.debug("headers are: '{}'".format(headers))
+    logger.debug(f"headers are: '{headers}'")
 
     # Get the state of the spigot from the api variable
     spigot_state = event.get('spigot_state')
     logger.info(
-        "spigot_state is set to: {}".format(spigot_state)
+        f"spigot_state is set to: {spigot_state}"
     )
 
     if spigot_state == "ON":
@@ -162,7 +162,7 @@ def lambda_handler(event, _context):
         # We had stored the payload to send in the
         # 'body' node of the data object.
         payload = event.get('body')
-        logger.debug("payload is: '{}'".format(payload))
+        logger.debug(f"payload is: '{payload}'")
 
         # Send it off!
         try:
@@ -178,7 +178,7 @@ def lambda_handler(event, _context):
                 "to the url: {}".format(url)
             )
         return (
-            "Webhook successfully sent to url: {}".format(url)
+            f"Webhook successfully sent to url: {url}"
         )
     elif spigot_state == "OFF":
         # Since the spigot is off, send the event
@@ -195,7 +195,7 @@ def lambda_handler(event, _context):
             _response = _send_to_queue(event, queue_name)
 
             return (
-                "Webhook successfully sent to queue: {}".format(queue_name)
+                f"Webhook successfully sent to queue: {queue_name}"
             )
     else:
         raise Exception(

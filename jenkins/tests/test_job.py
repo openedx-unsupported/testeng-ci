@@ -1,11 +1,11 @@
 # pylint: disable=missing-module-docstring
 from unittest import TestCase
+from unittest.mock import patch
 
-from mock import patch
 from requests.exceptions import HTTPError
 
-from jenkins.tests.helpers import mock_response, sample_data, Pr
 from jenkins.job import JenkinsJob
+from jenkins.tests.helpers import Pr, mock_response, sample_data
 
 
 class JenkinsJobTestCase(TestCase):

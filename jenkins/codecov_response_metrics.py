@@ -11,11 +11,11 @@
 # This script should be run periodically in order to get a good understanding
 # of the state of codecov response times.
 """
+import datetime
+import json
+import logging
 import os
 import sys
-import datetime
-import logging
-import json
 
 from github import Github
 
@@ -160,7 +160,7 @@ def gather_codecov_metrics(all_repos, time_frame):
     # pylint: disable=logging-not-lazy
     logger.info(
         'Gathering codecov response metrics on pull requests ' +
-        'updated within the last {} seconds'.format(time_frame)
+        f'updated within the last {time_frame} seconds'
     )
 
     results = []

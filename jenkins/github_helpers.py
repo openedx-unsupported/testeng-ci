@@ -1,7 +1,7 @@
 """
 Helper methods for connecting with Github
 """
-import io
+import io  # pylint: disable=unused-import
 import logging
 import os
 import re
@@ -25,30 +25,30 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
     def _set_github_token(self):
         try:
             self.github_token = os.environ.get('GITHUB_TOKEN')
-        except:
+        except Exception as error:
             raise Exception(
                 "Could not find env variable GITHUB_TOKEN. "
                 "Please make sure the variable is set and try again."
-            )
+            ) from error
 
     # FIXME: Does nothing, sets variable to None if env var missing
     def _set_user_email(self):
         try:
             self.github_user_email = os.environ.get('GITHUB_USER_EMAIL')
-        except:
+        except Exception as error:
             raise Exception(
                 "Could not find env variable GITHUB_USER_EMAIL. "
                 "Please make sure the variable is set and try again."
-            )
+            ) from error
 
     def _set_github_instance(self):
         try:
             self.github_instance = Github(self.github_token)
-        except:
+        except Exception as error:
             raise Exception(
                 "Failed connecting to Github. " +
                 "Please make sure the github token is accurate and try again."
-            )
+            ) from error
 
     def get_github_instance(self):
         return self.github_instance
@@ -136,11 +136,11 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         try:
             branch_object = repository.create_git_ref(branch_name, sha)
-        except:
+        except Exception as error:
             raise Exception(
                 "Unable to create git branch: {}. "
                 "Check to make sure this branch doesn't already exist.".format(branch_name)
-            )
+            ) from error
         return branch_object
 
     def is_cleanup_pr(self, branch_name):
@@ -235,10 +235,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ref = "heads/{}".format(branch_name)
             branch_object = repository.get_git_ref(ref)
             branch_object.delete()
-        except:
+        except Exception as error:
             raise Exception(
                 "Failed to delete branch"
-            )
+            ) from error
 
     def get_file_contents(self, repo_root, file_path):
         """
@@ -246,12 +246,13 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         try:
             full_file_path = os.path.join(repo_root, file_path)
-            with io.open(full_file_path, 'r') as opened_file:
+            with open(full_file_path, 'r') as opened_file:
                 data = opened_file.read()
-        except:
+        except Exception as error:
             raise Exception(
                 "Unable to read file: {}".format(file_path)
-            )
+            ) from error
+
         return data
 
     # pylint: disable=missing-function-docstring

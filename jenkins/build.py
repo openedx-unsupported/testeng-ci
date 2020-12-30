@@ -3,7 +3,6 @@ A class for working with the build info returned from the jenkins job API
 """
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 

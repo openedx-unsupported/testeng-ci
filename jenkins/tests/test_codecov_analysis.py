@@ -2,11 +2,9 @@
 import datetime
 from unittest import TestCase
 
-from jenkins.codecov_response_metrics import (
-    get_recent_pull_requests,
-    get_context_age,
-    gather_codecov_metrics
-)
+from jenkins.codecov_response_metrics import (gather_codecov_metrics,
+                                              get_context_age,
+                                              get_recent_pull_requests)
 
 
 class MockRepo:

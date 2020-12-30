@@ -17,7 +17,7 @@ logger.info('Loading function')
 log_level = os.environ.get('LOG_LEVEL', 'INFO').upper()
 numeric_level = getattr(logging, log_level, None)
 if not isinstance(numeric_level, int):
-    raise ValueError('Invalid log level: {}'.format(log_level))
+    raise ValueError(f'Invalid log level: {log_level}')
 logger.setLevel(numeric_level)
 
 
@@ -163,7 +163,7 @@ def _delete_from_queue(queue_object, message):
         response = queue_object.delete_messages(Entries=[entry])
     except:
         raise Exception(
-            'Unable to delete message {} from queue'.format(msg_id)
+            f'Unable to delete message {msg_id} from queue'
         )
 
 

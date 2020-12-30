@@ -1,8 +1,8 @@
 # pylint: disable=missing-module-docstring
 from unittest import TestCase
 
-from jenkins.tests.helpers import sample_data, Pr
 from jenkins.build import Build
+from jenkins.tests.helpers import Pr, sample_data
 
 
 class BuildTestCase(TestCase):

@@ -1,12 +1,12 @@
 import json
 import os
 from unittest import TestCase
+from unittest.mock import Mock, patch
 
 from requests import Response
-from mock import patch, Mock
 
-from ..send_from_queue import _get_target_queue, _get_api_url
-from ..send_from_queue import _delete_from_queue, lambda_handler
+from ..send_from_queue import (_delete_from_queue, _get_api_url,
+                               _get_target_queue, lambda_handler)
 
 
 class SendFromQueueTestCase(TestCase):

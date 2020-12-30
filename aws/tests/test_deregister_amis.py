@@ -3,10 +3,10 @@ Tests for testeng-ci/aws.
 """
 import os
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 import boto3
 from botocore.exceptions import ClientError
-from mock import MagicMock, patch
 from testfixtures import LogCapture
 
 from aws.deregister_amis import deregister_amis_by_tag, main

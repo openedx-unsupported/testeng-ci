@@ -4,22 +4,22 @@
 #
 #    make upgrade
 #
-boto3==1.16.14            # via -r requirements/aws.txt
-botocore==1.19.14         # via -r requirements/aws.txt, boto3, s3transfer
-certifi==2020.11.8        # via requests
-chardet==3.0.4            # via requests
+boto3==1.16.45            # via -r requirements/aws.txt
+botocore==1.19.45         # via -r requirements/aws.txt, boto3, s3transfer
+certifi==2020.12.5        # via requests
+chardet==4.0.0            # via requests
 click==7.1.2              # via -r requirements/base.in
 deprecated==1.2.10        # via pygithub
 gitdb==4.0.5              # via gitpython
 gitpython==3.1.11         # via -r requirements/base.in
 idna==2.10                # via requests
 jmespath==0.10.0          # via -r requirements/aws.txt, boto3, botocore
-pygithub==1.53            # via -r requirements/base.in
+pygithub==1.54.1          # via -r requirements/base.in
 pyjwt==1.7.1              # via pygithub
 python-dateutil==2.8.1    # via -r requirements/aws.txt, botocore
-requests==2.24.0          # via -r requirements/base.in, pygithub
+requests==2.25.1          # via -r requirements/base.in, pygithub
 s3transfer==0.3.3         # via -r requirements/aws.txt, boto3
 six==1.15.0               # via -r requirements/aws.txt, python-dateutil
 smmap==3.0.4              # via gitdb
-urllib3==1.25.11          # via -r requirements/aws.txt, botocore, requests
+urllib3==1.26.2           # via -r requirements/aws.txt, botocore, requests
 wrapt==1.11.2             # via -c requirements/constraints.txt, deprecated

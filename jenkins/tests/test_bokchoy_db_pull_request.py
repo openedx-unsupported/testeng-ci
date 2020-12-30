@@ -1,8 +1,8 @@
 # pylint: disable=missing-module-docstring,unused-variable
 from unittest import TestCase
+from unittest.mock import Mock, patch
 
 from click.testing import CliRunner
-from mock import Mock, patch
 
 from jenkins.bokchoy_db_pull_request import main
 

@@ -1,7 +1,6 @@
 # pylint: disable=missing-module-docstring
 from unittest import TestCase
-
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from jenkins.pull_request_creator import PullRequestCreator
 
