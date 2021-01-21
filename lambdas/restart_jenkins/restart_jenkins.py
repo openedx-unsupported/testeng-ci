@@ -19,7 +19,7 @@ logger.info('Loading function')
 log_level = os.environ.get('LOG_LEVEL', 'INFO').upper()
 numeric_level = getattr(logging, log_level, None)
 if not isinstance(numeric_level, int):
-    raise ValueError('Invalid log level: {}'.format(log_level))
+    raise ValueError(f'Invalid log level: {log_level}')
 logger.setLevel(numeric_level)
 
 
@@ -68,7 +68,7 @@ def lambda_handler(_event, _context):
     # If CSRF is enabled, you need to get a crumb
     # to send in the header of your POST request.
     response = get(
-        '{}/crumbIssuer/api/json'.format(jenkins_url),
+        f'{jenkins_url}/crumbIssuer/api/json',
         auth=auth,
         timeout=(3.05, 30)
     )
@@ -83,7 +83,7 @@ def lambda_handler(_event, _context):
         headers = {crumb_field: crumb_value}
 
     response = post(
-        '{}/safeRestart'.format(jenkins_url),
+        f'{jenkins_url}/safeRestart',
         auth=auth,
         headers=headers,
         timeout=(3.05, 30)

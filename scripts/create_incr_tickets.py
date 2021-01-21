@@ -168,16 +168,16 @@ def main():
     with open('ready_batches.csv', 'w') as out:
         for b in ready_batches:
             dirs = ':'.join(b.top_level_directories)
-            ticket_number = "INCR-{}".format(ticket_number_seed)
-            out.write('{},{},{},{}'.format(ticket_number, b.blocked, b.file_count(), dirs))
+            ticket_number = f"INCR-{ticket_number_seed}"
+            out.write(f'{ticket_number},{b.blocked},{b.file_count()},{dirs}')
             out.write('\n')
             ticket_number_seed += 1
 
     with open('blocked_batches.csv', 'w') as out:
         for b in blocked_batches:
             dirs = ':'.join(b.top_level_directories)
-            ticket_number = "INCR-{}".format(ticket_number_seed)
-            out.write('{},{},{},{}'.format(ticket_number, b.blocked, b.file_count(), dirs))
+            ticket_number = f"INCR-{ticket_number_seed}"
+            out.write(f'{ticket_number},{b.blocked},{b.file_count()},{dirs}')
             out.write('\n')
             ticket_number_seed += 1
 

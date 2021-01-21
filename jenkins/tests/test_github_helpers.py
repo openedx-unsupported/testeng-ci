@@ -1,7 +1,6 @@
 # pylint: disable=missing-module-docstring,missing-class-docstring
 from unittest import TestCase
-
-from mock import MagicMock, Mock, mock_open, patch
+from unittest.mock import MagicMock, Mock, mock_open, patch
 
 from jenkins.github_helpers import GitHubHelper
 
@@ -114,7 +113,7 @@ class HelpersTestCase(TestCase):
         assert return_sha is not None
 
     def test_get_file_contents(self):
-        with patch("io.open", mock_open(read_data="data")) as mock_file:
+        with patch("builtins.open", mock_open(read_data="data")) as mock_file:
             contents = GitHubHelper().get_file_contents("../../edx-platform", "path/to/file")
             mock_file.assert_called_with("../../edx-platform/path/to/file", "r")
             assert contents == "data"

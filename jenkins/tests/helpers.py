@@ -1,7 +1,8 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
 import datetime
 import functools
-from mock import Mock
+from unittest.mock import Mock
+
 from requests import Response
 
 

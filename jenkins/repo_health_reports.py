@@ -85,7 +85,7 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
             for num, deleted_pull_number in enumerate(deleted_pulls):
                 if num == 0:
                     pr_body += "\n\nDeleted obsolete pull_requests:"
-                pr_body += "\nhttps://github.com/{}/{}/pull/{}".format(org, repo_name, deleted_pull_number)
+                pr_body += f"\nhttps://github.com/{org}/{repo_name}/pull/{deleted_pull_number}"
 
             LOGGER.info("Creating a new pull request")
 

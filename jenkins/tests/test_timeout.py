@@ -1,12 +1,12 @@
 # pylint: disable=missing-module-docstring
 from unittest import TestCase
+from unittest.mock import call, patch
 
-from mock import patch, call
 from requests.exceptions import HTTPError
 
-from jenkins.tests.helpers import sample_data, mock_utcnow, Pr
-from jenkins.timeout import BuildTimeout, timeout_main
 from jenkins.job import JenkinsJob
+from jenkins.tests.helpers import Pr, mock_utcnow, sample_data
+from jenkins.timeout import BuildTimeout, timeout_main
 
 
 class TimeoutTestCase(TestCase):

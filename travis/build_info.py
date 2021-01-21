@@ -10,10 +10,10 @@ import argparse
 import logging
 import sys
 from operator import itemgetter
+
 import requests
 
-
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 
 BASE_URL = 'https://api.travis-ci.org/'
 
@@ -28,7 +28,7 @@ def get_repos(org):
     # If org has > 100, this code will need to be modified
     #  to include 'offset' requests
     req = requests.get(
-        BASE_URL + 'v3/owner/{org}/repos?active=true'.format(org=org)
+        BASE_URL + f'v3/owner/{org}/repos?active=true'
     )
     if req.status_code != 200:
         raise requests.HTTPError(req.status_code)
@@ -36,8 +36,8 @@ def get_repos(org):
     try:
         for repo in repos.get('repositories'):
             repo_list.append(repo['name'])
-    except KeyError:
-        raise KeyError("Cannot parse response")
+    except KeyError as error:
+        raise KeyError("Cannot parse response") from error
 
     return repo_list
 
@@ -47,9 +47,9 @@ def get_builds(org, repo, is_finished=False):
     Returns list of active builds for a given repo slug
     """
     logger.debug('getting builds for repo: %s', repo)
-    repo_slug = '{org}/{repo}'.format(org=org, repo=repo)
+    repo_slug = f'{org}/{repo}'
     req = requests.get(
-        BASE_URL + 'repos/{repo_slug}/builds'.format(repo_slug=repo_slug)
+        BASE_URL + f'repos/{repo_slug}/builds'
     )
     build_list = req.json()
     selected_build_list = []
@@ -134,7 +134,7 @@ def get_active_jobs(build_id):
     """
     jobs = []
     req = requests.get(
-        BASE_URL + 'v3/build/{build_id}/jobs'.format(build_id=build_id)
+        BASE_URL + f'v3/build/{build_id}/jobs'
     )
     job_resp = req.json()
     for job in job_resp['jobs']:

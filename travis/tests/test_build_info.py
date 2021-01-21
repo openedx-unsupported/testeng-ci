@@ -2,26 +2,19 @@
 Tests for testeng-ci/travis/build_info
 """
 
-from unittest import TestCase
 import os
-from ddt import ddt, data
-from mock import patch
-from testfixtures import LogCapture
+from unittest import TestCase
+from unittest.mock import patch
 
 import httpretty
 import requests
+from ddt import data, ddt
+from testfixtures import LogCapture
 
-from travis.build_info import (
-    get_repos,
-    get_active_jobs,
-    get_average_build_duration,
-    get_builds,
-    get_last_n_successful_builds,
-    BASE_URL,
-    main,
-    active_job_counts,
-    repo_active_build_count
-)
+from travis.build_info import (BASE_URL, active_job_counts, get_active_jobs,
+                               get_average_build_duration, get_builds,
+                               get_last_n_successful_builds, get_repos, main,
+                               repo_active_build_count)
 
 
 class TestTravisBuildRepoInfo(TestCase):

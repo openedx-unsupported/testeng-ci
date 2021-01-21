@@ -1,12 +1,12 @@
 import os
 from unittest import TestCase
+from unittest.mock import Mock, patch
 
 from requests import Response
-from mock import patch, Mock
 
-from ..process_webhooks import _send_message, _add_gh_header
-from ..process_webhooks import _get_target_url, _get_target_queue
-from ..process_webhooks import lambda_handler, _is_from_queue
+from ..process_webhooks import (_add_gh_header, _get_target_queue,
+                                _get_target_url, _is_from_queue, _send_message,
+                                lambda_handler)
 
 
 class ProcessWebhooksTestCase(TestCase):

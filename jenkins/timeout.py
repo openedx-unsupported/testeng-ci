@@ -9,7 +9,6 @@ import sys
 
 from .job import JenkinsJob
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -85,7 +84,7 @@ class BuildTimeout:
 
         lines = []
         for b in build_nums:
-            lines.append("Build #{} aborted due to timeout.".format(b))
+            lines.append(f"Build #{b} aborted due to timeout.")
             desc = self._aborted_description(self.timeout, b)
 
             try:

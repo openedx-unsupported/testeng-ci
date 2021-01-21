@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,bare-except
-import sys
 import logging
+import sys
 from time import sleep
 
 import boto3

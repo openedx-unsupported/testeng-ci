@@ -104,7 +104,7 @@ class EdxStatusBot:
             status_description = "There were no failures."
         else:
             status_description = "The following contexts failed:\n{}".format(
-                '\n'.join(["* {}".format(f) for f in failing_contexts])
+                '\n'.join([f"* {f}" for f in failing_contexts])
             )
         comment = "Your PR has finished running tests. {}".format(
             status_description
@@ -118,7 +118,7 @@ class EdxStatusBot:
                                                                                                             "error"]]
 
     def _action_str(self, action):
-        return '{}: {}'.format(self.name, action)
+        return f'{self.name}: {action}'
 
 
 @click.command()
