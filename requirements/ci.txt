@@ -15,5 +15,5 @@ six==1.15.0               # via tox, virtualenv
 toml==0.10.2              # via tox
 tox-battery==0.6.1        # via -r requirements/ci.in
 tox-travis==0.12          # via -r requirements/ci.in
-tox==3.20.1               # via -r requirements/ci.in, tox-battery, tox-travis
-virtualenv==20.2.2        # via tox
+tox==3.21.3               # via -r requirements/ci.in, tox-battery, tox-travis
+virtualenv==20.4.0        # via tox
