@@ -13,3 +13,6 @@ wrapt<1.12
 
 # Dropped support for python 3.5, failure on py 3.5 upgrade jobs
 PyGithub<1.54.1
+
+# PyGithub<1.54.1 needs urllib3<1.26
+urllib3<1.26

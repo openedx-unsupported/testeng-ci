@@ -4,10 +4,23 @@
 #
 #    make upgrade
 #
-boto3==1.16.45            # via -r requirements/aws.in
-botocore==1.19.45         # via boto3, s3transfer
-jmespath==0.10.0          # via boto3, botocore
-python-dateutil==2.8.1    # via botocore
-s3transfer==0.3.3         # via boto3
-six==1.15.0               # via python-dateutil
-urllib3==1.26.2           # via botocore
+boto3==1.16.63
+    # via -r requirements/aws.in
+botocore==1.19.63
+    # via
+    #   boto3
+    #   s3transfer
+jmespath==0.10.0
+    # via
+    #   boto3
+    #   botocore
+python-dateutil==2.8.1
+    # via botocore
+s3transfer==0.3.4
+    # via boto3
+six==1.15.0
+    # via python-dateutil
+urllib3==1.25.11
+    # via
+    #   -c requirements/constraints.txt
+    #   botocore
