@@ -10,3 +10,6 @@
 
 # astroid has a constraint wrapt==1.11.* in it's requirements so newer versions causing conflicts in make upgrade
 wrapt<1.12
+
+# Dropped support for python 3.5, failure on py 3.5 upgrade jobs
+PyGithub<1.54.1
