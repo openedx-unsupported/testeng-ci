@@ -8,10 +8,6 @@ appdirs==1.4.4
     # via
     #   -r requirements/ci.txt
     #   virtualenv
-asgiref==3.3.1
-    # via
-    #   -r requirements/testing.txt
-    #   django
 astroid==2.4.2
     # via
     #   -r requirements/testing.txt
@@ -66,12 +62,12 @@ distlib==0.3.1
     # via
     #   -r requirements/ci.txt
     #   virtualenv
-django==3.1.6
+django==2.2.18
     # via
     #   -r requirements/testing.txt
     #   code-annotations
     #   edx-lint
-edx-lint==3.0.2
+edx-lint==4.0.0
     # via -r requirements/testing.txt
 filelock==3.0.12
     # via
@@ -90,11 +86,23 @@ idna==2.10
     # via
     #   -r requirements/testing.txt
     #   requests
+importlib-metadata==2.1.1
+    # via
+    #   -r requirements/ci.txt
+    #   -r requirements/testing.txt
+    #   pluggy
+    #   pytest
+    #   tox
+    #   virtualenv
+importlib-resources==3.2.1
+    # via
+    #   -r requirements/ci.txt
+    #   virtualenv
 iniconfig==1.1.1
     # via
     #   -r requirements/testing.txt
     #   pytest
-isort==5.7.0
+isort==4.3.21
     # via
     #   -r requirements/testing.txt
     #   pylint
@@ -119,7 +127,7 @@ mccabe==0.6.1
     # via
     #   -r requirements/testing.txt
     #   pylint
-mock==4.0.3
+mock==3.0.5
     # via -r requirements/testing.txt
 packaging==20.9
     # via
@@ -127,6 +135,10 @@ packaging==20.9
     #   -r requirements/testing.txt
     #   pytest
     #   tox
+pathlib2==2.3.5
+    # via
+    #   -r requirements/testing.txt
+    #   pytest
 pbr==5.5.1
     # via
     #   -r requirements/testing.txt
@@ -151,7 +163,7 @@ pygithub==1.54
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/testing.txt
-pyjwt==2.0.1
+pyjwt==1.7.1
     # via
     #   -r requirements/testing.txt
     #   pygithub
@@ -182,7 +194,7 @@ pyparsing==2.4.7
     #   packaging
 pytest-cov==2.11.1
     # via -r requirements/testing.txt
-pytest==6.2.2
+pytest==6.1.2
     # via
     #   -r requirements/testing.txt
     #   pytest-cov
@@ -198,7 +210,7 @@ pytz==2021.1
     # via
     #   -r requirements/testing.txt
     #   django
-pyyaml==5.4.1
+pyyaml==5.3.1
     # via
     #   -r requirements/testing.txt
     #   code-annotations
@@ -216,7 +228,10 @@ six==1.15.0
     #   -r requirements/testing.txt
     #   astroid
     #   edx-lint
+    #   mock
+    #   pathlib2
     #   python-dateutil
+    #   stevedore
     #   tox
     #   virtualenv
 smmap==3.0.5
@@ -227,7 +242,7 @@ sqlparse==0.4.1
     # via
     #   -r requirements/testing.txt
     #   django
-stevedore==3.3.0
+stevedore==1.32.0
     # via
     #   -r requirements/testing.txt
     #   code-annotations
@@ -248,11 +263,15 @@ tox-battery==0.6.1
     # via -r requirements/ci.txt
 tox-travis==0.12
     # via -r requirements/ci.txt
-tox==3.21.3
+tox==3.21.4
     # via
     #   -r requirements/ci.txt
     #   tox-battery
     #   tox-travis
+typed-ast==1.4.2
+    # via
+    #   -r requirements/testing.txt
+    #   astroid
 urllib3==1.25.11
     # via
     #   -c requirements/constraints.txt
@@ -269,6 +288,12 @@ wrapt==1.11.2
     #   -r requirements/testing.txt
     #   astroid
     #   deprecated
+zipp==1.2.0
+    # via
+    #   -r requirements/ci.txt
+    #   -r requirements/testing.txt
+    #   importlib-metadata
+    #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
