@@ -143,9 +143,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from error
         return branch_object
 
-    def is_cleanup_pr(self, branch_name):
-        return re.fullmatch("jenkins/cleanup-python-code-[a-zA-Z0-9]*", branch_name) is not None
-
     def close_existing_pull_requests(self, repository, user_login, user_name, target_branch='master'):
         """
         Close any existing PR's by the bot user in this PR. This will help
@@ -166,7 +163,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         return deleted_pull_numbers
 
     def create_pull_request(self, repository, title, body, base, head, user_reviewers=GithubObject.NotSet,
-                            team_reviewers=GithubObject.NotSet):
+                            team_reviewers=GithubObject.NotSet, verify_reviewers=True):
         """
         Create a new pull request with the changes in head. And tag a list of teams
         for a review.
@@ -189,7 +186,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                     reviewers=user_reviewers,
                     team_reviewers=team_reviewers,
                 )
-                self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
+                if verify_reviewers:
+                    self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
 
         except Exception as e:
             raise Exception(
@@ -210,10 +208,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         - Github may have independently tagged additional users or teams
           based on a CODEOWNERS file.
         """
-        # TODO: Remove is_cleanup_pr in favor of a new CLI option on
-        # PullRequestCreator that makes tagging failures log-only
-        if self.is_cleanup_pr(pull_request.head.ref):
-            return
         tagged_for_review = pull_request.get_review_requests()
 
         tagged_users = [user.login for user in tagged_for_review[0]]
