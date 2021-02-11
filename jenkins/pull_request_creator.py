@@ -3,6 +3,7 @@ Class helps create GitHub Pull requests
 """
 # pylint: disable=missing-class-docstring,missing-function-docstring,attribute-defined-outside-init
 import logging
+import re
 
 import click
 from github import GithubObject
@@ -98,8 +99,13 @@ class PullRequestCreator:
 
     def delete_old_pull_requests(self):
         LOGGER.info("Checking if there's any old pull requests to delete")
-        deleted_pulls = self.github_helper.close_existing_pull_requests(self.repository, self.user.login,
-                                                                        self.user.name, self.target_branch)
+        # Only delete old PRs with the same base name
+        filter_pattern = "jenkins/{}-[a-zA-Z0-9]*".format(re.escape(self.branch_name))
+        deleted_pulls = self.github_helper.close_existing_pull_requests(
+            self.repository, self.user.login,
+            self.user.name, self.target_branch,
+            branch_name_filter=lambda name: re.fullmatch(filter_pattern, name)
+        )
 
         for num, deleted_pull_number in enumerate(deleted_pulls):
             if num == 0:
