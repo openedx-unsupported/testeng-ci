@@ -143,10 +143,14 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from error
         return branch_object
 
-    def close_existing_pull_requests(self, repository, user_login, user_name, target_branch='master'):
+    def close_existing_pull_requests(self, repository, user_login, user_name, target_branch='master',
+                                     branch_name_filter=None):
         """
         Close any existing PR's by the bot user in this PR. This will help
         reduce clutter, since any old PR's will be obsolete.
+        If function branch_name_filter is specified, it will be called with
+        branch names of PRs. The PR will only be closed when the function
+        returns true.
         """
         pulls = repository.get_pulls(state="open")
         deleted_pull_numbers = []
@@ -154,6 +158,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             user = pr.user
             if user.login == user_login and user.name == user_name and pr.base.ref == target_branch:
                 branch_name = pr.head.ref
+                if branch_name_filter and not branch_name_filter(branch_name):
+                    continue
                 logger.info("Deleting PR: #{}".format(pr.number))
                 pr.create_issue_comment("Closing obsolete PR.")
                 pr.edit(state="closed")
