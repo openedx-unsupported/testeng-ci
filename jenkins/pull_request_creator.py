@@ -91,7 +91,9 @@ class PullRequestCreator:
             self.target_branch,
             self.branch,
             user_reviewers=user_reviewers,
-            team_reviewers=team_reviewers
+            team_reviewers=team_reviewers,
+            # TODO: Remove hardcoded check in favor of a new --verify-reviewers CLI option
+            verify_reviewers=self.branch_name != 'cleanup-python-code',
         )
         LOGGER.info("Created PR: https://github.com/{}/pull/{}".format(
             self.repository.full_name, pr.number
