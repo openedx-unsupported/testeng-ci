@@ -21,9 +21,9 @@ attrs==20.3.0
     # via
     #   -r requirements/testing.txt
     #   pytest
-boto3==1.16.63
+boto3==1.17.6
     # via -r requirements/testing.txt
-botocore==1.19.63
+botocore==1.20.6
     # via
     #   -r requirements/testing.txt
     #   boto3
@@ -71,7 +71,7 @@ django==3.1.6
     #   -r requirements/testing.txt
     #   code-annotations
     #   edx-lint
-edx-lint==3.0.2
+edx-lint==4.0.1
     # via -r requirements/testing.txt
 filelock==3.0.12
     # via
@@ -82,7 +82,7 @@ gitdb==4.0.5
     # via
     #   -r requirements/testing.txt
     #   gitpython
-gitpython==3.1.12
+gitpython==3.1.13
     # via -r requirements/testing.txt
 httpretty==1.0.5
     # via -r requirements/testing.txt
@@ -248,7 +248,7 @@ tox-battery==0.6.1
     # via -r requirements/ci.txt
 tox-travis==0.12
     # via -r requirements/ci.txt
-tox==3.21.3
+tox==3.21.4
     # via
     #   -r requirements/ci.txt
     #   tox-battery
