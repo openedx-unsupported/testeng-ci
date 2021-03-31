@@ -69,7 +69,7 @@ def is_head_recent(pull_request, time_frame=3600):
         logger.info('{} has no commits. Skipping'.format(pull_request.title))
         return False
     statuses = head_commit.get_combined_status().statuses
-    return any(
+    return any(  # pylint: disable=use-a-generator
         [is_recent(dt, time_frame) for dt in [s.updated_at for s in statuses]]
     )
 
