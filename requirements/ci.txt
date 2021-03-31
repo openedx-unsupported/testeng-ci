@@ -30,10 +30,10 @@ tox-battery==0.6.1
     # via -r requirements/ci.in
 tox-travis==0.12
     # via -r requirements/ci.in
-tox==3.21.4
+tox==3.23.0
     # via
     #   -r requirements/ci.in
     #   tox-battery
     #   tox-travis
-virtualenv==20.4.2
+virtualenv==20.4.3
     # via tox

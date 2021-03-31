@@ -19,3 +19,6 @@ PyGithub<1.54.1
 
 # PyGithub<1.54.1 needs urllib3<1.26
 urllib3<1.26
+
+# pygithub needs version < 2.0
+pyjwt<2.0
