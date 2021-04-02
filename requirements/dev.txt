@@ -17,9 +17,9 @@ attrs==20.3.0
     # via
     #   -r requirements/testing.txt
     #   pytest
-boto3==1.17.41
+boto3==1.17.43
     # via -r requirements/testing.txt
-botocore==1.20.41
+botocore==1.20.43
     # via
     #   -r requirements/testing.txt
     #   boto3
