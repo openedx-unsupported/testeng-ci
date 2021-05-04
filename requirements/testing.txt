@@ -45,7 +45,7 @@ deprecated==1.2.12
     # via
     #   -r requirements/base.txt
     #   pygithub
-django==2.2.20
+django==2.2.21
     # via
     #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
     #   code-annotations
