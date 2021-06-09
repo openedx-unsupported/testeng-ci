@@ -48,9 +48,8 @@ class GithubTokenHandler:
     def _get_bearer_token(self, duration: int = 60) -> str:
         timestamp = int(now('UNIX'))
         payload = {'iat': timestamp, 'exp': timestamp + duration, 'iss': APP_ID}
-        if not self.private_key:
-            LOGGER.info("private key is present")
-        return jwt.encode(payload, self.private_key, algorithm='RS256')
+        encoded_key = self.private_key.encode()
+        return jwt.encode(payload, encoded_key, algorithm='RS256')
 
     def get_access_token(self) -> str:
         """
