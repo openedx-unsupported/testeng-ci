@@ -7,3 +7,4 @@ PyGithub
 requests
 click
 pyjwt
+cryptography
