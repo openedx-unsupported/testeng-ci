@@ -6,3 +6,4 @@ GitPython
 PyGithub
 requests
 click
+pyjwt
