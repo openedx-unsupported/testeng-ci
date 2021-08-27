@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-appdirs==1.4.4
+backports.entry-points-selectable==1.1.0
     # via virtualenv
 distlib==0.3.2
     # via virtualenv
@@ -12,10 +12,14 @@ filelock==3.0.12
     # via
     #   tox
     #   virtualenv
-packaging==20.9
+packaging==21.0
     # via tox
+platformdirs==2.2.0
+    # via virtualenv
 pluggy==0.13.1
-    # via tox
+    # via
+    #   -c requirements/constraints.txt
+    #   tox
 py==1.10.0
     # via tox
 pyparsing==2.4.7
@@ -30,10 +34,10 @@ tox-battery==0.6.1
     # via -r requirements/ci.in
 tox-travis==0.12
     # via -r requirements/ci.in
-tox==3.23.1
+tox==3.24.3
     # via
     #   -r requirements/ci.in
     #   tox-battery
     #   tox-travis
-virtualenv==20.4.7
+virtualenv==20.7.2
     # via tox

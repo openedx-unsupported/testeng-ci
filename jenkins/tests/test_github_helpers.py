@@ -115,5 +115,5 @@ class HelpersTestCase(TestCase):
     def test_get_file_contents(self):
         with patch("builtins.open", mock_open(read_data="data")) as mock_file:
             contents = GitHubHelper().get_file_contents("../../edx-platform", "path/to/file")
-            mock_file.assert_called_with("../../edx-platform/path/to/file", "r")
+            mock_file.assert_called_with("../../edx-platform/path/to/file", "r", encoding='utf-8')
             assert contents == "data"

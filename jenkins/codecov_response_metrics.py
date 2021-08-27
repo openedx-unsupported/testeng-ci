@@ -239,7 +239,7 @@ def main():
     outfile_name = 'codecov_metrics.json'
     try:
         logger.info('Writing results to {}'.format(outfile_name))
-        with open(outfile_name, 'w') as outfile:
+        with open(outfile_name, 'w', encoding='utf-8') as outfile:
             json.dump(json_data, outfile, separators=(',', ':'))
             outfile.write('\n')
     except OSError:

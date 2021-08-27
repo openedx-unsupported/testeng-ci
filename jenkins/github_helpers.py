@@ -246,7 +246,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         try:
             full_file_path = os.path.join(repo_root, file_path)
-            with open(full_file_path, 'r') as opened_file:
+            with open(full_file_path, 'r', encoding='utf-8') as opened_file:
                 data = opened_file.read()
         except Exception as error:
             raise Exception(
