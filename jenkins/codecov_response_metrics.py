@@ -146,8 +146,7 @@ def get_context_age(statuses, codecov_context, trigger_context):
     # sharded tasks, one of which submits coverage data. This will result
     # in a negative age for the codecov context. Treat these as 0, since
     # their impact is not important.
-    if context_age_in_seconds < 0:
-        context_age_in_seconds = 0
+    context_age_in_seconds = max(context_age_in_seconds, 0)
     return posted, context_age_in_seconds, trigger_context_update_time
 
 
