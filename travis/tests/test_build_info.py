@@ -348,7 +348,7 @@ class TestTravisSuccessfulBuilds(TestCase):
         """
         test_dir = os.path.dirname(__file__)
         abs_file = os.path.join(test_dir, filename)
-        with open(abs_file) as test_file:
+        with open(abs_file, encoding='utf-8') as test_file:
             contents = test_file.read()
 
         return contents
