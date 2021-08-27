@@ -4,24 +4,28 @@
 #
 #    make upgrade
 #
-boto3==1.17.41
+boto3==1.18.30
     # via -r requirements/aws.txt
-botocore==1.20.41
+botocore==1.21.30
     # via
     #   -r requirements/aws.txt
     #   boto3
     #   s3transfer
-certifi==2020.12.5
+certifi==2021.5.30
     # via requests
+cffi==1.14.6
+    # via cryptography
 chardet==3.0.4
     # via requests
-click==7.1.2
+click==8.0.1
     # via -r requirements/base.in
+cryptography==3.4.8
+    # via pyjwt
 deprecated==1.2.12
     # via pygithub
 gitdb==4.0.7
     # via gitpython
-gitpython==3.1.14
+gitpython==3.1.18
     # via -r requirements/base.in
 idna==2.10
     # via requests
@@ -30,15 +34,18 @@ jmespath==0.10.0
     #   -r requirements/aws.txt
     #   boto3
     #   botocore
-pygithub==1.54.0
+pycparser==2.20
+    # via cffi
+pygithub==1.54.0.1
     # via
     #   -c requirements/constraints.txt
     #   -r requirements/base.in
-pyjwt==1.7.1
+pyjwt[crypto]==1.7.1
     # via
+    #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
     #   -c requirements/constraints.txt
     #   pygithub
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   -r requirements/aws.txt
     #   botocore
@@ -46,11 +53,11 @@ requests==2.24.0
     # via
     #   -r requirements/base.in
     #   pygithub
-s3transfer==0.3.6
+s3transfer==0.5.0
     # via
     #   -r requirements/aws.txt
     #   boto3
-six==1.15.0
+six==1.16.0
     # via
     #   -r requirements/aws.txt
     #   python-dateutil
