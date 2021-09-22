@@ -5,6 +5,7 @@ import io  # pylint: disable=unused-import
 import logging
 import os
 import re
+import time
 
 from git import Git, Repo
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
@@ -193,6 +194,9 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                     team_reviewers=team_reviewers,
                 )
                 if verify_reviewers:
+                    # Sometimes GitHub can't find the pull request we just made.
+                    # Try waiting a moment before asking about it.
+                    time.sleep(5)
                     self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
 
         except Exception as e:
