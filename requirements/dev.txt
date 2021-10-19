@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-astroid==2.8.2
+astroid==2.8.3
     # via
     #   -r requirements/testing.txt
     #   pylint
@@ -17,9 +17,9 @@ backports.entry-points-selectable==1.1.0
     # via
     #   -r requirements/ci.txt
     #   virtualenv
-boto3==1.18.62
+boto3==1.18.64
     # via -r requirements/testing.txt
-botocore==1.21.62
+botocore==1.21.64
     # via
     #   -r requirements/testing.txt
     #   boto3
@@ -122,7 +122,7 @@ pbr==5.6.0
     # via
     #   -r requirements/testing.txt
     #   stevedore
-pep517==0.11.0
+pep517==0.12.0
     # via
     #   -r requirements/pip-tools.txt
     #   pip-tools
@@ -221,7 +221,7 @@ smmap==4.0.0
     # via
     #   -r requirements/testing.txt
     #   gitdb
-stevedore==3.4.0
+stevedore==3.5.0
     # via
     #   -r requirements/testing.txt
     #   code-annotations
