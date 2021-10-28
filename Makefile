@@ -34,6 +34,5 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	$(PIP_COMPILE) -o requirements/aws.txt requirements/aws.in
 	$(PIP_COMPILE) -o requirements/base.txt requirements/base.in
 	$(PIP_COMPILE) -o requirements/testing.txt requirements/testing.in
-	$(PIP_COMPILE) -o requirements/travis.txt requirements/travis.in
 	$(PIP_COMPILE) -o requirements/ci.txt requirements/ci.in
 	$(PIP_COMPILE) -o requirements/dev.txt requirements/dev.in

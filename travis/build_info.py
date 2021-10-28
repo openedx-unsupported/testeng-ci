@@ -4,6 +4,8 @@ Gather Travis usage info in real-time using Travis REST APIs
 This only applies to travis instances that do not require
 authorization (e.g., travis-ci.org). Auth is a #TODO
 
+Remove/Replace this implementation for GitHub CI since
+Travis is being removed from across edX #TODO
 """
 
 import argparse

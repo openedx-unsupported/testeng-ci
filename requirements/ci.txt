@@ -22,7 +22,7 @@ pluggy==0.13.1
     #   tox
 py==1.10.0
     # via tox
-pyparsing==2.4.7
+pyparsing==3.0.3
     # via packaging
 six==1.16.0
     # via
@@ -34,10 +34,7 @@ tox==3.24.4
     # via
     #   -r requirements/ci.in
     #   tox-battery
-    #   tox-travis
 tox-battery==0.6.1
     # via -r requirements/ci.in
-tox-travis==0.12
-    # via -r requirements/ci.in
-virtualenv==20.8.1
+virtualenv==20.9.0
     # via tox
