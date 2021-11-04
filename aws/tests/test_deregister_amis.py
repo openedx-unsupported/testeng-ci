@@ -22,7 +22,7 @@ class MockImages:
         self.image = MagicMock()
         self.image.__str__.return_value = 'test_ami'
 
-    def filter(self, *args, **kwargs):  # pylint: disable=missing-function-docstring
+    def filter(self, *args, **kwargs):  # pylint: disable=missing-function-docstring,unused-argument
         if self.filter_raises_error:
             raise ClientError(MagicMock(), 'filter')
         if self.matching_image_exists:
@@ -49,7 +49,7 @@ class DeregisterAmisTestCase(TestCase):
         ]
 
     @patch('boto3.resource', return_value=MockEC2(matching_image_exists=False))
-    def test_main(self, mock_ec2):
+    def test_main(self, mock_ec2):  # pylint: disable=unused-argument
         """
         Test output of main
         """
@@ -66,7 +66,7 @@ class DeregisterAmisTestCase(TestCase):
             )
 
     @patch('boto3.resource', return_value=MockEC2())
-    def test_main_deregister(self, mock_ec2):
+    def test_main_deregister(self, mock_ec2):  # pylint: disable=unused-argument
         """
         Test that a correctly-tagged AMI is deregistered
         """
@@ -84,7 +84,7 @@ class DeregisterAmisTestCase(TestCase):
             )
 
     @patch('boto3.resource', return_value=MockEC2(matching_image_exists=False))
-    def test_main_no_deregister(self, mock_ec2):
+    def test_main_no_deregister(self, mock_ec2):   # pylint: disable=unused-argument
         """
         Test that an AMI without proper tags is not de-registered
         """
@@ -117,7 +117,7 @@ class DeregisterExceptionTestCase(TestCase):
     Test exceptions that would be thrown from the script.
     """
     @patch('boto3.resource', return_value=MockEC2(filter_raises_error=True))
-    def test_cant_get_instances(self, mock_ec2):
+    def test_cant_get_instances(self, mock_ec2):   # pylint: disable=unused-argument
         region = os.environ.get('AWS_DEFAULT_REGION', 'us-east-1')
         ec2 = boto3.resource('ec2', region_name=region)
         with self.assertRaises(ClientError):

@@ -60,7 +60,7 @@ class EdxStatusBot:
                 )
                 comment.delete()
 
-    def delete_old_comments_marker(self, pr):
+    def delete_old_comments_marker(self, pr):  # pylint: disable=unused-argument
         return True
 
     def notify_tests_completed(self, pr):
