@@ -98,7 +98,7 @@ class HelpersTestCase(TestCase):
            return_value=Mock())
     @patch('jenkins.github_helpers.InputGitTreeElement',
            return_value=Mock())
-    def test_update_list_of_files_with_changes(self, get_file_contents_mock, author_mock, git_tree_mock):
+    def test_update_list_of_files_with_changes(self, get_file_contents_mock, author_mock, git_tree_mock):  # lint-amnesty, pylint: disable=unused-argument
         repo_mock = Mock()
         repo_root = "../../edx-platform"
         file_path_list = ["path/to/file1", "path/to/file2"]

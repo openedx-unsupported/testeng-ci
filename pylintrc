@@ -385,7 +385,6 @@ disable =
 	xrange-builtin,
 	
 	logging-fstring-interpolation,
-	unused-argument,
 	logging-format-interpolation
 
 [REPORTS]
@@ -486,4 +485,4 @@ int-import-graph =
 [EXCEPTIONS]
 overgeneral-exceptions = Exception
 
-# 503ae8374fd2ca0b311a0a435b60c62488841656
+# 38da3bdc049174d7585873453ca6b04a078eec62

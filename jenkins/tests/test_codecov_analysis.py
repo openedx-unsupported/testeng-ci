@@ -13,7 +13,7 @@ class MockRepo:
         self.full_name = full_name
         self.prs = prs
 
-    def get_pulls(self, state, sort, direction):
+    def get_pulls(self, state, sort, direction):  # lint-amnesty, pylint: disable=unused-argument
         return self.prs
 
 
