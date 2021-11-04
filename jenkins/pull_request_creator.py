@@ -72,7 +72,7 @@ class PullRequestCreator:
         )
         self._create_branch(commit_sha)
 
-    def _create_new_pull_request(self):
+    def _create_new_pull_request(self, draft=False):
         # If there are reviewers to be added, split them into python lists
         if isinstance(self.user_reviewers, str) and self.user_reviewers:
             user_reviewers = self.user_reviewers.split(',')
@@ -94,6 +94,7 @@ class PullRequestCreator:
             team_reviewers=team_reviewers,
             # TODO: Remove hardcoded check in favor of a new --verify-reviewers CLI option
             verify_reviewers=self.branch_name != 'cleanup-python-code',
+            draft=draft,
         )
         LOGGER.info("Created PR: https://github.com/{}/pull/{}".format(
             self.repository.full_name, pr.number
@@ -115,7 +116,7 @@ class PullRequestCreator:
             self.pr_body += "\nhttps://github.com/{}/pull/{}".format(self.repository.full_name,
                                                                      deleted_pull_number)
 
-    def create(self, delete_old_pull_requests):
+    def create(self, delete_old_pull_requests, draft=False):
         self._set_github_data()
 
         if not self.modified_files_list:
@@ -131,7 +132,7 @@ class PullRequestCreator:
         if delete_old_pull_requests:
             self.delete_old_pull_requests()
 
-        self._create_new_pull_request()
+        self._create_new_pull_request(draft)
 
 
 @click.command()
@@ -172,11 +173,14 @@ class PullRequestCreator:
     default=True,
     help="If set, delete old branches with the same base branch name and close their PRs"
 )
+@click.option(
+    '--draft', is_flag=True
+)
 def main(
     repo_root, base_branch_name, target_branch,
     commit_message, pr_title, pr_body,
     user_reviewers, team_reviewers,
-    delete_old_pull_requests
+    delete_old_pull_requests, draft
 ):
     """
     Create a pull request with these changes in the repo.
@@ -195,7 +199,7 @@ def main(
         user_reviewers=user_reviewers,
         team_reviewers=team_reviewers
     )
-    creator.create(delete_old_pull_requests)
+    creator.create(delete_old_pull_requests, draft)
 
 
 if __name__ == '__main__':
