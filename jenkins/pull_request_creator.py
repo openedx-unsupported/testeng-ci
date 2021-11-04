@@ -18,7 +18,7 @@ LOGGER.setLevel(logging.INFO)
 class PullRequestCreator:
 
     def __init__(self, repo_root, branch_name, user_reviewers, team_reviewers, commit_message, pr_title,
-                 pr_body, target_branch='master'):
+                 pr_body, target_branch='master', draft=False):
         self.branch_name = branch_name
         self.pr_body = pr_body
         self.pr_title = pr_title
@@ -27,6 +27,7 @@ class PullRequestCreator:
         self.user_reviewers = user_reviewers
         self.repo_root = repo_root
         self.target_branch = target_branch
+        self.draft = draft
 
     github_helper = GitHubHelper()
 
@@ -94,6 +95,7 @@ class PullRequestCreator:
             team_reviewers=team_reviewers,
             # TODO: Remove hardcoded check in favor of a new --verify-reviewers CLI option
             verify_reviewers=self.branch_name != 'cleanup-python-code',
+            draft=self.draft,
         )
         LOGGER.info("Created PR: https://github.com/{}/pull/{}".format(
             self.repository.full_name, pr.number
@@ -172,11 +174,14 @@ class PullRequestCreator:
     default=True,
     help="If set, delete old branches with the same base branch name and close their PRs"
 )
+@click.option(
+    '--draft', is_flag=True
+)
 def main(
     repo_root, base_branch_name, target_branch,
     commit_message, pr_title, pr_body,
     user_reviewers, team_reviewers,
-    delete_old_pull_requests
+    delete_old_pull_requests, draft
 ):
     """
     Create a pull request with these changes in the repo.
@@ -193,7 +198,8 @@ def main(
         commit_message=commit_message,
         pr_title=pr_title, pr_body=pr_body,
         user_reviewers=user_reviewers,
-        team_reviewers=team_reviewers
+        team_reviewers=team_reviewers,
+        draft=draft,
     )
     creator.create(delete_old_pull_requests)
 

@@ -170,7 +170,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         return deleted_pull_numbers
 
     def create_pull_request(self, repository, title, body, base, head, user_reviewers=GithubObject.NotSet,
-                            team_reviewers=GithubObject.NotSet, verify_reviewers=True):
+                            team_reviewers=GithubObject.NotSet, verify_reviewers=True, draft=False):
         """
         Create a new pull request with the changes in head. And tag a list of teams
         for a review.
@@ -180,7 +180,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 title=title,
                 body=body,
                 base=base,
-                head=head
+                head=head,
+                draft=draft
             )
         except Exception as e:
             raise Exception("Failed to create pull request") from e
