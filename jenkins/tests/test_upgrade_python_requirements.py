@@ -14,7 +14,7 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
            return_value=[])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=None)
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_modified_files_list', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_updated_files_list', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
@@ -48,7 +48,7 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance',
            return_value=Mock())
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=Mock())
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_modified_files_list',
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_updated_files_list',
            return_value=["requirements/edx/base.txt", "requirements/edx/coverage.txt"])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=False)
@@ -83,7 +83,7 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance',
            return_value=Mock())
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=Mock())
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_modified_files_list',
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_updated_files_list',
            return_value=["requirements/edx/base.txt", "requirements/edx/coverage.txt"])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     # all above this unused params, no need to interact with those mocks
@@ -119,7 +119,7 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
            return_value=[])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance', return_value=None)
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=None)
-    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_modified_files_list',
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_updated_files_list',
            return_value=["requirements/edx/base.txt", "requirements/edx/coverage.txt"])
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=True)

@@ -117,17 +117,26 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         return Git(repo_root).rev_parse('HEAD')
 
-    def get_modified_files_list(self, repo_root):
+    def get_updated_files_list(self, repo_root, untracked_files_required=False):
         """
         Use the Git library to run the ls-files command to find
-        the list of files modified.
+        the list of files updated.
         """
         git_instance = Git(repo_root)
         git_instance.init()
-        modified_files = git_instance.ls_files("--modified")
 
-        if len(modified_files) > 0:
-            return modified_files.split("\n")
+        if untracked_files_required:
+            modified_files = git_instance.ls_files("--modified")
+            untracked_files = git_instance.ls_files("--others", "--exclude-from=.gitignore")
+            updated_files = modified_files + '\n' + untracked_files \
+                if (len(modified_files) > 0 and len(untracked_files) > 0) \
+                else modified_files + untracked_files
+
+        else:
+            updated_files = git_instance.ls_files("--modified")
+
+        if len(updated_files) > 0:
+            return updated_files.split("\n")
         else:
             return []
 

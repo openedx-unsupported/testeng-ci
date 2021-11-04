@@ -64,18 +64,18 @@ class HelpersTestCase(TestCase):
         assert correct_pr_one.edit.called
         assert correct_pr_two.edit.called
 
-    def test_get_modified_files_list_no_change(self):
+    def test_get_updated_files_list_no_change(self):
         git_instance = Mock()
         git_instance.ls_files = MagicMock(return_value="")
         with patch('jenkins.github_helpers.Git', return_value=git_instance):
-            result = GitHubHelper().get_modified_files_list("edx-platform")
+            result = GitHubHelper().get_updated_files_list("edx-platform")
             assert result == []
 
-    def test_get_modified_files_list_with_changes(self):
+    def test_get_updated_files_list_with_changes(self):
         git_instance = Mock()
         git_instance.ls_files = MagicMock(return_value="file1\nfile2")
         with patch('jenkins.github_helpers.Git', return_value=git_instance):
-            result = GitHubHelper().get_modified_files_list("edx-platform")
+            result = GitHubHelper().get_updated_files_list("edx-platform")
             assert result == ["file1", "file2"]
 
     def test_update_list_of_files_no_change(self):

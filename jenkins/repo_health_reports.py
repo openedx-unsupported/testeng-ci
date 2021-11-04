@@ -60,7 +60,7 @@ def main(sha, repo_root, repo_name, org, user_reviewers, team_reviewers):
     repository = github_helper.connect_to_repo(github_instance, repo_name)
     LOGGER.info("Successfully connected to repo")
 
-    modified_files_list = github_helper.get_modified_files_list(repo_root)
+    modified_files_list = github_helper.get_updated_files_list(repo_root)
     LOGGER.info("modified files: {}".format(modified_files_list))
     if modified_files_list:
         branch = "refs/heads/jenkins/repo_health-{}".format(sha[:7])

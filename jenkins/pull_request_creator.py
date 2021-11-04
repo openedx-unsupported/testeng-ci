@@ -41,13 +41,13 @@ class PullRequestCreator:
     def _set_repository(self):
         self.repository = self.github_helper.repo_from_remote(self.repo_root, ['origin'])
 
-    def _set_modified_files_list(self):
-        self.modified_files_list = self.github_helper.get_modified_files_list(self.repo_root)
+    def _set_updated_files_list(self, untracked_files_required=False):
+        self.updated_files_list = self.github_helper.get_updated_files_list(self.repo_root, untracked_files_required)
 
     def _create_branch(self, commit_sha):
         self.github_helper.create_branch(self.repository, self.branch, commit_sha)
 
-    def _set_github_data(self):
+    def _set_github_data(self, untracked_files_required=False):
         LOGGER.info("Authenticating with Github")
         self.github_instance = self._get_github_instance()
         self.user = self._get_user()
@@ -55,7 +55,7 @@ class PullRequestCreator:
         LOGGER.info("Trying to connect to repo")
         self._set_repository()
         LOGGER.info("Connected to {}".format(self.repository))
-        self._set_modified_files_list()
+        self._set_updated_files_list(untracked_files_required)
         self.base_sha = self.github_helper.get_current_commit(self.repo_root)
 
     def _branch_exists(self):
@@ -63,11 +63,11 @@ class PullRequestCreator:
         return self.github_helper.branch_exists(self.repository, self.branch)
 
     def _create_new_branch(self):
-        LOGGER.info("modified files: {}".format(self.modified_files_list))
+        LOGGER.info("updated files: {}".format(self.updated_files_list))
         commit_sha = self.github_helper.update_list_of_files(
             self.repository,
             self.repo_root,
-            self.modified_files_list,
+            self.updated_files_list,
             self.commit_message,
             self.base_sha,
             self.user.name
@@ -122,10 +122,10 @@ class PullRequestCreator:
             self.pr_body += "\nhttps://github.com/{}/pull/{}".format(self.repository.full_name,
                                                                      deleted_pull_number)
 
-    def create(self, delete_old_pull_requests):
-        self._set_github_data()
+    def create(self, delete_old_pull_requests, untracked_files_required=False):
+        self._set_github_data(untracked_files_required)
 
-        if not self.modified_files_list:
+        if not self.updated_files_list:
             LOGGER.info("No changes needed")
             return
 
@@ -187,11 +187,17 @@ class PullRequestCreator:
     default=False,
     help="If set, print resultant PR in github action set output sytax"
 )
+@click.option(
+    '--untracked-files-required',
+    required=False,
+    help='If set, add Untracked files to the PR as well'
+)
 def main(
     repo_root, base_branch_name, target_branch,
     commit_message, pr_title, pr_body,
     user_reviewers, team_reviewers,
-    delete_old_pull_requests, draft, output_pr_url_for_github_action
+    delete_old_pull_requests, draft, output_pr_url_for_github_action,
+    untracked_files_required
 ):
     """
     Create a pull request with these changes in the repo.
@@ -212,7 +218,7 @@ def main(
         draft=draft,
         output_pr_url_for_github_action=output_pr_url_for_github_action,
     )
-    creator.create(delete_old_pull_requests)
+    creator.create(delete_old_pull_requests, untracked_files_required)
 
 
 if __name__ == '__main__':

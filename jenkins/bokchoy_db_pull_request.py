@@ -56,7 +56,7 @@ def main(sha=None, repo_root=None):
     github_instance = github_helper.get_github_instance()
     repository = github_helper.connect_to_repo(github_instance, "edx-platform")
 
-    all_modified_files = github_helper.get_modified_files_list(repo_root)
+    all_modified_files = github_helper.get_updated_files_list(repo_root)
     bokchoy_db_files_full_path = [os.path.join(DB_CACHE_FILEPATH, db_file) for db_file in BOKCHOY_DB_FILES]
     modified_files_list = [file for file in all_modified_files if file in bokchoy_db_files_full_path]
     logger.info("modified db files: {}".format(modified_files_list))
