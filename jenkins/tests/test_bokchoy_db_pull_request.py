@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring,unused-variable
+# pylint: disable=missing-module-docstring,unused-variable,unused-argument
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -30,8 +30,8 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_no_changes(
-            self, delete_branch_mock, create_pr_mock, create_branch_mock, update_files_mock,  # lint-amnesty, pylint: disable=unused-argument
-            branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock):  # lint-amnesty, pylint: disable=unused-argument
+            self, delete_branch_mock, create_pr_mock, create_branch_mock, update_files_mock,
+            branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
@@ -66,9 +66,10 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_changes(
-            self, delete_branch_mock, create_pr_mock, close_pr_mock, update_file_mock, read_local_db_mock,  # lint-amnesty, pylint: disable=unused-argument
-            create_branch_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock  # lint-amnesty, pylint: disable=unused-argument
+            self, delete_branch_mock, create_pr_mock, close_pr_mock, update_file_mock, read_local_db_mock,
+            create_branch_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock
     ):
+
         """
         Ensure a merge with changes to db files will result in the proper updates, a new branch, and a PR.
         """
@@ -98,8 +99,8 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch',
            return_value=None)
     def test_branch_exists(
-            self, delete_branch_mock, create_pr_mock, create_branch_mock, modified_list_mock,  # lint-amnesty, pylint: disable=unused-argument
-            get_branch_mock, repo_mock, authenticate_mock  # lint-amnesty, pylint: disable=unused-argument
+            self, delete_branch_mock, create_pr_mock, create_branch_mock, modified_list_mock,
+            get_branch_mock, repo_mock, authenticate_mock
     ):
         """
         If the branch for a given fingerprint already exists, make sure the script

@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring
+# pylint: disable=missing-module-docstring,unused-argument
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -23,10 +23,10 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
-    def test_no_changes(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,  # lint-amnesty, pylint: disable=unused-argument
-                        update_files_mock, branch_exists_mock, current_commit_mock,  # lint-amnesty, pylint: disable=unused-argument
+    def test_no_changes(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
+                        update_files_mock, branch_exists_mock, current_commit_mock,
                         modified_list_mock, repo_mock, authenticate_mock,
-                        close_existing_prs_mock):  # lint-amnesty, pylint: disable=unused-argument
+                        close_existing_prs_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
@@ -58,10 +58,10 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
-    def test_changes(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,  # lint-amnesty, pylint: disable=unused-argument
-                     update_files_mock, branch_exists_mock, current_commit_mock,  # lint-amnesty, pylint: disable=unused-argument
-                     modified_list_mock, repo_mock, authenticate_mock,  # lint-amnesty, pylint: disable=unused-argument
-                     close_existing_prs_mock):  # lint-amnesty, pylint: disable=unused-argument
+    def test_changes(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
+                     update_files_mock, branch_exists_mock, current_commit_mock,
+                     modified_list_mock, repo_mock, authenticate_mock,
+                     close_existing_prs_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
@@ -92,10 +92,10 @@ class BokchoyPullRequestTestCase(TestCase):
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
-    def test_branch_exists(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,  # lint-amnesty, pylint: disable=unused-argument
-                           update_files_mock, branch_exists_mock, current_commit_mock,  # lint-amnesty, pylint: disable=unused-argument
-                           modified_list_mock, repo_mock, authenticate_mock,  # lint-amnesty, pylint: disable=unused-argument
-                           close_existing_prs_mock):  # lint-amnesty, pylint: disable=unused-argument
+    def test_branch_exists(self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
+                           update_files_mock, branch_exists_mock, current_commit_mock,
+                           modified_list_mock, repo_mock, authenticate_mock,
+                           close_existing_prs_mock):
         """
         Ensure a merge with no changes to db files will not result in any updates.
         """
