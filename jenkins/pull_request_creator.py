@@ -117,7 +117,7 @@ class PullRequestCreator:
             self.pr_body += "\nhttps://github.com/{}/pull/{}".format(self.repository.full_name,
                                                                      deleted_pull_number)
 
-    def create(self, delete_old_pull_requests, draft=False):
+    def create(self, delete_old_pull_requests):
         self._set_github_data()
 
         if not self.modified_files_list:
@@ -133,7 +133,7 @@ class PullRequestCreator:
         if delete_old_pull_requests:
             self.delete_old_pull_requests()
 
-        self._create_new_pull_request(draft)
+        self._create_new_pull_request()
 
 
 @click.command()
