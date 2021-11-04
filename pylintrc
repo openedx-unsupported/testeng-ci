@@ -384,7 +384,7 @@ disable =
 	unpacking-in-except,
 	xrange-builtin,
 	
-	logging-fstring-interpolation,consider-using-f-string,logging-format-interpolation
+	logging-fstring-interpolation,
 
 [REPORTS]
 output-format = text
@@ -484,4 +484,4 @@ int-import-graph =
 [EXCEPTIONS]
 overgeneral-exceptions = Exception
 
-# 68c1ac4abdebd7f47a99eb27cf232bcb6bfff409
+# 6f6df9fe229422b14f890e2c394836c25f5fcd08
