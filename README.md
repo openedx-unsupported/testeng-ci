@@ -11,7 +11,3 @@ This repo contains:
 	* Clean up orphaned jenkins-worker nodes with whom we have lost contact
 
 * Job infrastructure for our Jenkins instance
-
-## Developing
-
-To get a PR merged, file a review request in the SRE Jira portal. (SRE has to perform an additional deployment step after merging.)
