@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring
+# pylint: disable=missing-module-docstring,unused-argument
 from unittest import TestCase
 from unittest.mock import Mock, patch
 

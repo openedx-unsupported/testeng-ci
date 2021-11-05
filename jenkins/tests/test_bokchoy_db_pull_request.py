@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring,unused-variable
+# pylint: disable=missing-module-docstring,unused-variable,unused-argument
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -69,6 +69,7 @@ class BokchoyPullRequestTestCase(TestCase):
             self, delete_branch_mock, create_pr_mock, close_pr_mock, update_file_mock, read_local_db_mock,
             create_branch_mock, branch_exists_mock, modified_list_mock, repo_mock, authenticate_mock
     ):
+
         """
         Ensure a merge with changes to db files will result in the proper updates, a new branch, and a PR.
         """
