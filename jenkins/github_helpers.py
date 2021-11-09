@@ -200,11 +200,11 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                     time.sleep(5)
                     self.verify_reviewers_tagged(pull_request, user_reviewers, team_reviewers)
 
-        except Exception as e:
-            raise Exception(
+        except Exception:
+            logger.warn(
                 "Some reviewers could not be tagged on new PR "
                 "https://github.com/{}/pull/{}".format(repository.full_name, pull_request.number)
-            ) from e
+            )
 
         return pull_request
 
