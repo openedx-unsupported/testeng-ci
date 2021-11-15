@@ -18,7 +18,7 @@ LOGGER.setLevel(logging.INFO)
 class PullRequestCreator:
 
     def __init__(self, repo_root, branch_name, user_reviewers, team_reviewers, commit_message, pr_title,
-                 pr_body, target_branch='master', draft=False):
+                 pr_body, target_branch='master', draft=False, output_pr_url_for_github_action=False):
         self.branch_name = branch_name
         self.pr_body = pr_body
         self.pr_title = pr_title
@@ -28,6 +28,7 @@ class PullRequestCreator:
         self.repo_root = repo_root
         self.target_branch = target_branch
         self.draft = draft
+        self.output_pr_url_for_github_action = output_pr_url_for_github_action
 
     github_helper = GitHubHelper()
 
@@ -100,6 +101,10 @@ class PullRequestCreator:
         LOGGER.info("Created PR: https://github.com/{}/pull/{}".format(
             self.repository.full_name, pr.number
         ))
+        if self.output_pr_url_for_github_action:
+            # using print rather than logger to avoid the logger
+            # prepending anything past which github actions wouldn't parse
+            print(f'::set-output name=generated_pr::https://github.com/{self.repository.full_name}/pull/{pr.number}')
 
     def delete_old_pull_requests(self):
         LOGGER.info("Checking if there's any old pull requests to delete")
@@ -177,11 +182,16 @@ class PullRequestCreator:
 @click.option(
     '--draft', is_flag=True
 )
+@click.option(
+    '--output-pr-url-for-github-action/--no-output-pr-url-for-github-action',
+    default=False,
+    help="If set, print resultant PR in github action set output sytax"
+)
 def main(
     repo_root, base_branch_name, target_branch,
     commit_message, pr_title, pr_body,
     user_reviewers, team_reviewers,
-    delete_old_pull_requests, draft
+    delete_old_pull_requests, draft, output_pr_url_for_github_action
 ):
     """
     Create a pull request with these changes in the repo.
@@ -200,6 +210,7 @@ def main(
         user_reviewers=user_reviewers,
         team_reviewers=team_reviewers,
         draft=draft,
+        output_pr_url_for_github_action=output_pr_url_for_github_action,
     )
     creator.create(delete_old_pull_requests)
 
