@@ -18,7 +18,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request.github_helper.connect_to_repo',
            return_value=None)
-    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_modified_files_list',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_updated_files_list',
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request.github_helper.branch_exists',
            return_value=False)
@@ -47,7 +47,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=Mock())
     @patch('jenkins.bokchoy_db_pull_request.github_helper.connect_to_repo',
            return_value=Mock())
-    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_modified_files_list',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_updated_files_list',
            return_value=[
                "common/test/db_cache/bok_choy_data_default.json",
                "common/test/db_cache/bok_choy_schema_default.sql"
@@ -90,7 +90,7 @@ class BokchoyPullRequestTestCase(TestCase):
            return_value=None)
     @patch('jenkins.bokchoy_db_pull_request.github_helper.branch_exists',
            return_value=True)
-    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_modified_files_list',
+    @patch('jenkins.bokchoy_db_pull_request.github_helper.get_updated_files_list',
            return_value="common/test/db_cache/bok_choy_data_default.json\n"
                         "common/test/db_cache/bok_choy_schema_default.sql")
     @patch('jenkins.bokchoy_db_pull_request.github_helper.create_branch',
