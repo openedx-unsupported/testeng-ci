@@ -18,7 +18,8 @@ LOGGER.setLevel(logging.INFO)
 class PullRequestCreator:
 
     def __init__(self, repo_root, branch_name, user_reviewers, team_reviewers, commit_message, pr_title,
-                 pr_body, target_branch='master', draft=False, output_pr_url_for_github_action=False):
+                 pr_body, target_branch='master', draft=False, output_pr_url_for_github_action=False,
+                 force_delete_old_prs=False):
         self.branch_name = branch_name
         self.pr_body = pr_body
         self.pr_title = pr_title
@@ -29,6 +30,7 @@ class PullRequestCreator:
         self.target_branch = target_branch
         self.draft = draft
         self.output_pr_url_for_github_action = output_pr_url_for_github_action
+        self.force_delete_old_prs = force_delete_old_prs
 
     github_helper = GitHubHelper()
 
@@ -57,9 +59,9 @@ class PullRequestCreator:
         LOGGER.info("Connected to {}".format(self.repository))
         self._set_updated_files_list(untracked_files_required)
         self.base_sha = self.github_helper.get_current_commit(self.repo_root)
+        self.branch = "refs/heads/jenkins/{}-{}".format(self.branch_name, self.base_sha[:7])
 
     def _branch_exists(self):
-        self.branch = "refs/heads/jenkins/{}-{}".format(self.branch_name, self.base_sha[:7])
         return self.github_helper.branch_exists(self.repository, self.branch)
 
     def _create_new_branch(self):
@@ -96,7 +98,7 @@ class PullRequestCreator:
             team_reviewers=team_reviewers,
             # TODO: Remove hardcoded check in favor of a new --verify-reviewers CLI option
             verify_reviewers=self.branch_name != 'cleanup-python-code',
-            draft=self.draft,
+            draft=self.draft
         )
         LOGGER.info("Created PR: https://github.com/{}/pull/{}".format(
             self.repository.full_name, pr.number
@@ -129,7 +131,10 @@ class PullRequestCreator:
             LOGGER.info("No changes needed")
             return
 
-        if self._branch_exists():
+        if self.force_delete_old_prs:
+            self.delete_old_pull_requests()
+
+        elif self._branch_exists():
             LOGGER.info("Branch for this sha already exists")
             return
 
@@ -180,6 +185,11 @@ class PullRequestCreator:
     help="If set, delete old branches with the same base branch name and close their PRs"
 )
 @click.option(
+    '--force-delete-old-prs/--no-force-delete-old-prs',
+    default=True,
+    help="If set, force delete old branches with the same base branch name and close their PRs"
+)
+@click.option(
     '--draft', is_flag=True
 )
 @click.option(
@@ -197,7 +207,7 @@ def main(
     commit_message, pr_title, pr_body,
     user_reviewers, team_reviewers,
     delete_old_pull_requests, draft, output_pr_url_for_github_action,
-    untracked_files_required
+    untracked_files_required, force_delete_old_prs
 ):
     """
     Create a pull request with these changes in the repo.
@@ -217,6 +227,7 @@ def main(
         team_reviewers=team_reviewers,
         draft=draft,
         output_pr_url_for_github_action=output_pr_url_for_github_action,
+        force_delete_old_prs=force_delete_old_prs
     )
     creator.create(delete_old_pull_requests, untracked_files_required)
 
