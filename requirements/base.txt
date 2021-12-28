@@ -4,9 +4,9 @@
 #
 #    make upgrade
 #
-boto3==1.19.5
+boto3==1.20.26
     # via -r requirements/aws.txt
-botocore==1.22.5
+botocore==1.23.26
     # via
     #   -r requirements/aws.txt
     #   boto3
@@ -56,7 +56,7 @@ six==1.16.0
     #   python-dateutil
 smmap==5.0.0
     # via gitdb
-typing-extensions==3.10.0.2
+typing-extensions==4.0.1
     # via gitpython
 urllib3==1.25.11
     # via
