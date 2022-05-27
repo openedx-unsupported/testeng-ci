@@ -31,7 +31,7 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip install -qr requirements/pip-tools.txt
 	# Make sure to compile files after any other files they include!
 	$(PIP_COMPILE) --allow-unsafe -o requirements/pip.txt requirements/pip.in
-	$(PIP_COMPILE) -o requirements/pip_tools.txt requirements/pip_tools.in
+	$(PIP_COMPILE) -o requirements/pip-tools.txt requirements/pip-tools.in
 	pip install -qr requirements/pip.txt
 	pip install -qr requirements/pip-tools.txt
 	$(PIP_COMPILE) -o requirements/aws.txt requirements/aws.in
