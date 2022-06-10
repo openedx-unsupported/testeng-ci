@@ -78,10 +78,10 @@ def sample_data(running_builds, not_running_builds):
         build_time = first_time - (minutes_ago * 60000)
         return build_time
 
-    for i, _ in enumerate(running_builds):
+    for i, build in enumerate(running_builds):
         parameters = [
-            {'name': 'ghprbPullId', 'value': running_builds[i].get('prnum')},
-            {'name': 'ghprbActualCommitAuthorEmail', 'value': running_builds[i].get('author')}
+            {'name': 'ghprbPullId', 'value': build.get('prnum')},
+            {'name': 'ghprbActualCommitAuthorEmail', 'value': build.get('author')}
         ]
         actions = [
             {
@@ -96,11 +96,11 @@ def sample_data(running_builds, not_running_builds):
             'timestamp': mktimestamp(i)
         })
 
-    for i, _ in enumerate(not_running_builds):
+    for i, build in enumerate(not_running_builds):
         num = i + len(running_builds)
         parameters = [
-            {'name': 'ghprbPullId', 'value': not_running_builds[i].get('prnum')},
-            {'name': 'ghprbActualCommitAuthorEmail', 'value': not_running_builds[i].get('author')}
+            {'name': 'ghprbPullId', 'value': build.get('prnum')},
+            {'name': 'ghprbActualCommitAuthorEmail', 'value': build.get('author')}
         ]
         actions = [
             {
