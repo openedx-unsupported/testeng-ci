@@ -13,14 +13,14 @@ attrs==21.4.0
     # via
     #   -r requirements/testing.txt
     #   pytest
-boto3==1.24.9
+boto3==1.24.18
     # via -r requirements/testing.txt
-botocore==1.27.9
+botocore==1.27.18
     # via
     #   -r requirements/testing.txt
     #   boto3
     #   s3transfer
-certifi==2022.5.18.1
+certifi==2022.6.15
     # via
     #   -r requirements/testing.txt
     #   requests
@@ -93,7 +93,7 @@ jinja2==3.1.2
     # via
     #   -r requirements/testing.txt
     #   code-annotations
-jmespath==1.0.0
+jmespath==1.0.1
     # via
     #   -r requirements/testing.txt
     #   boto3
@@ -158,7 +158,7 @@ pyjwt==1.7.1
     #   -c requirements/constraints.txt
     #   -r requirements/testing.txt
     #   pygithub
-pylint==2.14.2
+pylint==2.14.3
     # via
     #   -r requirements/testing.txt
     #   edx-lint
@@ -264,7 +264,7 @@ urllib3==1.25.11
     #   -r requirements/testing.txt
     #   botocore
     #   requests
-virtualenv==20.14.1
+virtualenv==20.15.0
     # via
     #   -r requirements/ci.txt
     #   tox
