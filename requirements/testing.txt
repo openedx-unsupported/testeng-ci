@@ -10,14 +10,14 @@ astroid==2.11.6
     #   pylint-celery
 attrs==21.4.0
     # via pytest
-boto3==1.24.9
+boto3==1.24.22
     # via -r requirements/base.txt
-botocore==1.27.9
+botocore==1.27.22
     # via
     #   -r requirements/base.txt
     #   boto3
     #   s3transfer
-certifi==2022.5.18.1
+certifi==2022.6.15
     # via
     #   -r requirements/base.txt
     #   requests
@@ -67,7 +67,7 @@ isort==5.10.1
     # via pylint
 jinja2==3.1.2
     # via code-annotations
-jmespath==1.0.0
+jmespath==1.0.1
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -103,7 +103,7 @@ pyjwt==1.7.1
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
     #   pygithub
-pylint==2.14.2
+pylint==2.14.4
     # via
     #   edx-lint
     #   pylint-celery
@@ -163,7 +163,7 @@ tomli==2.0.1
     #   pytest
 tomlkit==0.11.0
     # via pylint
-typing-extensions==4.2.0
+typing-extensions==4.3.0
     # via
     #   astroid
     #   pylint
