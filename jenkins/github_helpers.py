@@ -127,7 +127,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
         if untracked_files_required:
             modified_files = git_instance.ls_files("--modified")
-            untracked_files = git_instance.ls_files("--others", "--exclude-from=.gitignore")
+            untracked_files = git_instance.ls_files("--others", "--exclude-standard")
             updated_files = modified_files + '\n' + untracked_files \
                 if (len(modified_files) > 0 and len(untracked_files) > 0) \
                 else modified_files + untracked_files
