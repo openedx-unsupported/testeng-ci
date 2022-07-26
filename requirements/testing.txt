@@ -4,20 +4,20 @@
 #
 #    make upgrade
 #
-astroid==2.11.6
+astroid==2.11.7
     # via
     #   pylint
     #   pylint-celery
 attrs==21.4.0
     # via pytest
-boto3==1.24.9
+boto3==1.24.37
     # via -r requirements/base.txt
-botocore==1.27.9
+botocore==1.27.37
     # via
     #   -r requirements/base.txt
     #   boto3
     #   s3transfer
-certifi==2022.5.18.1
+certifi==2022.6.15
     # via
     #   -r requirements/base.txt
     #   requests
@@ -35,7 +35,7 @@ click-log==0.4.0
     # via edx-lint
 code-annotations==1.3.0
     # via edx-lint
-coverage[toml]==6.4.1
+coverage[toml]==6.4.2
     # via
     #   -r requirements/testing.in
     #   pytest-cov
@@ -67,7 +67,7 @@ isort==5.10.1
     # via pylint
 jinja2==3.1.2
     # via code-annotations
-jmespath==1.0.0
+jmespath==1.0.1
     # via
     #   -r requirements/base.txt
     #   boto3
@@ -103,7 +103,7 @@ pyjwt==1.7.1
     #   -c requirements/constraints.txt
     #   -r requirements/base.txt
     #   pygithub
-pylint==2.14.2
+pylint==2.14.5
     # via
     #   edx-lint
     #   pylint-celery
@@ -150,9 +150,9 @@ smmap==5.0.0
     # via
     #   -r requirements/base.txt
     #   gitdb
-stevedore==3.5.0
+stevedore==4.0.0
     # via code-annotations
-testfixtures==6.18.5
+testfixtures==7.0.0
     # via -r requirements/testing.in
 text-unidecode==1.3
     # via python-slugify
@@ -161,9 +161,9 @@ tomli==2.0.1
     #   coverage
     #   pylint
     #   pytest
-tomlkit==0.11.0
+tomlkit==0.11.1
     # via pylint
-typing-extensions==4.2.0
+typing-extensions==4.3.0
     # via
     #   astroid
     #   pylint
