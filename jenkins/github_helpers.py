@@ -193,7 +193,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 draft=draft
             )
         except Exception as e:
-            raise Exception("Failed to create pull request") from e
+            raise e
 
         try:
             any_reviewers = (user_reviewers is not GithubObject.NotSet or team_reviewers is not GithubObject.NotSet)
