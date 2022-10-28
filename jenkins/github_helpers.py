@@ -61,11 +61,11 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
     # repos have the same name in different orgs.
     #
     # Use repo_from_remote instead, and delete this when no longer in use.
-    def connect_to_repo(self, github_instance, repo_name):
+    def connect_to_repo(self, repo_name):
         """
         Get the repository object of the desired repo.
         """
-        repos_list = github_instance.get_user().get_repos()
+        repos_list = self.github_instance.get_user().get_repos()
         for repo in repos_list:
             if repo.name == repo_name:
                 return repo
@@ -287,3 +287,42 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             return commit_sha
 
         return None
+
+import requests
+import re
+from itertools import groupby
+from pkg_resources import parse_version
+
+
+if __name__ == '__main__':
+
+    gg = GitHubHelper()
+    time.sleep(2)
+    repo = gg.connect_to_repo('credentials')
+    time.sleep(2)
+    files = repo.get_pull(number=2).get_files()
+
+    # txt_files = [f.filename for f in files if '.txt' in f.filename]
+
+    load_content = requests.get("https://patch-diff.githubusercontent.com/raw/awais786/credentials/pull/2.diff")
+    txt = None
+    time.sleep(2)
+    if load_content.status_code == 200:
+        txt = load_content.content.decode('utf-8')
+
+    x = re.findall(r"[+-](?P<package_name>[\w][\w-]+)==(?P<version>\d+.\d+.\d+)", txt)
+    res = {k: [b for a, b in g] for k, g in groupby(x, key=lambda x: x[0])}
+    time.sleep(2)
+    suspicious_pack = []
+    for pack in res.items():
+        if len(pack[1]) == 2:
+            if parse_version(pack[1][1]) > parse_version(pack[1][0]):
+                pass
+        else:
+            suspicious_pack.append(pack)
+
+    if suspicious_pack: # if it has any item means PR should fail some package downgraded.
+        print(suspicious_pack)
+
+
+
