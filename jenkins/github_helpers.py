@@ -6,6 +6,9 @@ import logging
 import os
 import re
 import time
+import requests
+import re
+from pkg_resources import parse_version
 
 from git import Git, Repo
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
@@ -192,6 +195,9 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 head=head,
                 draft=draft
             )
+
+            self.verify_upgrade_packages(pull_request)
+
         except Exception as e:
             raise e
 
@@ -240,6 +246,38 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             logger.info("Team taggging failure: Requested %s, actually tagged %s", requested_teams, tagged_teams)
             raise Exception('Some of the requested teams were not tagged on PR for review')
 
+    def verify_upgrade_packages(self, pull_request):
+        """
+        Iterate on pull request diff and parse the packages and check the versions.
+        If all versions are upgrading then add a label ready for auto merge. In case of any downgrade package
+        add a comment on PR.
+        """
+        load_content = requests.get(pull_request.diff_url)
+        txt = None
+        time.sleep(2)
+        if load_content.status_code == 200:
+            txt = load_content.content.decode('utf-8')
+        regex = r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
+        res = re.findall(regex, txt, re.MULTILINE)
+
+        if not res:
+            logger.info("No package available for comparison.")
+
+        suspicious_pack = []
+        valid_packages = []
+        for pack in res:
+            if parse_version(pack[4]) > parse_version(pack[2]):
+                valid_packages.append(pack[0])
+            else:
+                suspicious_pack.append(pack)
+
+        if not suspicious_pack:
+            pull_request.set_labels('Ready to review')
+            logger.info("Total valid upgrades are %s", valid_packages)
+        else:
+            pull_request.create_issue_comment(f"Few packages downgraded. {suspicious_pack}")
+
+
     def delete_branch(self, repository, branch_name):
         """
         Delete a branch from a repository.
@@ -287,42 +325,4 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             return commit_sha
 
         return None
-
-import requests
-import re
-from itertools import groupby
-from pkg_resources import parse_version
-
-
-if __name__ == '__main__':
-
-    gg = GitHubHelper()
-    time.sleep(2)
-    repo = gg.connect_to_repo('credentials')
-    time.sleep(2)
-    files = repo.get_pull(number=2).get_files()
-
-    # txt_files = [f.filename for f in files if '.txt' in f.filename]
-
-    load_content = requests.get("https://patch-diff.githubusercontent.com/raw/awais786/credentials/pull/2.diff")
-    txt = None
-    time.sleep(2)
-    if load_content.status_code == 200:
-        txt = load_content.content.decode('utf-8')
-
-    x = re.findall(r"[+-](?P<package_name>[\w][\w-]+)==(?P<version>\d+.\d+.\d+)", txt)
-    res = {k: [b for a, b in g] for k, g in groupby(x, key=lambda x: x[0])}
-    time.sleep(2)
-    suspicious_pack = []
-    for pack in res.items():
-        if len(pack[1]) == 2:
-            if parse_version(pack[1][1]) > parse_version(pack[1][0]):
-                pass
-        else:
-            suspicious_pack.append(pack)
-
-    if suspicious_pack: # if it has any item means PR should fail some package downgraded.
-        print(suspicious_pack)
-
-
 
