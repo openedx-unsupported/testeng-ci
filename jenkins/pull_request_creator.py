@@ -124,6 +124,10 @@ class PullRequestCreator:
             self.pr_body += "\nhttps://github.com/{}/pull/{}".format(self.repository.full_name,
                                                                      deleted_pull_number)
 
+    def _delete_old_branch(self):
+        LOGGER.info("Deleting existing old branch with same name")
+        self.github_helper.delete_branch(self.repository, self.branch)
+
     def create(self, delete_old_pull_requests, untracked_files_required=False):
         self._set_github_data(untracked_files_required)
 
@@ -131,17 +135,16 @@ class PullRequestCreator:
             LOGGER.info("No changes needed")
             return
 
-        if self.force_delete_old_prs:
+        if self.force_delete_old_prs or delete_old_pull_requests:
             self.delete_old_pull_requests()
+            if self._branch_exists():
+                self._delete_old_branch()
 
         elif self._branch_exists():
             LOGGER.info("Branch for this sha already exists")
             return
 
         self._create_new_branch()
-
-        if delete_old_pull_requests:
-            self.delete_old_pull_requests()
 
         self._create_new_pull_request()
 

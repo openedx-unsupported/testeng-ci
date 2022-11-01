@@ -134,14 +134,48 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
                            modified_list_mock, repo_mock, authenticate_mock,
                            close_existing_prs_mock):
         """
-        Ensure a merge with no changes to db files will not result in any updates.
+        Ensure if a branch exists and delete_old_pull_requests is set to False, then there are no updates.
         """
         pull_request_creator = PullRequestCreator('--repo_root=../../edx-platform', 'upgrade-branch', [],
                                                   [], 'Upgrade python requirements', 'Update python requirements',
                                                   'make upgrade PR')
-        pull_request_creator.create(True)
+        pull_request_creator.create(False)
 
         assert branch_exists_mock.called
         assert not create_branch_mock.called
         assert not create_pr_mock.called
         assert not delete_branch_mock.called
+
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.close_existing_pull_requests',
+           return_value=[])
+    @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
+           return_value=Mock(name="fake name", login="fake login"))
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance',
+           return_value=Mock())
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.repo_from_remote', return_value=Mock())
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_updated_files_list',
+           return_value=["requirements/edx/base.txt", "requirements/edx/coverage.txt"])
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_current_commit', return_value='1234567')
+    # all above this unused params, no need to interact with those mocks
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.branch_exists', return_value=True)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.update_list_of_files', return_value=None)
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_pull_request')
+    @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.create_branch', return_value=None)
+    @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
+    @patch('builtins.print')
+    def test_branch_deletion(self, create_branch_mock, create_pr_mock,
+                             update_files_mock, branch_exists_mock, delete_branch_mock, *args):
+        """
+        Ensure if a branch exists and delete_old_pull_requests is set, then branch is deleted
+        before creating new PR.
+        """
+        pull_request_creator = PullRequestCreator('--repo_root=../../edx-platform', 'upgrade-branch', [],
+                                                  [], 'Upgrade python requirements', 'Update python requirements',
+                                                  'make upgrade PR', output_pr_url_for_github_action=True)
+        pull_request_creator.create(True)
+
+        assert branch_exists_mock.called
+        assert delete_branch_mock.called
+        assert create_branch_mock.called
+        assert update_files_mock.called
+        assert create_pr_mock.called
