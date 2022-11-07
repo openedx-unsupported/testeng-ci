@@ -84,23 +84,23 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         create_pr_mock.repository.name = 'credentials'
 
         content = b"""
-            #   django
-            -astroid==2.12.10
-            +astroid==2.12.12
-                 # via
-                 #   -r requirements/dev.txt
-                 #   pylint
-            @@ -30,11 +30,11 @@ backoff==1.10.0
-                 #   -r requirements/dev.txt
-                 #   -r requirements/production.txt
-                 #   analytics-python
-            -bcrypt==4.0.0
-            +bcrypt==4.0.1
-                 # via
-                 #   -r requirements/dev.txt
-                 #   paramiko
-            -black==22.8.0
-            +black==22.10.0
+                 #   django
+        -astroid==2.12.10
+        +astroid==2.12.12
+             # via
+             #   -r requirements/dev.txt
+             #   pylint
+        @@ -30,11 +30,11 @@ backoff==1.10.0
+             #   -r requirements/dev.txt
+             #   -r requirements/production.txt
+             #   analytics-python
+        -bcrypt==4.0.0
+        +bcrypt==4.0.1
+             # via
+             #   -r requirements/dev.txt
+             #   paramiko
+        -black==22.8.0
+        +black==22.10.0
         """
         with patch('requests.get') as mock_request:
             mock_request.return_value.content = content

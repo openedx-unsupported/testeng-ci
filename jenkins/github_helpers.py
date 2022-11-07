@@ -227,8 +227,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
         import pdb;
         pdb.set_trace()
-        if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
-            self.verify_upgrade_packages(pull_request)
+        # if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
+        self.verify_upgrade_packages(pull_request)
 
         return pull_request
 
@@ -270,6 +270,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         time.sleep(2)
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
+
         regex = \
             r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)" \
             r"==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
@@ -278,22 +279,20 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         suspicious_pack = []
         valid_packages = []
 
-        import pdb;
-        pdb.set_trace()
-
-        if res:
-            try:
-                for pack in res:
-                    if Version(pack[4]) > Version(pack[1]):
-                        valid_packages.append(pack[0])
-                    else:
-                        suspicious_pack.append(pack)
-            except Exception as error:
-                raise Exception(
-                    "Failed to compare packages versions."
-                ) from error
-        else:
+        if not res:
             logger.info("No package available for comparison.")
+            return
+
+        try:
+            for pack in res:
+                if Version(pack[4]) > Version(pack[1]):
+                    valid_packages.append(pack[0])
+                else:
+                    suspicious_pack.append(pack)
+        except Exception as error:
+            raise Exception(
+                "Failed to compare packages versions."
+            ) from error
 
         if not suspicious_pack and valid_packages:
             pull_request.set_labels('Ready to review')
