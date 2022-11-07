@@ -4,11 +4,10 @@ Helper methods for connecting with Github
 import io  # pylint: disable=unused-import
 import logging
 import os
-import re
 import time
 import requests
 import re
-from pkg_resources import parse_version
+from packaging.version import Version
 
 from git import Git, Repo
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
@@ -125,6 +124,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         Use the Git library to run the ls-files command to find
         the list of files updated.
         """
+        import pdb;
+        pdb.set_trace()
         git_instance = Git(repo_root)
         git_instance.init()
 
@@ -187,6 +188,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         Create a new pull request with the changes in head. And tag a list of teams
         for a review.
         """
+        import pdb;
+        pdb.set_trace()
         try:
             pull_request = repository.create_pull(
                 title=title,
@@ -196,10 +199,11 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 draft=draft
             )
 
-            self.verify_upgrade_packages(pull_request)
-
         except Exception as e:
             raise e
+
+        import pdb;
+        pdb.set_trace()
 
         try:
             any_reviewers = (user_reviewers is not GithubObject.NotSet or team_reviewers is not GithubObject.NotSet)
@@ -220,6 +224,11 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 "Some reviewers could not be tagged on new PR "
                 "https://github.com/{}/pull/{}".format(repository.full_name, pull_request.number)
             ) from e
+
+        import pdb;
+        pdb.set_trace()
+        if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
+            self.verify_upgrade_packages(pull_request)
 
         return pull_request
 
@@ -253,30 +262,44 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         add a comment on PR.
         """
         load_content = requests.get(pull_request.diff_url)
+
         txt = None
+        import pdb;
+        pdb.set_trace()
+
         time.sleep(2)
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
-        regex = r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
+        regex = \
+            r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)" \
+            r"==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
         res = re.findall(regex, txt, re.MULTILINE)
-
-        if not res:
-            logger.info("No package available for comparison.")
 
         suspicious_pack = []
         valid_packages = []
-        for pack in res:
-            if parse_version(pack[4]) > parse_version(pack[2]):
-                valid_packages.append(pack[0])
-            else:
-                suspicious_pack.append(pack)
 
-        if not suspicious_pack:
+        import pdb;
+        pdb.set_trace()
+
+        if res:
+            try:
+                for pack in res:
+                    if Version(pack[4]) > Version(pack[1]):
+                        valid_packages.append(pack[0])
+                    else:
+                        suspicious_pack.append(pack)
+            except Exception as error:
+                raise Exception(
+                    "Failed to compare packages versions."
+                ) from error
+        else:
+            logger.info("No package available for comparison.")
+
+        if not suspicious_pack and valid_packages:
             pull_request.set_labels('Ready to review')
             logger.info("Total valid upgrades are %s", valid_packages)
         else:
             pull_request.create_issue_comment(f"Few packages downgraded. {suspicious_pack}")
-
 
     def delete_branch(self, repository, branch_name):
         """

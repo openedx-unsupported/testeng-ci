@@ -1,8 +1,10 @@
 # pylint: disable=missing-module-docstring,unused-argument
 from unittest import TestCase
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
+from jenkins.github_helpers import GitHubHelper
 from jenkins.pull_request_creator import PullRequestCreator
+from jenkins.tests.helpers import mock_response
 
 
 class UpgradePythonRequirementsPullRequestTestCase(TestCase):
@@ -76,7 +78,65 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         assert update_files_mock.called
         self.assertEqual(update_files_mock.call_count, 1)
         assert create_pr_mock.called
+
+        create_pr_mock.title = "John Smith"
+        create_pr_mock.diff_url = "/"
+        create_pr_mock.repository.name = 'credentials'
+
+        content = b"""
+            #   django
+            -astroid==2.12.10
+            +astroid==2.12.12
+                 # via
+                 #   -r requirements/dev.txt
+                 #   pylint
+            @@ -30,11 +30,11 @@ backoff==1.10.0
+                 #   -r requirements/dev.txt
+                 #   -r requirements/production.txt
+                 #   analytics-python
+            -bcrypt==4.0.0
+            +bcrypt==4.0.1
+                 # via
+                 #   -r requirements/dev.txt
+                 #   paramiko
+            -black==22.8.0
+            +black==22.10.0
+        """
+        with patch('requests.get') as mock_request:
+            mock_request.return_value.content = content
+            mock_request.return_value.status_code = 200
+            GitHubHelper().verify_upgrade_packages(create_pr_mock)
+
+        assert create_pr_mock.set_labels.called
+
+        # content = b"""
+        #            #   django
+        #            -astroid==2.12.10
+        #            +astroid==2.12.12
+        #                 # via
+        #                 #   -r requirements/dev.txt
+        #                 #   pylint
+        #            @@ -30,11 +30,11 @@ backoff==1.10.0
+        #                 #   -r requirements/dev.txt
+        #                 #   -r requirements/production.txt
+        #                 #   analytics-python
+        #            -bcrypt==4.0.0
+        #            +bcrypt==4.0.1
+        #                 # via
+        #                 #   -r requirements/dev.txt
+        #                 #   paramiko
+        #            -black==22.8.0
+        #            +black==22.7.0
+        #        """
+        # with patch('requests.get') as mock_request:
+        #     mock_request.return_value.content = content
+        #     mock_request.return_value.status_code = 200
+        #     GitHubHelper().verify_upgrade_packages(create_pr_mock)
+        #
+        # assert create_pr_mock.create_issue_comment.called
+
         assert not delete_branch_mock.called
+
 
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
