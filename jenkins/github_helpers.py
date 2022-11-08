@@ -217,6 +217,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 "https://github.com/{}/pull/{}".format(repository.full_name, pull_request.number)
             ) from e
 
+        # it's a discovery work that's why only enabled for repo-health-data.
         if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
             self.verify_upgrade_packages(pull_request)
 
