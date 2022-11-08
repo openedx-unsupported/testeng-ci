@@ -254,14 +254,17 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         load_content = requests.get(pull_request.diff_url)
 
-        txt = None
-        time.sleep(1)
+        txt = ''
+        time.sleep(2)
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
+
+        logger.info(txt)
 
         regex = \
             r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)" \
             r"==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
+
         res = re.findall(regex, txt, re.MULTILINE)
 
         suspicious_pack = []
