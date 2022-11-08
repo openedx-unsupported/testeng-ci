@@ -135,7 +135,6 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
 
         assert not delete_branch_mock.called
 
-
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.pull_request_creator.PullRequestCreator.github_helper.get_github_instance',
