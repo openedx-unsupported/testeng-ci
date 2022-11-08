@@ -252,10 +252,13 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         If all versions are upgrading then add a label ready for auto merge. In case of any downgrade package
         add a comment on PR.
         """
+        logger.info(pull_request.diff_url)
         load_content = requests.get(pull_request.diff_url)
 
-        txt = None
-        time.sleep(1)
+        txt = ''
+        time.sleep(3)
+
+        logger.info(load_content.status_code)
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
 
