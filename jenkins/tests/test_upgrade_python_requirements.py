@@ -78,9 +78,9 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         self.assertEqual(update_files_mock.call_count, 1)
         assert create_pr_mock.called
 
-        create_pr_mock.title = "John Smith"
+        create_pr_mock.title = "Python Requirements Update"
         create_pr_mock.diff_url = "/"
-        create_pr_mock.repository.name = 'credentials'
+        create_pr_mock.repository.name = 'repo-health-data'
 
         content = ("\n"
                    "-boto3==1.24.85\n"
