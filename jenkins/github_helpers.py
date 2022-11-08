@@ -124,8 +124,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         Use the Git library to run the ls-files command to find
         the list of files updated.
         """
-        import pdb;
-        pdb.set_trace()
         git_instance = Git(repo_root)
         git_instance.init()
 
