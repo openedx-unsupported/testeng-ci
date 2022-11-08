@@ -253,6 +253,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         add a comment on PR.
         """
         logger.info(pull_request.diff_url)
+
         load_content = requests.get(pull_request.diff_url)
 
         txt = ''
@@ -262,6 +263,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
 
+        logger.info(txt)
         regex = \
             r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)" \
             r"==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
