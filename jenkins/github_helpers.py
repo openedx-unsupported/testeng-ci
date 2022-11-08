@@ -5,8 +5,8 @@ import io  # pylint: disable=unused-import
 import logging
 import os
 import time
-import requests
 import re
+import requests
 from packaging.version import Version
 
 from git import Git, Repo
