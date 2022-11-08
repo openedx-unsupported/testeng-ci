@@ -194,7 +194,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 head=head,
                 draft=draft
             )
-
         except Exception as e:
             raise e
 
