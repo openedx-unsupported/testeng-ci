@@ -107,6 +107,7 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
 
         assert create_pr_mock.set_labels.called
 
+        # downgrade test
         content = ("\n"
                    "-boto3==1.24.85\n"
                    "+boto3==1.24.00\n"
