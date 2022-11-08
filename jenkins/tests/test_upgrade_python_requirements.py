@@ -2,7 +2,6 @@
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-from jenkins.github_helpers import GitHubHelper
 from jenkins.pull_request_creator import PullRequestCreator
 
 
@@ -77,63 +76,6 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         assert update_files_mock.called
         self.assertEqual(update_files_mock.call_count, 1)
         assert create_pr_mock.called
-
-        create_pr_mock.title = "Python Requirements Update"
-        create_pr_mock.diff_url = "/"
-        create_pr_mock.repository.name = 'repo-health-data'
-
-        content = ("\n"
-                   "-boto3==1.24.85\n"
-                   "+boto3==1.24.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   django-ses\n"
-                   "-botocore==1.27.85\n"
-                   "+botocore==1.27.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   boto3\n"
-                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
-                   "     # via\n"
-                   "     #   -r requirements/dev.txt\n"
-                   "     #   virtualenv\n"
-                   "-distro==1.7.0\n"
-                   "+distro==1.8.0\n"
-                   ).encode('utf-8')
-        with patch('requests.get') as mock_request:
-            mock_request.return_value.content = content
-            mock_request.return_value.status_code = 200
-            GitHubHelper().verify_upgrade_packages(create_pr_mock)
-
-        assert create_pr_mock.set_labels.called
-
-        # downgrade test
-        content = ("\n"
-                   "-boto3==1.24.85\n"
-                   "+boto3==1.24.00\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   django-ses\n"
-                   "-botocore==1.27.85\n"
-                   "+botocore==1.27.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   boto3\n"
-                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
-                   "     # via\n"
-                   "     #   -r requirements/dev.txt\n"
-                   "     #   virtualenv\n"
-                   "-distro==1.7.0\n"
-                   "+distro==1.8.0\n"
-                   ).encode('utf-8')
-
-        with patch('requests.get') as mock_request:
-            mock_request.return_value.content = content
-            mock_request.return_value.status_code = 200
-            GitHubHelper().verify_upgrade_packages(create_pr_mock)
-
-        assert create_pr_mock.create_issue_comment.called
-
         assert not delete_branch_mock.called
 
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
