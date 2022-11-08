@@ -67,7 +67,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         Get the repository object of the desired repo.
         """
-        repos_list = self.github_instance.get_user().get_repos()
+        repos_list = github_instance.get_user().get_repos()
         for repo in repos_list:
             if repo.name == repo_name:
                 return repo
