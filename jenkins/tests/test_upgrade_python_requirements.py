@@ -1,10 +1,9 @@
 # pylint: disable=missing-module-docstring,unused-argument
 from unittest import TestCase
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 from jenkins.github_helpers import GitHubHelper
 from jenkins.pull_request_creator import PullRequestCreator
-from jenkins.tests.helpers import mock_response
 
 
 class UpgradePythonRequirementsPullRequestTestCase(TestCase):
@@ -83,25 +82,24 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         create_pr_mock.diff_url = "/"
         create_pr_mock.repository.name = 'credentials'
 
-        content = b"""
-                 #   django
-        -astroid==2.12.10
-        +astroid==2.12.12
-             # via
-             #   -r requirements/dev.txt
-             #   pylint
-        @@ -30,11 +30,11 @@ backoff==1.10.0
-             #   -r requirements/dev.txt
-             #   -r requirements/production.txt
-             #   analytics-python
-        -bcrypt==4.0.0
-        +bcrypt==4.0.1
-             # via
-             #   -r requirements/dev.txt
-             #   paramiko
-        -black==22.8.0
-        +black==22.10.0
-        """
+        content = ("\n"
+                   "-boto3==1.24.85\n"
+                   "+boto3==1.24.95\n"
+                   "     # via\n"
+                   "     #   -r requirements/production.txt\n"
+                   "     #   django-ses\n"
+                   "-botocore==1.27.85\n"
+                   "+botocore==1.27.95\n"
+                   "     # via\n"
+                   "     #   -r requirements/production.txt\n"
+                   "     #   boto3\n"
+                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
+                   "     # via\n"
+                   "     #   -r requirements/dev.txt\n"
+                   "     #   virtualenv\n"
+                   "-distro==1.7.0\n"
+                   "+distro==1.8.0\n"
+                   ).encode('utf-8')
         with patch('requests.get') as mock_request:
             mock_request.return_value.content = content
             mock_request.return_value.status_code = 200
@@ -109,31 +107,31 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
 
         assert create_pr_mock.set_labels.called
 
-        # content = b"""
-        #            #   django
-        #            -astroid==2.12.10
-        #            +astroid==2.12.12
-        #                 # via
-        #                 #   -r requirements/dev.txt
-        #                 #   pylint
-        #            @@ -30,11 +30,11 @@ backoff==1.10.0
-        #                 #   -r requirements/dev.txt
-        #                 #   -r requirements/production.txt
-        #                 #   analytics-python
-        #            -bcrypt==4.0.0
-        #            +bcrypt==4.0.1
-        #                 # via
-        #                 #   -r requirements/dev.txt
-        #                 #   paramiko
-        #            -black==22.8.0
-        #            +black==22.7.0
-        #        """
-        # with patch('requests.get') as mock_request:
-        #     mock_request.return_value.content = content
-        #     mock_request.return_value.status_code = 200
-        #     GitHubHelper().verify_upgrade_packages(create_pr_mock)
-        #
-        # assert create_pr_mock.create_issue_comment.called
+        content = ("\n"
+                   "-boto3==1.24.85\n"
+                   "+boto3==1.24.00\n"
+                   "     # via\n"
+                   "     #   -r requirements/production.txt\n"
+                   "     #   django-ses\n"
+                   "-botocore==1.27.85\n"
+                   "+botocore==1.27.95\n"
+                   "     # via\n"
+                   "     #   -r requirements/production.txt\n"
+                   "     #   boto3\n"
+                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
+                   "     # via\n"
+                   "     #   -r requirements/dev.txt\n"
+                   "     #   virtualenv\n"
+                   "-distro==1.7.0\n"
+                   "+distro==1.8.0\n"
+                   ).encode('utf-8')
+
+        with patch('requests.get') as mock_request:
+            mock_request.return_value.content = content
+            mock_request.return_value.status_code = 200
+            GitHubHelper().verify_upgrade_packages(create_pr_mock)
+
+        assert create_pr_mock.create_issue_comment.called
 
         assert not delete_branch_mock.called
 

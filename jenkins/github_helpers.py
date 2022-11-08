@@ -188,8 +188,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         Create a new pull request with the changes in head. And tag a list of teams
         for a review.
         """
-        import pdb;
-        pdb.set_trace()
         try:
             pull_request = repository.create_pull(
                 title=title,
@@ -201,9 +199,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
         except Exception as e:
             raise e
-
-        import pdb;
-        pdb.set_trace()
 
         try:
             any_reviewers = (user_reviewers is not GithubObject.NotSet or team_reviewers is not GithubObject.NotSet)
@@ -225,10 +220,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 "https://github.com/{}/pull/{}".format(repository.full_name, pull_request.number)
             ) from e
 
-        import pdb;
-        pdb.set_trace()
-        # if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
-        self.verify_upgrade_packages(pull_request)
+        if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
+            self.verify_upgrade_packages(pull_request)
 
         return pull_request
 
@@ -264,10 +257,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         load_content = requests.get(pull_request.diff_url)
 
         txt = None
-        import pdb;
-        pdb.set_trace()
-
-        time.sleep(2)
+        time.sleep(1)
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
 
@@ -347,4 +337,3 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             return commit_sha
 
         return None
-
