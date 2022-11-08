@@ -4,13 +4,13 @@ Helper methods for connecting with Github
 import io  # pylint: disable=unused-import
 import logging
 import os
-import time
 import re
-import requests
-from packaging.version import Version
+import time
 
+import requests
 from git import Git, Repo
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
+from packaging.version import Version
 
 logging.basicConfig()
 logger = logging.getLogger()
