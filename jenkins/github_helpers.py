@@ -254,8 +254,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         logger.info(pull_request.diff_url)
 
-        load_content = requests.get(pull_request.diff_url)
-
+        load_content = requests.get(pull_request.diff_url, headers={'Authorization': os.environ.get('GITHUB_TOKEN')})
         txt = ''
         time.sleep(3)
 
