@@ -7,10 +7,8 @@ import os
 import re
 import time
 
-import requests
 from git import Git, Repo
 from github import Github, GithubObject, InputGitAuthor, InputGitTreeElement
-from packaging.version import Version
 
 logging.basicConfig()
 logger = logging.getLogger()
@@ -217,10 +215,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 "https://github.com/{}/pull/{}".format(repository.full_name, pull_request.number)
             ) from e
 
-        # it's a discovery work that's why only enabled for repo-health-data.
-        if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
-            self.verify_upgrade_packages(pull_request)
-
         return pull_request
 
     def verify_reviewers_tagged(self, pull_request, requested_users, requested_teams):
@@ -245,53 +239,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         if not (requested_teams is GithubObject.NotSet or set(requested_teams) <= set(tagged_teams)):
             logger.info("Team taggging failure: Requested %s, actually tagged %s", requested_teams, tagged_teams)
             raise Exception('Some of the requested teams were not tagged on PR for review')
-
-    def verify_upgrade_packages(self, pull_request):
-        """
-        Iterate on pull request diff and parse the packages and check the versions.
-        If all versions are upgrading then add a label ready for auto merge. In case of any downgrade package
-        add a comment on PR.
-        """
-        logger.info(pull_request.diff_url)
-
-        load_content = requests.get(pull_request.diff_url)
-
-        txt = ''
-        time.sleep(3)
-
-        logger.info(load_content.status_code)
-        if load_content.status_code == 200:
-            txt = load_content.content.decode('utf-8')
-
-        logger.info(txt)
-        regex = \
-            r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)" \
-            r"==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
-        res = re.findall(regex, txt, re.MULTILINE)
-
-        suspicious_pack = []
-        valid_packages = []
-
-        if not res:
-            logger.info("No package available for comparison.")
-            return
-
-        try:
-            for pack in res:
-                if Version(pack[4]) > Version(pack[1]):
-                    valid_packages.append(pack[0])
-                else:
-                    suspicious_pack.append(pack)
-        except Exception as error:
-            raise Exception(
-                "Failed to compare packages versions."
-            ) from error
-
-        if not suspicious_pack and valid_packages:
-            pull_request.set_labels('Ready to review')
-            logger.info("Total valid upgrades are %s", valid_packages)
-        else:
-            pull_request.create_issue_comment(f"Few packages downgraded. {suspicious_pack}")
 
     def delete_branch(self, repository, branch_name):
         """
