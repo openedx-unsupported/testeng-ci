@@ -186,7 +186,7 @@ class PullRequestCreator:
 )
 @click.option(
     '--force-delete-old-prs/--no-force-delete-old-prs',
-    default=True,
+    default=False,
     help="If set, force delete old branches with the same base branch name and close their PRs"
 )
 @click.option(
