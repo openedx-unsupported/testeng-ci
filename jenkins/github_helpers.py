@@ -16,6 +16,8 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+repos_list = ['edx-drf-extensions', 'credentials', 'edx-celeryutils']
+
 
 class GitHubHelper:  # pylint: disable=missing-class-docstring
 
@@ -218,7 +220,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from e
 
         # it's a discovery work that's why only enabled for repo-health-data.
-        if pull_request.title == 'Python Requirements Update' and repository.name in ['repo-health-data']:
+        if pull_request.title == 'Python Requirements Update' and repository.name in repos_list:
             self.verify_upgrade_packages(pull_request)
 
         return pull_request
