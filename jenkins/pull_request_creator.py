@@ -126,7 +126,8 @@ class PullRequestCreator:
 
     def _delete_old_branch(self):
         LOGGER.info("Deleting existing old branch with same name")
-        self.github_helper.delete_branch(self.repository, self.branch)
+        branch_name = self.branch.split('/', 2)[2]
+        self.github_helper.delete_branch(self.repository, branch_name)
 
     def create(self, delete_old_pull_requests, untracked_files_required=False):
         self._set_github_data(untracked_files_required)
