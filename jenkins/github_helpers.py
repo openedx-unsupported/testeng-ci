@@ -17,7 +17,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 public_repos_list = ['edx-drf-extensions', 'credentials', 'edx-celeryutils', 'repo-health-data']
-GIT_API_PULL_REQ_URL = "https://api.github.com/repos/{}"
+
 
 class GitHubHelper:  # pylint: disable=missing-class-docstring
 
