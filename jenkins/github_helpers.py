@@ -255,7 +255,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         add a comment on PR.
         """
         location = None
-        location = pull_request._headers['location']
+        location = pull_request._headers['location']    # pylint: disable=protected-access
         logger.info(location)
 
         if not location:
