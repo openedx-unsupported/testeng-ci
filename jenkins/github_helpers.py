@@ -254,8 +254,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         If all versions are upgrading then add a label ready for auto merge. In case of any downgrade package
         add a comment on PR.
         """
-        import pdb;
-        pdb.set_trace()
         location = None
         location = pull_request._headers['location']
         logger.info(location)
