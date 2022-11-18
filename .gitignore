@@ -29,3 +29,4 @@ cover_html/
 ### Local development artifacts
 requirements/private.in
 requirements/private.txt
+venv/
