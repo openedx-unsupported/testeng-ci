@@ -16,8 +16,8 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-public_repos_list = ['edx-drf-extensions', 'credentials', 'edx-celeryutils']
-
+public_repos_list = ['edx-drf-extensions', 'credentials', 'edx-celeryutils', 'repo-health-data']
+GIT_API_PULL_REQ_URL = "https://api.github.com/repos/{}"
 
 class GitHubHelper:  # pylint: disable=missing-class-docstring
 
@@ -220,8 +220,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from e
 
         # it's a discovery work that's why only enabled for repo-health-data.
-        if pull_request.title == 'Python Requirements Update' and repository.name in public_repos_list:
-            self.verify_upgrade_packages(pull_request)
+        # if pull_request.title == 'Python Requirements Update' and repository.name in public_repos_list:
+        self.verify_upgrade_packages(pull_request)
 
         return pull_request
 
@@ -254,10 +254,19 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         If all versions are upgrading then add a label ready for auto merge. In case of any downgrade package
         add a comment on PR.
         """
-        logger.info(pull_request.diff_url)
+        import pdb;
+        pdb.set_trace()
+        location = None
+        location = pull_request._headers['location']
+        logger.info(location)
 
-        load_content = requests.get(pull_request.diff_url)
+        if not location:
+            return
 
+        logger.info('Hitting pull request for difference')
+        headers = {"Accept": "application/vnd.github.v3.diff", "Authorization": f'Bearer {self.github_token}'}
+
+        load_content = requests.get(location, headers=headers)
         txt = ''
         time.sleep(3)
 
