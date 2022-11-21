@@ -16,7 +16,7 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-public_repos_list = ['edx-drf-extensions', 'credentials', 'edx-celeryutils', 'repo-health-data']
+public_repos_list = ['edx-drf-extensions', 'credentials', 'edx-celeryutils']
 
 
 class GitHubHelper:  # pylint: disable=missing-class-docstring
@@ -254,17 +254,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         If all versions are upgrading then add a label ready for auto merge. In case of any downgrade package
         add a comment on PR.
         """
-        location = None
-        location = pull_request._headers['location']    # pylint: disable=protected-access
-        logger.info(location)
+        logger.info(pull_request.diff_url)
 
-        if not location:
-            return
+        load_content = requests.get(pull_request.diff_url)
 
-        logger.info('Hitting pull request for difference')
-        headers = {"Accept": "application/vnd.github.v3.diff", "Authorization": f'Bearer {self.github_token}'}
-
-        load_content = requests.get(location, headers=headers)
         txt = ''
         time.sleep(3)
 
