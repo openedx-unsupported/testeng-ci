@@ -4,5 +4,6 @@
 
 GitPython
 PyGithub
+packaging             # used in create pull request script to compare package versions
 requests
 click

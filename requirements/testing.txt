@@ -81,7 +81,9 @@ mccabe==0.7.0
 mock==4.0.3
     # via -r requirements/testing.in
 packaging==21.3
-    # via pytest
+    # via
+    #   -r requirements/base.txt
+    #   pytest
 pbr==5.9.0
     # via stevedore
 platformdirs==2.5.2
@@ -118,7 +120,9 @@ pylint-plugin-utils==0.7
     #   pylint-celery
     #   pylint-django
 pyparsing==3.0.9
-    # via packaging
+    # via
+    #   -r requirements/base.txt
+    #   packaging
 pytest==7.1.2
     # via
     #   -r requirements/testing.in
