@@ -4,23 +4,27 @@
 #
 #    make upgrade
 #
-astroid==2.11.6
+astroid==2.12.13
     # via
     #   -r requirements/testing.txt
     #   pylint
     #   pylint-celery
-attrs==21.4.0
+attrs==22.1.0
     # via
     #   -r requirements/testing.txt
     #   pytest
-boto3==1.24.9
+boto3==1.26.17
     # via -r requirements/testing.txt
-botocore==1.27.9
+botocore==1.29.17
     # via
     #   -r requirements/testing.txt
     #   boto3
     #   s3transfer
-certifi==2022.5.18.1
+build==0.9.0
+    # via
+    #   -r requirements/pip-tools.txt
+    #   pip-tools
+certifi==2022.9.24
     # via
     #   -r requirements/testing.txt
     #   requests
@@ -44,36 +48,40 @@ code-annotations==1.3.0
     # via
     #   -r requirements/testing.txt
     #   edx-lint
-coverage[toml]==6.4.1
+coverage[toml]==6.5.0
     # via
     #   -r requirements/testing.txt
     #   pytest-cov
-ddt==1.5.0
+ddt==1.6.0
     # via -r requirements/testing.txt
 deprecated==1.2.13
     # via
     #   -r requirements/testing.txt
     #   pygithub
-dill==0.3.5.1
+dill==0.3.6
     # via
     #   -r requirements/testing.txt
     #   pylint
-distlib==0.3.4
+distlib==0.3.6
     # via
     #   -r requirements/ci.txt
     #   virtualenv
-edx-lint==5.2.4
+edx-lint==5.3.0
     # via -r requirements/testing.txt
-filelock==3.7.1
+exceptiongroup==1.0.4
+    # via
+    #   -r requirements/testing.txt
+    #   pytest
+filelock==3.8.0
     # via
     #   -r requirements/ci.txt
     #   tox
     #   virtualenv
-gitdb==4.0.9
+gitdb==4.0.10
     # via
     #   -r requirements/testing.txt
     #   gitpython
-gitpython==3.1.27
+gitpython==3.1.29
     # via -r requirements/testing.txt
 httpretty==1.1.4
     # via -r requirements/testing.txt
@@ -93,12 +101,12 @@ jinja2==3.1.2
     # via
     #   -r requirements/testing.txt
     #   code-annotations
-jmespath==1.0.0
+jmespath==1.0.1
     # via
     #   -r requirements/testing.txt
     #   boto3
     #   botocore
-lazy-object-proxy==1.7.1
+lazy-object-proxy==1.8.0
     # via
     #   -r requirements/testing.txt
     #   astroid
@@ -115,20 +123,22 @@ mock==4.0.3
 packaging==21.3
     # via
     #   -r requirements/ci.txt
+    #   -r requirements/pip-tools.txt
     #   -r requirements/testing.txt
+    #   build
     #   pytest
     #   tox
-pbr==5.9.0
+pbr==5.11.0
     # via
     #   -r requirements/testing.txt
     #   stevedore
-pep517==0.12.0
+pep517==0.13.0
     # via
     #   -r requirements/pip-tools.txt
-    #   pip-tools
-pip-tools==6.6.2
+    #   build
+pip-tools==6.10.0
     # via -r requirements/pip-tools.txt
-platformdirs==2.5.2
+platformdirs==2.5.4
     # via
     #   -r requirements/ci.txt
     #   -r requirements/testing.txt
@@ -144,10 +154,8 @@ pluggy==0.13.1
 py==1.11.0
     # via
     #   -r requirements/ci.txt
-    #   -r requirements/testing.txt
-    #   pytest
     #   tox
-pycodestyle==2.8.0
+pycodestyle==2.10.0
     # via -r requirements/testing.txt
 pygithub==1.54.0.1
     # via
@@ -158,7 +166,7 @@ pyjwt==1.7.1
     #   -c requirements/constraints.txt
     #   -r requirements/testing.txt
     #   pygithub
-pylint==2.14.2
+pylint==2.15.6
     # via
     #   -r requirements/testing.txt
     #   edx-lint
@@ -181,19 +189,20 @@ pylint-plugin-utils==0.7
 pyparsing==3.0.9
     # via
     #   -r requirements/ci.txt
+    #   -r requirements/pip-tools.txt
     #   -r requirements/testing.txt
     #   packaging
-pytest==7.1.2
+pytest==7.2.0
     # via
     #   -r requirements/testing.txt
     #   pytest-cov
-pytest-cov==3.0.0
+pytest-cov==4.0.0
     # via -r requirements/testing.txt
 python-dateutil==2.8.2
     # via
     #   -r requirements/testing.txt
     #   botocore
-python-slugify==6.1.2
+python-slugify==7.0.0
     # via
     #   -r requirements/testing.txt
     #   code-annotations
@@ -216,44 +225,42 @@ six==1.16.0
     #   edx-lint
     #   python-dateutil
     #   tox
-    #   virtualenv
 smmap==5.0.0
     # via
     #   -r requirements/testing.txt
     #   gitdb
-stevedore==3.5.0
+stevedore==4.1.1
     # via
     #   -r requirements/testing.txt
     #   code-annotations
-testfixtures==6.18.5
+testfixtures==7.0.3
     # via -r requirements/testing.txt
 text-unidecode==1.3
     # via
     #   -r requirements/testing.txt
     #   python-slugify
-toml==0.10.2
-    # via
-    #   -r requirements/ci.txt
-    #   tox
 tomli==2.0.1
     # via
+    #   -r requirements/ci.txt
     #   -r requirements/pip-tools.txt
     #   -r requirements/testing.txt
+    #   build
     #   coverage
     #   pep517
     #   pylint
     #   pytest
-tomlkit==0.11.0
+    #   tox
+tomlkit==0.11.6
     # via
     #   -r requirements/testing.txt
     #   pylint
-tox==3.25.0
+tox==3.27.1
     # via
     #   -r requirements/ci.txt
     #   tox-battery
 tox-battery==0.6.1
     # via -r requirements/ci.txt
-typing-extensions==4.2.0
+typing-extensions==4.4.0
     # via
     #   -r requirements/testing.txt
     #   astroid
@@ -264,11 +271,11 @@ urllib3==1.25.11
     #   -r requirements/testing.txt
     #   botocore
     #   requests
-virtualenv==20.14.1
+virtualenv==20.17.0
     # via
     #   -r requirements/ci.txt
     #   tox
-wheel==0.37.1
+wheel==0.38.4
     # via
     #   -r requirements/pip-tools.txt
     #   pip-tools
