@@ -16,8 +16,6 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-public_repos_list = ['edx-drf-extensions', 'credentials', 'edx-celeryutils', 'repo-health-data']
-
 
 class GitHubHelper:  # pylint: disable=missing-class-docstring
 
@@ -220,7 +218,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from e
 
         # it's a discovery work that's why only enabled for repo-health-data.
-        if pull_request.title == 'Python Requirements Update' and repository.name in public_repos_list:
+        if pull_request.title == 'Python Requirements Update':
             self.verify_upgrade_packages(pull_request)
 
         return pull_request
@@ -287,7 +285,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
         try:
             for pack in res:
-                if Version(pack[4]) > Version(pack[1]):
+                if Version(pack[4]) > Version(pack[1]) and Version(pack[4]).major == Version(pack[1]).major:
                     valid_packages.append(pack[0])
                 else:
                     suspicious_pack.append(pack)
@@ -297,10 +295,13 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from error
 
         if not suspicious_pack and valid_packages:
-            pull_request.set_labels('Ready to review')
+            pull_request.set_labels('Ready to Merge')
             logger.info("Total valid upgrades are %s", valid_packages)
         else:
-            pull_request.create_issue_comment(f"Few packages downgraded. {suspicious_pack}")
+            pull_request.create_issue_comment(
+                f"We are reviewing packages automatically to mark this PR good to merge. We identified few of the "
+                f"packages downgraded or need manual review before merge. {suspicious_pack}"
+            )
 
     def delete_branch(self, repository, branch_name):
         """
