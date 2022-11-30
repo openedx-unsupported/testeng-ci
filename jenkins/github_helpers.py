@@ -295,7 +295,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from error
 
         if not suspicious_pack and valid_packages:
-            pull_request.set_labels('Ready to review')
+            pull_request.set_labels('Ready to Merge')
             logger.info("Total valid upgrades are %s", valid_packages)
         else:
             pull_request.create_issue_comment(
