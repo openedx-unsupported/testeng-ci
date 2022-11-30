@@ -299,7 +299,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             logger.info("Total valid upgrades are %s", valid_packages)
         else:
             pull_request.create_issue_comment(
-                f"We are reviewing packages automatically to mark this PR good to merge. We identified we of the "
+                f"We are reviewing packages automatically to mark this PR good to merge. We identified few of the "
                 f"packages downgraded or need manual review before merge. {suspicious_pack}"
             )
 
