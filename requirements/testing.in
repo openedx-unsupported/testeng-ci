@@ -3,9 +3,7 @@
 -r base.txt
 
 coverage
-ddt
 edx-lint
-httpretty
 mock
 pycodestyle
 pytest
