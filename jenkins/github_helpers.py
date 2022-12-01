@@ -303,7 +303,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             logger.info("Total valid upgrades are %s", valid_packages)
         else:
             pull_request.create_issue_comment(
-                f"The PR needs manual review before merge.</br> {' '.join(suspicious_pack)}"
+                f"The PR needs manual review before merge.</br></br> {' '.join(suspicious_pack)}"
             )
 
     def delete_branch(self, repository, branch_name):
