@@ -291,7 +291,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 else:
                     # same package appears multiple times in PR. So avoid duplicates in msg.
                     if pack[0] not in temp_ls:
-                        suspicious_pack.append(f"This package {pack[0]} changes from {pack[1]} to {pack[4]}.")
+                        suspicious_pack.append(f"This package {pack[0]} changes from {pack[1]} to {pack[4]}. ")
                         temp_ls.append(pack[0])
         except Exception as error:
             raise Exception(
