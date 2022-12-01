@@ -152,6 +152,8 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
                    "     #   virtualenv\n"
                    "-distro==1.7.0\n"
                    "+distro==1.8.0\n"
+                   "-boto3==1.24.85\n"
+                   "+boto3==2.24.00\n"
                    ).encode('utf-8')
 
         with patch('requests.get') as mock_request:

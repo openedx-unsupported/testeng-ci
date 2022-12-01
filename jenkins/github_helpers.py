@@ -288,7 +288,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 if Version(pack[4]) > Version(pack[1]) and Version(pack[4]).major == Version(pack[1]).major:
                     valid_packages.append(pack[0])
                 else:
-                    suspicious_pack.append(pack)
+                    if pack not in suspicious_pack:
+                        suspicious_pack.append(pack)
         except Exception as error:
             raise Exception(
                 "Failed to compare packages versions."
@@ -300,7 +301,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         else:
             pull_request.create_issue_comment(
                 f"We are reviewing packages automatically to mark this PR good to merge. We identified few of the "
-                f"packages downgraded or need manual review before merge. {suspicious_pack}"
+                f"packages downgraded or major version upgraded or need manual review before merge. {suspicious_pack}"
             )
 
     def delete_branch(self, repository, branch_name):
