@@ -218,8 +218,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from e
 
         # it's a discovery work that's why only enabled for repo-health-data.
-        if pull_request.title == 'Python Requirements Update':
-            self.verify_upgrade_packages(pull_request)
+        #if pull_request.title == 'Python Requirements Update':
+        self.verify_upgrade_packages(pull_request)
 
         return pull_request
 
@@ -291,7 +291,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 else:
                     # same package appears multiple times in PR. So avoid duplicates in msg.
                     if pack[0] not in temp_ls:
-                        suspicious_pack.append(f"This package {pack[0]} changes from {pack[1]} to {pack[4]}. ")
+                        suspicious_pack.append(f"This package {pack[0]} changes from {pack[1]} to {pack[4]}.\n ")
                         temp_ls.append(pack[0])
         except Exception as error:
             raise Exception(
@@ -303,7 +303,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             logger.info("Total valid upgrades are %s", valid_packages)
         else:
             pull_request.create_issue_comment(
-                f"The PR needs manual review before merge {suspicious_pack}."
+                f"The PR needs manual review before merge.</br> {' '.join(suspicious_pack)}"
             )
 
     def delete_branch(self, repository, branch_name):
