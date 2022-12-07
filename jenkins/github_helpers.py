@@ -276,14 +276,15 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             if not suspicious_pack and valid_packages:
                 pull_request.set_labels('Ready to Merge')
                 logger.info("Total valid upgrades are %s", valid_packages)
+
             else:
                 pull_request.create_issue_comment(
-                    f"The PR needs manual review before merge.</br></br> {' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
+                    f"Packages upgraded.</br> \n {' '.join(self.make_readable_string(g) for g in valid_packages)}"
                 )
 
-            pull_request.create_issue_comment(
-                f"Packages upgraded.</br></br> {' '.join(self.make_readable_string(g) for g in valid_packages)}"
-            )
+                pull_request.create_issue_comment(
+                    f"The PR needs manual review before merge.</br> \n {' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
+                )
 
         else:
             logger.info("No package available for comparison.")
@@ -334,7 +335,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         return valid_packages, suspicious_pack
 
     def make_readable_string(self, groups):
-            return f"`{groups['package_name']}` changes from `{groups['old_version']}` to `{groups['new_version']}`.\n"
+            return f"- `{groups['package_name']}` changes from `{groups['old_version']}` to `{groups['new_version']}`.\n"
 
     def check_suspicious(self, groups, suspicious_pack, temp_ls):
         """Same package appears multiple times in PR. So avoid duplicates in msg."""
