@@ -265,46 +265,76 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         load_content = requests.get(location, headers=headers)
         txt = ''
         time.sleep(3)
-
         logger.info(load_content.status_code)
+
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
 
-        logger.info(txt)
-        regex = \
-            r"^[\-](?P<package_name>[\w][\w-]+)==(?P<old_version>\d+\.\d+\.\d+(\.[\w]+)?).*\n[\+]([\w][\w-]+)" \
-            r"==(?P<new_version>\d+\.\d+\.\d+(\.[\w]+)?).*"
-        res = re.findall(regex, txt, re.MULTILINE)
+        if txt:
+            valid_packages, suspicious_pack = self.compare_pr_differnce(txt)
+
+            if not suspicious_pack and valid_packages:
+                pull_request.set_labels('Ready to Merge')
+                logger.info("Total valid upgrades are %s", valid_packages)
+            else:
+                pull_request.create_issue_comment(
+                    f"The PR needs manual review before merge.</br></br> {' '.join(suspicious_pack)}"
+                )
+        else:
+            logger.info("No package available for comparison.")
+
+    def compare_pr_differnce(self, txt):
+        """ Parse the content and extract packages for comparison. """
+
+        regex = re.compile(r"^(?P<change>[\-\+])(?P<package_name>[\w][\w\-\[\]]+)=="
+                           r"(?P<old_version>\d+\.\d+(\.\d+)?(\.[\w]+)?)(.*\n[\+]([\w][\w\-\[\]]+)=="
+                           r"(?P<new_version>\d+\.\d+(\.\d+)?(\.[\w]+)?).*)?", re.MULTILINE)
 
         suspicious_pack = []
         valid_packages = []
         temp_ls = []
 
-        if not res:
-            logger.info("No package available for comparison.")
-            return
-
         try:
-            for pack in res:
-                if Version(pack[4]) > Version(pack[1]) and Version(pack[4]).major == Version(pack[1]).major:
-                    valid_packages.append(pack[0])
-                else:
-                    # same package appears multiple times in PR. So avoid duplicates in msg.
-                    if pack[0] not in temp_ls:
-                        suspicious_pack.append(f"This package {pack[0]} changes from {pack[1]} to {pack[4]}. ")
-                        temp_ls.append(pack[0])
+            for match in regex.finditer(txt):
+                groups = match.groupdict()
+                if not groups:
+                    logger.info("No package available for comparison.")
+                    raise
+
+                if groups['new_version'] and groups['old_version']:  # if both values exits then do version comparison
+                    if Version(groups['new_version']) > Version(groups['old_version']) \
+                            and Version(groups['new_version']).major == Version(groups['old_version']).major:
+                        valid_packages.append(groups['package_name'])
+                    else:
+                        self.check_suspicious(groups, suspicious_pack, temp_ls)
+                elif groups['change'] == '-':
+                    self.check_suspicious(groups, suspicious_pack, temp_ls)
+                elif groups['change'] == '+':
+                    valid_packages.append(groups['package_name'])
+
         except Exception as error:
             raise Exception(
                 "Failed to compare packages versions."
             ) from error
 
-        if not suspicious_pack and valid_packages:
-            pull_request.set_labels('Ready to Merge')
-            logger.info("Total valid upgrades are %s", valid_packages)
-        else:
-            pull_request.create_issue_comment(
-                f"The PR needs manual review before merge {suspicious_pack}."
-            )
+        return valid_packages, suspicious_pack
+
+    def check_suspicious(self, groups, suspicious_pack, temp_ls):
+        # same package appears multiple times in PR. So avoid duplicates in msg.
+
+        if groups['package_name'] not in temp_ls:
+            suspicious_pack.append(
+                f"This package `{groups['package_name']}` changes from"
+                f" `{groups['old_version']}` to `{groups['new_version']}`.\n ")
+            temp_ls.append(groups['package_name'])
+
+    def check_versions_comparisons(self, pkg, new_version, old_version, change, valid_pack, suspicious_pack, temp_ls):
+        """ check if package remove or add."""
+        if new_version and not old_version:
+            if change == '+':
+                valid_pack.append(pkg)
+            else:
+                self.check_suspicious(pkg, suspicious_pack, temp_ls)
 
     def delete_branch(self, repository, branch_name):
         """
