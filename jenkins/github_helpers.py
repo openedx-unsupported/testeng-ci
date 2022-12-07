@@ -283,7 +283,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 )
 
                 pull_request.create_issue_comment(
-                    f"The PR needs manual review before merge.</br> \n {' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
+                    f"The PR needs manual review before merge.</br> \n "
+                    f"{' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
                 )
 
         else:
@@ -318,14 +319,16 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                         self.check_suspicious(groups, suspicious_pack, temp_ls)
 
                 elif groups['change'] == '-':
-                    self.check_suspicious(groups, suspicious_pack, temp_ls)
+                    if groups['package_name'] not in temp_ls:
+                        self.check_suspicious(groups, suspicious_pack, temp_ls)
+                        temp_ls.append(groups['package_name'])
 
                 elif groups['change'] == '+':
-                    if groups['package_name'] not in temp_valid_ls:
+                    if groups['package_name'] not in temp_ls:
                         groups['new_version'] = groups['old_version']  # due to new addition regex picks wrong order.
                         groups['old_version'] = ''
-                        valid_packages.append(groups)
-                        temp_valid_ls.append(groups['package_name'])
+                        suspicious_pack.append(groups)
+                        temp_ls.append(groups['package_name'])
 
         except Exception as error:
             raise Exception(
@@ -335,7 +338,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         return valid_packages, suspicious_pack
 
     def make_readable_string(self, groups):
-            return f"- `{groups['package_name']}` changes from `{groups['old_version']}` to `{groups['new_version']}`.\n"
+            return f"- `{groups['package_name']}` changes from " \
+                   f"`{groups['old_version']}` to `{groups['new_version']}`.\n"
 
     def check_suspicious(self, groups, suspicious_pack, temp_ls):
         """Same package appears multiple times in PR. So avoid duplicates in msg."""
