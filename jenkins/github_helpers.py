@@ -306,9 +306,9 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                             and Version(groups['new_version']).major == Version(groups['old_version']).major:
                         valid_packages.append(groups['package_name'])
                     else:
-                        self.check_suspicious(groups, suspicious_pack, temp_ls)
+                        self.check_suspicious(groups, suspicious_pack, temp_ls, "Major Change:")
                 elif groups['change'] == '-':
-                    self.check_suspicious(groups, suspicious_pack, temp_ls)
+                    self.check_suspicious(groups, suspicious_pack, temp_ls, "Removed:")
                 elif groups['change'] == '+':
                     valid_packages.append(groups['package_name'])
 
@@ -319,12 +319,12 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
         return valid_packages, suspicious_pack
 
-    def check_suspicious(self, groups, suspicious_pack, temp_ls):
+    def check_suspicious(self, groups, suspicious_pack, temp_ls, msg_type):
         """Same package appears multiple times in PR. So avoid duplicates in msg."""
 
         if groups['package_name'] not in temp_ls:
             suspicious_pack.append(
-                f"This package `{groups['package_name']}` changes from"
+                f"`{msg_type}` This package `{groups['package_name']}` changes from"
                 f" `{groups['old_version']}` to `{groups['new_version']}`.\n ")
             temp_ls.append(groups['package_name'])
 
