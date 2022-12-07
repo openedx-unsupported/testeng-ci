@@ -218,8 +218,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from e
 
         # it's a discovery work that's why only enabled for repo-health-data.
-        if pull_request.title == 'Python Requirements Update':
-            self.verify_upgrade_packages(pull_request)
+        #if pull_request.title == 'Python Requirements Update':
+        self.verify_upgrade_packages(pull_request)
 
         return pull_request
 
@@ -278,8 +278,13 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 logger.info("Total valid upgrades are %s", valid_packages)
             else:
                 pull_request.create_issue_comment(
-                    f"The PR needs manual review before merge.</br></br> {' '.join(suspicious_pack)}"
+                    f"The PR needs manual review before merge.</br></br> {' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
                 )
+
+            pull_request.create_issue_comment(
+                f"Packages upgraded.</br></br> {' '.join(self.make_readable_string(g) for g in valid_packages)}"
+            )
+
         else:
             logger.info("No package available for comparison.")
 
@@ -293,6 +298,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         suspicious_pack = []
         valid_packages = []
         temp_ls = []
+        temp_valid_ls = []
 
         try:
             for match in regex.finditer(txt):
@@ -304,13 +310,20 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 if groups['new_version'] and groups['old_version']:  # if both values exits then do version comparison
                     if Version(groups['new_version']) > Version(groups['old_version']) \
                             and Version(groups['new_version']).major == Version(groups['old_version']).major:
-                        valid_packages.append(groups['package_name'])
+
+                        if groups['package_name'] not in temp_valid_ls:
+                            valid_packages.append(groups)
+                            temp_valid_ls.append(groups['package_name'])
                     else:
-                        self.check_suspicious(groups, suspicious_pack, temp_ls, "Major Change:")
+                        self.check_suspicious(groups, suspicious_pack, temp_ls)
+
                 elif groups['change'] == '-':
-                    self.check_suspicious(groups, suspicious_pack, temp_ls, "Removed:")
+                    self.check_suspicious(groups, suspicious_pack, temp_ls)
+
                 elif groups['change'] == '+':
-                    valid_packages.append(groups['package_name'])
+                    if groups['package_name'] not in temp_valid_ls:
+                        valid_packages.append(groups)
+                        temp_valid_ls.append(groups['package_name'])
 
         except Exception as error:
             raise Exception(
@@ -319,13 +332,14 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
         return valid_packages, suspicious_pack
 
-    def check_suspicious(self, groups, suspicious_pack, temp_ls, msg_type):
+    def make_readable_string(self, groups):
+            return f"`{groups['package_name']}` changes from `{groups['old_version']}` to `{groups['new_version']}`.\n"
+
+    def check_suspicious(self, groups, suspicious_pack, temp_ls):
         """Same package appears multiple times in PR. So avoid duplicates in msg."""
 
         if groups['package_name'] not in temp_ls:
-            suspicious_pack.append(
-                f"`{msg_type}` This package `{groups['package_name']}` changes from"
-                f" `{groups['old_version']}` to `{groups['new_version']}`.\n ")
+            suspicious_pack.append(groups)
             temp_ls.append(groups['package_name'])
 
     def check_versions_comparisons(self, pkg, new_version, old_version, change, valid_pack, suspicious_pack, temp_ls):
