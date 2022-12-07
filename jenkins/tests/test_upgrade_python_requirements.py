@@ -297,6 +297,5 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
                    "+boto1==2.24.90\n"
                    )
         valid, suspicious = GitHubHelper().compare_pr_differnce(content)
-        assert sorted(['boto3', 'botocore', 'toml', "distro"]) == sorted(valid)
-        assert sorted(['`Removed:` This package `django` changes from `3.24.00` to `None`.\n ',
-                       '`Major Change:` This package `boto1` changes from `1.24.85` to `2.24.90`.\n ']) == sorted(suspicious)
+        assert sorted(['boto3', 'botocore', 'toml', "distro"]) == sorted([g['package_name']for g in valid])
+        assert sorted(['boto1', 'django']) == sorted([g['package_name']for g in suspicious])

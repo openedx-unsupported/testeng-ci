@@ -218,8 +218,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             ) from e
 
         # it's a discovery work that's why only enabled for repo-health-data.
-        #if pull_request.title == 'Python Requirements Update':
-        self.verify_upgrade_packages(pull_request)
+        if pull_request.title == 'Python Requirements Update':
+            self.verify_upgrade_packages(pull_request)
 
         return pull_request
 
@@ -310,7 +310,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 if groups['new_version'] and groups['old_version']:  # if both values exits then do version comparison
                     if Version(groups['new_version']) > Version(groups['old_version']) \
                             and Version(groups['new_version']).major == Version(groups['old_version']).major:
-
                         if groups['package_name'] not in temp_valid_ls:
                             valid_packages.append(groups)
                             temp_valid_ls.append(groups['package_name'])
@@ -322,6 +321,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
                 elif groups['change'] == '+':
                     if groups['package_name'] not in temp_valid_ls:
+                        groups['new_version'] = groups['old_version']  # due to new addition regex picks wrong order.
+                        groups['old_version'] = ''
                         valid_packages.append(groups)
                         temp_valid_ls.append(groups['package_name'])
 
