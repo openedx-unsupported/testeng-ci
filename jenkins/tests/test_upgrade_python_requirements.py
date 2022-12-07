@@ -154,6 +154,7 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
                    "+distro==1.8.0\n"
                    "-boto3==1.24.85\n"
                    "+boto3==2.24.00\n"
+                   "+toml==2.24.00\n"
                    ).encode('utf-8')
 
         with patch('requests.get') as mock_request:
@@ -266,3 +267,35 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         assert create_branch_mock.called
         assert update_files_mock.called
         assert create_pr_mock.called
+
+    def test_compare_upgrade_difference(self):
+        content = ("\n"
+                   "-boto3==1.24.85\n"
+                   "+boto3==1.24.90\n"
+                   "     # via\n"
+                   "     #   -r requirements/production.txt\n"
+                   "     #   django-ses\n"
+                   "-botocore==1.27.85\n"
+                   "+botocore==1.27.95\n"
+                   "     # via\n"
+                   "     #   -r requirements/production.txt\n"
+                   "     #   boto3\n"
+                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
+                   "     # via\n"
+                   "     #   -r requirements/dev.txt\n"
+                   "     #   virtualenv\n"
+                   "     # via\n"
+                   "     #   django-ses\n"
+                   "-distro==1.24.85\n"
+                   "+distro==1.27.95\n"
+                   "     # via\n"
+                   "+toml==2.24.00\n"
+                   "     # via\n"
+                   "-django==3.24.00\n"
+                   "     # via\n"
+                   "-boto1==1.24.85\n"
+                   "+boto1==2.24.90\n"
+                   )
+        valid, suspicious = GitHubHelper().compare_pr_differnce(content)
+        assert sorted(['boto3', 'botocore', "distro"]) == sorted([g['package_name']for g in valid])
+        assert sorted(['boto1', 'django', 'toml']) == sorted([g['package_name']for g in suspicious])
