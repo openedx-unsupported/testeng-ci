@@ -338,8 +338,8 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         return valid_packages, suspicious_pack
 
     def make_readable_string(self, groups):
-            return f"- `{groups['package_name']}` changes from " \
-                   f"`{groups['old_version']}` to `{groups['new_version']}`.\n"
+        """making string for readability"""
+        return f"- `{groups['package_name']}` changes from `{groups['old_version']}` to `{groups['new_version']}`.\n"
 
     def check_suspicious(self, groups, suspicious_pack, temp_ls):
         """Same package appears multiple times in PR. So avoid duplicates in msg."""
