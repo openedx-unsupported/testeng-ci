@@ -299,7 +299,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 groups = match.groupdict()
                 if not groups:
                     logger.info("No package available for comparison.")
-                    raise
+                    raise Exception("No package available for comparison.")
 
                 if groups['new_version'] and groups['old_version']:  # if both values exits then do version comparison
                     if Version(groups['new_version']) > Version(groups['old_version']) \
@@ -320,7 +320,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         return valid_packages, suspicious_pack
 
     def check_suspicious(self, groups, suspicious_pack, temp_ls):
-        # same package appears multiple times in PR. So avoid duplicates in msg.
+        """Same package appears multiple times in PR. So avoid duplicates in msg."""
 
         if groups['package_name'] not in temp_ls:
             suspicious_pack.append(
