@@ -273,20 +273,19 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         if txt:
             valid_packages, suspicious_pack = self.compare_pr_differnce(txt)
 
+            pull_request.create_issue_comment(
+                f"Packages upgraded.</br> \n {' '.join(self.make_readable_string(g) for g in valid_packages)}"
+            )
+
             if not suspicious_pack and valid_packages:
                 pull_request.set_labels('Ready to Merge')
                 logger.info("Total valid upgrades are %s", valid_packages)
 
             else:
                 pull_request.create_issue_comment(
-                    f"Packages upgraded.</br> \n {' '.join(self.make_readable_string(g) for g in valid_packages)}"
-                )
-
-                pull_request.create_issue_comment(
                     f"The PR needs manual review before merge.</br> \n "
                     f"{' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
                 )
-
         else:
             logger.info("No package available for comparison.")
 
