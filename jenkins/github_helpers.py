@@ -274,7 +274,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             valid_packages, suspicious_pack = self.compare_pr_differnce(txt)
 
             pull_request.create_issue_comment(
-                f"Packages upgraded.</br> \n {' '.join(self.make_readable_string(g) for g in valid_packages)}"
+                f"**`{len(valid_packages)}` Packages upgraded with minor versions.**</br> \n {' '.join(self.make_readable_string(g) for g in valid_packages)}"
             )
 
             if not suspicious_pack and valid_packages:
@@ -283,7 +283,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
             else:
                 pull_request.create_issue_comment(
-                    f"The PR needs manual review before merge.</br> \n "
+                    f"**`{len(suspicious_pack)}` Packages upgraded/downgraded with Major versions. PR needs manual review.**</br> \n "
                     f"{' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
                 )
         else:
