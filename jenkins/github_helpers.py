@@ -53,6 +53,16 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
                 "Please make sure the github token is accurate and try again."
             ) from error
 
+    def _add_reason(self, req, reason):
+        req['reason'] = reason
+        return req
+
+    def _add_comment_about_reqs(self, pr, summary, reqs):
+        separator = "\n"
+        pr.create_issue_comment(
+            f"{summary}.</br> \n {separator.join(self.make_readable_string(req) for req in reqs)}"
+        )
+
     def get_github_instance(self):
         return self.github_instance
 
@@ -269,91 +279,89 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
 
         if load_content.status_code == 200:
             txt = load_content.content.decode('utf-8')
+            valid_reqs, suspicious_reqs = self.compare_pr_differnce(txt)
 
-        if txt:
-            valid_packages, suspicious_pack = self.compare_pr_differnce(txt)
+            self._add_comment_about_reqs(pull_request, "Valid upgraded packages", valid_reqs)
 
-            pull_request.create_issue_comment(
-                f"Packages upgraded.</br> \n {' '.join(self.make_readable_string(g) for g in valid_packages)}"
-            )
-
-            if not suspicious_pack and valid_packages:
+            if not suspicious_reqs and valid_reqs:
                 pull_request.set_labels('Ready to Merge')
-                logger.info("Total valid upgrades are %s", valid_packages)
-
+                logger.info("Total valid upgrades are %s", valid_reqs)
+                self._add_comment_about_reqs(pull_request, "Valid upgraded packages", valid_reqs)
             else:
-                pull_request.create_issue_comment(
-                    f"The PR needs manual review before merge.</br> \n "
-                    f"{' '.join(self.make_readable_string(g) for g in suspicious_pack)}"
-                )
+                self._add_comment_about_reqs(pull_request, "These Packages need manual review.", suspicious_reqs)
+
         else:
             logger.info("No package available for comparison.")
 
     def compare_pr_differnce(self, txt):
         """ Parse the content and extract packages for comparison. """
+        regex = re.compile(r"(?P<change>[\-\+])(?P<name>[\w][\w\-\[\]]+)==(?P<version>\d+\.\d+(\.\d+)?(\.[\w]+)?)")
+        reqs = {}
+        if not txt:
+            return [], []
 
-        regex = re.compile(r"^(?P<change>[\-\+])(?P<package_name>[\w][\w\-\[\]]+)=="
-                           r"(?P<old_version>\d+\.\d+(\.\d+)?(\.[\w]+)?)(.*\n[\+]([\w][\w\-\[\]]+)=="
-                           r"(?P<new_version>\d+\.\d+(\.\d+)?(\.[\w]+)?).*)?", re.MULTILINE)
-
-        suspicious_pack = []
-        valid_packages = []
-        temp_ls = []
-        temp_valid_ls = []
-
-        try:
-            for match in regex.finditer(txt):
-                groups = match.groupdict()
-                if not groups:
-                    logger.info("No package available for comparison.")
-                    raise Exception("No package available for comparison.")
-
-                if groups['new_version'] and groups['old_version']:  # if both values exits then do version comparison
-                    if Version(groups['new_version']) > Version(groups['old_version']) \
-                            and Version(groups['new_version']).major == Version(groups['old_version']).major:
-                        if groups['package_name'] not in temp_valid_ls:
-                            valid_packages.append(groups)
-                            temp_valid_ls.append(groups['package_name'])
+        # skipping zeroth index  as it will be empty
+        files = txt.split("diff --git")[1:]
+        for file in files:
+            lines = file.split("\n")
+            filename_match = re.search(r"[\w\-\_]*.txt", lines[0])
+            if not filename_match:
+                continue
+            filename = filename_match[0]
+            reqs[filename] = {}
+            for line in lines:
+                match = re.match(regex, line)
+                if match:
+                    groups = match.groupdict()
+                    keys = ('new_version', 'old_version') if groups['change'] == '+' \
+                        else ('old_version', 'new_version')
+                    if groups['name'] in reqs[filename]:
+                        reqs[filename][groups['name']][keys[0]] = groups['version']
                     else:
-                        self.check_suspicious(groups, suspicious_pack, temp_ls)
+                        reqs[filename][groups['name']] = {keys[0]: groups['version'], keys[1]: None}
+        combined_reqs = []
+        for file, lst in reqs.items():
+            for name, versions in lst.items():
+                combined_reqs.append(
+                    {"name": name, 'old_version': versions['old_version'], 'new_version': versions['new_version']}
+                )
 
-                elif groups['change'] == '-':
-                    if groups['package_name'] not in temp_ls:
-                        self.check_suspicious(groups, suspicious_pack, temp_ls)
-                        temp_ls.append(groups['package_name'])
-
-                elif groups['change'] == '+':
-                    if groups['package_name'] not in temp_ls:
-                        groups['new_version'] = groups['old_version']  # due to new addition regex picks wrong order.
-                        groups['old_version'] = ''
-                        suspicious_pack.append(groups)
-                        temp_ls.append(groups['package_name'])
-
-        except Exception as error:
-            raise Exception(
-                "Failed to compare packages versions."
-            ) from error
-
-        return valid_packages, suspicious_pack
-
-    def make_readable_string(self, groups):
-        """making string for readability"""
-        return f"- `{groups['package_name']}` changes from `{groups['old_version']}` to `{groups['new_version']}`.\n"
-
-    def check_suspicious(self, groups, suspicious_pack, temp_ls):
-        """Same package appears multiple times in PR. So avoid duplicates in msg."""
-
-        if groups['package_name'] not in temp_ls:
-            suspicious_pack.append(groups)
-            temp_ls.append(groups['package_name'])
-
-    def check_versions_comparisons(self, pkg, new_version, old_version, change, valid_pack, suspicious_pack, temp_ls):
-        """ check if package remove or add."""
-        if new_version and not old_version:
-            if change == '+':
-                valid_pack.append(pkg)
+        unique_reqs = [dict(s) for s in set(frozenset(d.items()) for d in combined_reqs)]
+        valid_reqs = []
+        suspicious_reqs = []
+        for req in unique_reqs:
+            if req['new_version'] and req['old_version']:  # if both values exits then do version comparison
+                old_version = Version(req['old_version'])
+                new_version = Version(req['new_version'])
+                if new_version > old_version:
+                    if new_version.major == old_version.major:
+                        valid_reqs.append(req)
+                    else:
+                        suspicious_reqs.append(self._add_reason(req, "MAJOR"))
+                else:
+                    suspicious_reqs.append(self._add_reason(req, "DOWNGRADE"))
             else:
-                self.check_suspicious(pkg, suspicious_pack, temp_ls)
+                if req['new_version']:
+                    suspicious_reqs.append(self._add_reason(req, "NEW"))
+                else:
+                    suspicious_reqs.append(self._add_reason(req, "REMOVED"))
+
+        return sorted(valid_reqs, key=lambda d: d['name']), sorted(suspicious_reqs, key=lambda d: d['name'])
+
+    def make_readable_string(self, req):
+        """making string for readability"""
+        if 'reason' in req:
+            if req['reason'] == 'NEW':
+                return f"- **[{req['reason']}]**  `{req['name']}`" \
+                       f" (`{req['old_version']}`) added to the requirements"
+            if req['reason'] == 'REMOVED':
+                return f"- **[{req['reason']}]**  `{req['name']}`" \
+                       f" (`{req['old_version']}`) removed from to the requirements"
+            # either major version bump or downgraded
+            return f"- **[{req['reason']}]** `{req['name']}` " \
+                   f"changes from `{req['old_version']}` to `{req['new_version']}`"
+        # valid requirement
+        return f"- `{req['name']}` changes from `{req['old_version']}` to `{req['new_version']}`"
 
     def delete_branch(self, repository, branch_name):
         """
