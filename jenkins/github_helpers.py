@@ -281,7 +281,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             txt = load_content.content.decode('utf-8')
             valid_reqs, suspicious_reqs = self.compare_pr_differnce(txt)
 
-            self._add_comment_about_reqs(pull_request, "Valid upgraded packages", valid_reqs)
+            self._add_comment_about_reqs(pull_request, "List of packages in the PR without any issue", valid_reqs)
 
             if not suspicious_reqs and valid_reqs:
                 pull_request.set_labels('Ready to Merge')
@@ -353,10 +353,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         if 'reason' in req:
             if req['reason'] == 'NEW':
                 return f"- **[{req['reason']}]**  `{req['name']}`" \
-                       f" (`{req['old_version']}`) added to the requirements"
+                       f" (`{req['new_version']}`) added to the requirements"
             if req['reason'] == 'REMOVED':
                 return f"- **[{req['reason']}]**  `{req['name']}`" \
-                       f" (`{req['old_version']}`) removed from to the requirements"
+                       f" (`{req['old_version']}`) removed from the requirements"
             # either major version bump or downgraded
             return f"- **[{req['reason']}]** `{req['name']}` " \
                    f"changes from `{req['old_version']}` to `{req['new_version']}`"
