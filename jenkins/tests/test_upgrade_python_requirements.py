@@ -1,4 +1,5 @@
 # pylint: disable=missing-module-docstring,unused-argument
+from os import path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -82,89 +83,17 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         create_pr_mock.diff_url = "/"
         create_pr_mock.repository.name = 'repo-health-data'
 
-        content = ("\n"
-                   "-boto3==1.24.85\n"
-                   "+boto3==1.24.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   django-ses\n"
-                   "-botocore==1.27.85\n"
-                   "+botocore==1.27.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   boto3\n"
-                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
-                   "     # via\n"
-                   "     #   -r requirements/dev.txt\n"
-                   "     #   virtualenv\n"
-                   "-distro==1.7.0\n"
-                   "+distro==1.8.0\n"
-                   ).encode('utf-8')
-        with patch('requests.get') as mock_request:
-            mock_request.return_value.content = content
-            mock_request.return_value.status_code = 200
-            GitHubHelper().verify_upgrade_packages(create_pr_mock)
+        basepath = path.dirname(__file__)
 
-        assert create_pr_mock.set_labels.called
-
-        # downgrade test
-        content = ("\n"
-                   "-boto3==1.24.85\n"
-                   "+boto3==1.24.00\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   django-ses\n"
-                   "-botocore==1.27.85\n"
-                   "+botocore==1.27.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   boto3\n"
-                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
-                   "     # via\n"
-                   "     #   -r requirements/dev.txt\n"
-                   "     #   virtualenv\n"
-                   "-distro==1.7.0\n"
-                   "+distro==1.8.0\n"
-                   ).encode('utf-8')
-
-        with patch('requests.get') as mock_request:
-            mock_request.return_value.content = content
-            mock_request.return_value.status_code = 200
-            GitHubHelper().verify_upgrade_packages(create_pr_mock)
-
-        assert create_pr_mock.create_issue_comment.called
-
-        # major uprade failure test
-        content = ("\n"
-                   "-boto3==1.24.85\n"
-                   "+boto3==2.24.00\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   django-ses\n"
-                   "-botocore==1.27.85\n"
-                   "+botocore==1.27.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   boto3\n"
-                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
-                   "     # via\n"
-                   "     #   -r requirements/dev.txt\n"
-                   "     #   virtualenv\n"
-                   "-distro==1.7.0\n"
-                   "+distro==1.8.0\n"
-                   "-boto3==1.24.85\n"
-                   "+boto3==2.24.00\n"
-                   "+toml==2.24.00\n"
-                   ).encode('utf-8')
-
-        with patch('requests.get') as mock_request:
-            mock_request.return_value.content = content
-            mock_request.return_value.status_code = 200
-            GitHubHelper().verify_upgrade_packages(create_pr_mock)
-
-        assert create_pr_mock.create_issue_comment.called
-
-        assert not delete_branch_mock.called
+        filepath = path.abspath(path.join(basepath, "test_data", "diff.txt"))
+        with open(filepath, "r") as f:
+            content = f.read().encode('utf-8')
+            with patch('requests.get') as mock_request:
+                mock_request.return_value.content = content
+                mock_request.return_value.status_code = 200
+                GitHubHelper().verify_upgrade_packages(create_pr_mock)
+            assert create_pr_mock.create_issue_comment.called
+            assert not delete_branch_mock.called
 
     @patch('jenkins.pull_request_creator.PullRequestCreator._get_user',
            return_value=Mock(name="fake name", login="fake login"))
@@ -269,33 +198,14 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         assert create_pr_mock.called
 
     def test_compare_upgrade_difference(self):
-        content = ("\n"
-                   "-boto3==1.24.85\n"
-                   "+boto3==1.24.90\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   django-ses\n"
-                   "-botocore==1.27.85\n"
-                   "+botocore==1.27.95\n"
-                   "     # via\n"
-                   "     #   -r requirements/production.txt\n"
-                   "     #   boto3\n"
-                   "@@ -124,7 +124,7 @@ distlib==0.3.6\n"
-                   "     # via\n"
-                   "     #   -r requirements/dev.txt\n"
-                   "     #   virtualenv\n"
-                   "     # via\n"
-                   "     #   django-ses\n"
-                   "-distro==1.24.85\n"
-                   "+distro==1.27.95\n"
-                   "     # via\n"
-                   "+toml==2.24.00\n"
-                   "     # via\n"
-                   "-django==3.24.00\n"
-                   "     # via\n"
-                   "-boto1==1.24.85\n"
-                   "+boto1==2.24.90\n"
-                   )
-        valid, suspicious = GitHubHelper().compare_pr_differnce(content)
-        assert sorted(['boto3', 'botocore', "distro"]) == sorted([g['package_name']for g in valid])
-        assert sorted(['boto1', 'django', 'toml']) == sorted([g['package_name']for g in suspicious])
+        basepath = path.dirname(__file__)
+        filepath = path.abspath(path.join(basepath, "test_data", "diff.txt"))
+        with open(filepath, "r") as f:
+            valid, suspicious = GitHubHelper().compare_pr_differnce(f.read())
+            assert sorted(
+                ['certifi', 'chardet', 'filelock', 'pip-tools', 'platformdirs', 'pylint', 'virtualenv']
+            ) == [g['name'] for g in valid]
+
+            assert sorted(
+                ['cachetools', 'six', 'tox', 'pyproject-api', 'colorama', 'py', 'chardet', 'pyparsing', 'packaging']
+            ) == [g['name'] for g in suspicious]
