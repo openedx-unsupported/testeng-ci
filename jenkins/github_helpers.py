@@ -333,6 +333,10 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             if req['new_version'] and req['old_version']:  # if both values exits then do version comparison
                 old_version = Version(req['old_version'])
                 new_version = Version(req['new_version'])
+
+                # skip, if the package location is changed in txt file only and both versions are same
+                if old_version == new_version:
+                    continue
                 if new_version > old_version:
                     if new_version.major == old_version.major:
                         valid_reqs.append(req)
