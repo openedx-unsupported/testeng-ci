@@ -286,7 +286,6 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             if not suspicious_reqs and valid_reqs:
                 pull_request.set_labels('Ready to Merge')
                 logger.info("Total valid upgrades are %s", valid_reqs)
-                self._add_comment_about_reqs(pull_request, "Valid upgraded packages", valid_reqs)
             else:
                 self._add_comment_about_reqs(pull_request, "These Packages need manual review.", suspicious_reqs)
 
