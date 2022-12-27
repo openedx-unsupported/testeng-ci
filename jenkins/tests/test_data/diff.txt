@@ -350,12 +350,14 @@ index 284c0b0..191d25a 100644
 +    # via tox
 +certifi==2022.12.7
      # via requests
++codecov==2.1.12
++    # via -r requirements/travis.in
 +chardet==5.1.0
 +    # via tox
  charset-normalizer==2.1.1
      # via requests
- codecov==2.1.12
-     # via -r requirements/travis.in
+-codecov==2.1.12
+-    # via -r requirements/travis.in
 +colorama==0.4.6
 +    # via tox
  coverage==6.5.0
