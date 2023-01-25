@@ -202,10 +202,12 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         filepath = path.abspath(path.join(basepath, "test_data", "diff.txt"))
         with open(filepath, "r") as f:
             valid, suspicious = GitHubHelper().compare_pr_differnce(f.read())
+
             assert sorted(
-                ['certifi', 'chardet', 'filelock', 'pip-tools', 'platformdirs', 'pylint', 'virtualenv']
+                ['certifi', 'filelock', 'platformdirs', 'virtualenv']
             ) == [g['name'] for g in valid]
 
             assert sorted(
-                ['cachetools', 'six', 'tox', 'pyproject-api', 'colorama', 'py', 'chardet', 'pyparsing', 'packaging']
+                ['cachetools', 'django', 'chardet', 'colorama', 'packaging',
+                 'py', 'pyparsing', 'pyproject-api', 'six', 'celery']
             ) == [g['name'] for g in suspicious]
