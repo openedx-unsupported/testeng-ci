@@ -307,17 +307,19 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             if not filename_match:
                 continue
             filename = filename_match[0]
-            reqs[filename] = {}
-            for line in lines:
-                match = re.match(regex, line)
-                if match:
-                    groups = match.groupdict()
-                    keys = ('new_version', 'old_version') if groups['change'] == '+' \
-                        else ('old_version', 'new_version')
-                    if groups['name'] in reqs[filename]:
-                        reqs[filename][groups['name']][keys[0]] = groups['version']
-                    else:
-                        reqs[filename][groups['name']] = {keys[0]: groups['version'], keys[1]: None}
+            if filename in ['base.txt', 'production.txt']:
+                reqs[filename] = {}
+                for line in lines:
+                    match = re.match(regex, line)
+                    if match:
+                        groups = match.groupdict()
+                        keys = ('new_version', 'old_version') if groups['change'] == '+' \
+                            else ('old_version', 'new_version')
+                        if groups['name'] in reqs[filename]:
+                            reqs[filename][groups['name']][keys[0]] = groups['version']
+                        else:
+                            reqs[filename][groups['name']] = {keys[0]: groups['version'], keys[1]: None}
+
         combined_reqs = []
         for file, lst in reqs.items():
             for name, versions in lst.items():
