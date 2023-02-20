@@ -284,7 +284,9 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             self._add_comment_about_reqs(pull_request, "List of packages in the PR without any issue", valid_reqs)
 
             if not suspicious_reqs and valid_reqs:
-                pull_request.set_labels('Ready to Merge')
+                # right now this scripts is adding labels on all prs and other scripts
+                # merge these labeled prs. We need to do this only for under arch-bom ownership repos.
+                # pull_request.set_labels('Ready to Merge')
                 logger.info("Total valid upgrades are %s", valid_reqs)
             else:
                 self._add_comment_about_reqs(pull_request, "These Packages need manual review.", suspicious_reqs)
