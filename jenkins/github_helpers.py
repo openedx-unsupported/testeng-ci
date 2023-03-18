@@ -23,6 +23,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         self._set_github_token()
         self._set_user_email()
         self._set_github_instance()
+        self.AUTOMERGE_ACTION_VAR = 'AUTOMERGE_PYTHON_DEPENDENCIES_UPGRADES_PR'
 
     # FIXME: Does nothing, sets variable to None if env var missing
     def _set_github_token(self):
@@ -284,15 +285,30 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
             self._add_comment_about_reqs(pull_request, "List of packages in the PR without any issue", valid_reqs)
 
             if not suspicious_reqs and valid_reqs:
-                # right now this scripts is adding labels on all prs and other scripts
-                # merge these labeled prs. We need to do this only for under arch-bom ownership repos.
-                # pull_request.set_labels('Ready to Merge')
+                pull_request.set_labels('Ready to Merge')
                 logger.info("Total valid upgrades are %s", valid_reqs)
             else:
                 self._add_comment_about_reqs(pull_request, "These Packages need manual review.", suspicious_reqs)
 
         else:
             logger.info("No package available for comparison.")
+
+    def check_automerge_variable_value(self, location):
+        """
+        Check whether repository has the `AUTOMERGE_PYTHON_DEPENDENCIES_UPGRADES_PR` variable
+        with `True` value exists.
+        """
+        link = location.split('pulls')
+        get_repo_variable = link[0] + 'actions/variables/' + self.AUTOMERGE_ACTION_VAR
+        logger.info('Hitting pull request for difference')
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f'Bearer {self.github_token}'}
+        load_content = requests.get(get_repo_variable, headers=headers)
+        time.sleep(1)
+
+        if load_content.status_code == 200:
+            return eval(load_content.json()['value'])
+
+        return False
 
     def compare_pr_differnce(self, txt):
         """ Parse the content and extract packages for comparison. """
