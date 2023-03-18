@@ -300,7 +300,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         """
         link = location.split('pulls')
         get_repo_variable = link[0] + 'actions/variables/' + self.AUTOMERGE_ACTION_VAR
-        logger.info('Hitting pull request for difference')
+        logger.info('Hitting repository to check AUTOMERGE_ACTION_VAR settings.')
         headers = {"Accept": "application/vnd.github+json", "Authorization": f'Bearer {self.github_token}'}
         load_content = requests.get(get_repo_variable, headers=headers)
         time.sleep(1)
