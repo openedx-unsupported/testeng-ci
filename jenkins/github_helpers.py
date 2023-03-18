@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import time
+from ast import literal_eval
 
 import requests
 from git import Git, Repo
@@ -308,7 +309,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         time.sleep(1)
 
         if load_content.status_code == 200:
-            val = eval(load_content.json()['value'])
+            val = literal_eval(load_content.json()['value'])
             logger.info(f"AUTOMERGE_ACTION_VAR value is {val}")
             return val
 
