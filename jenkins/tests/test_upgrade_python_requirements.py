@@ -197,7 +197,7 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
         assert update_files_mock.called
         assert create_pr_mock.called
 
-    def test_compare_upgrade_difference(self):
+    def test_compare_upgrade_difference_with_major_changes(self):
         basepath = path.dirname(__file__)
         filepath = path.abspath(path.join(basepath, "test_data", "diff.txt"))
         with open(filepath, "r") as f:
@@ -208,4 +208,17 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
 
             assert sorted(
                 ['cachetools', 'six', 'tox', 'pyproject-api', 'colorama', 'py', 'chardet', 'pyparsing', 'packaging']
+            ) == [g['name'] for g in suspicious]
+
+    def test_compare_upgrade_difference_with_minor_changes(self):
+        basepath = path.dirname(__file__)
+        filepath = path.abspath(path.join(basepath, "test_data", "minor_diff.txt"))
+        with open(filepath, "r") as f:
+            valid, suspicious = GitHubHelper().compare_pr_differnce(f.read())
+            assert sorted(
+                ['packaging']
+            ) == [g['name'] for g in valid]
+
+            assert sorted(
+                []
             ) == [g['name'] for g in suspicious]
