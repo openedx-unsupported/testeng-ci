@@ -222,3 +222,38 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
             assert sorted(
                 []
             ) == [g['name'] for g in suspicious]
+
+    def test_check_automerge_variable_value(self):
+        with patch('requests.get') as mock_request:
+            mock_request.return_value.status_code = 200
+            mock_request.return_value.json.return_value = {
+                'name': 'ENABLE_AUTOMERGE_FOR_DEPENDENCIES_PRS', 'value': 'True',
+                'created_at': '2023-03-17T12:58:50Z', 'updated_at': '2023-03-17T13:01:12Z'
+            }
+            self.assertTrue(
+                GitHubHelper().check_automerge_variable_value(
+                    'https://foo/bar/testrepo/pulls/1'
+                )
+            )
+
+            # in case of false value of variable.
+            mock_request.return_value.json.return_value = {
+                'name': 'ENABLE_AUTOMERGE_FOR_DEPENDENCIES_PRS', 'value': 'False',
+                'created_at': '2023-03-17T12:58:50Z', 'updated_at': '2023-03-17T13:01:12Z'
+            }
+            self.assertFalse(
+                GitHubHelper().check_automerge_variable_value(
+                    'https://foo/bar/testrepo/pulls/1'
+                )
+            )
+            # in case of no variable exists.
+            mock_request.return_value.status_code = 404
+            mock_request.return_value.json.return_value = {
+                'name': 'ENABLE_AUTOMERGE_FOR_DEPENDENCIES_PRS', 'value': 'False',
+                'created_at': '2023-03-17T12:58:50Z', 'updated_at': '2023-03-17T13:01:12Z'
+            }
+            self.assertFalse(
+                GitHubHelper().check_automerge_variable_value(
+                    'https://foo/bar/testrepo/pulls/1'
+                )
+            )
