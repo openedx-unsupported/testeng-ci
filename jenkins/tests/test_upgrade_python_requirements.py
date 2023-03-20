@@ -306,7 +306,9 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
                 mock_request.return_value.status_code = 200
 
                 # in case of `check_automerge_variable_value` false value label will not added.
-                with patch('jenkins.github_helpers.GitHubHelper.check_automerge_variable_value') as check_automerge_variable_value:
+                with patch(
+                        'jenkins.github_helpers.GitHubHelper.check_automerge_variable_value'
+                ) as check_automerge_variable_value:
                     check_automerge_variable_value.return_value = False
                     GitHubHelper().verify_upgrade_packages(create_pr_mock)
                     assert create_pr_mock.set_labels.called
