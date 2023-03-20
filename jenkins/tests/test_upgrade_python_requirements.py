@@ -313,4 +313,4 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
                 ) as check_automerge_variable_value:
                     check_automerge_variable_value.return_value = False
                     GitHubHelper().verify_upgrade_packages(create_pr_mock)
-                    assert create_pr_mock.set_labels.called
+                    assert not create_pr_mock.set_labels.called
