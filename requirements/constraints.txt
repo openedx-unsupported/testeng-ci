@@ -25,7 +25,3 @@ pyjwt<2.0
 
 # pytest 6.2.4 requires pluggy<1.0.0
 pluggy<1.0.0
-
-# Deprecated version of the AWS SDK;
-# we should stop using this
-boto==2.39.0
