@@ -274,10 +274,10 @@ class UpgradePythonRequirementsPullRequestTestCase(TestCase):
            return_value=Mock(name="fake name", login="fake login"))
     @patch('jenkins.github_helpers.GitHubHelper.delete_branch', return_value=None)
     def test_changes_with_minor_versions_and_variable(
-            self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
-                     update_files_mock, branch_exists_mock, current_commit_mock,
-                     modified_list_mock, repo_mock, authenticate_mock,
-                     close_existing_prs_mock
+        self, delete_branch_mock, get_user_mock, create_branch_mock, create_pr_mock,
+        update_files_mock, branch_exists_mock, current_commit_mock,
+        modified_list_mock, repo_mock, authenticate_mock,
+        close_existing_prs_mock
     ):
         """
         Ensure a merge with no changes to db files will not result in any updates.
