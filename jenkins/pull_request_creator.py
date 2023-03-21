@@ -237,4 +237,4 @@ def main(
 
 
 if __name__ == '__main__':
-    main(auto_envvar_prefix="PR_CREATOR")  # pylint: disable=no-value-for-parameter, unexpected-keyword-arg
+    main(auto_envvar_prefix="PR_CREATOR")  # pylint: disable=no-value-for-parameter
