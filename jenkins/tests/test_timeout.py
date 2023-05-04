@@ -15,7 +15,7 @@ class TimeoutTestCase(TestCase):
     TestCase class for testing timeout.py.
     """
 
-    def setUp(self):  # pylint: disable=super-method-not-called
+    def setUp(self):
         self.job_url = 'http://localhost:8080/fakejenkins'
         self.user = 'ausername'
         self.api_key = 'apikey'

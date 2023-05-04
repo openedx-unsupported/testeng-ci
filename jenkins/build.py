@@ -13,7 +13,7 @@ class Build(dict):
     :Args:
         build (dict): build data from Jenkins
     """
-    def __init__(self, build):  # pylint: disable=super-init-not-called
+    def __init__(self, build):
         self.isbuilding = build.get('building')
 
         author = None

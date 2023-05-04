@@ -43,7 +43,7 @@ class DeregisterAmisTestCase(TestCase):
     TestCase class for testing get_running_instances.py.
     """
 
-    def setUp(self):  # pylint: disable=super-method-not-called
+    def setUp(self):
         self.args = [
             '--log-level', 'INFO',
         ]
