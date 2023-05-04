@@ -274,7 +274,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         logger.info('Hitting pull request for difference')
         headers = {"Accept": "application/vnd.github.v3.diff", "Authorization": f'Bearer {self.github_token}'}
 
-        load_content = requests.get(location, headers=headers)
+        load_content = requests.get(location, headers=headers, timeout=5)
         txt = ''
         time.sleep(3)
         logger.info(load_content.status_code)
@@ -305,7 +305,7 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         logger.info('Hitting repository to check AUTOMERGE_ACTION_VAR settings.')
 
         headers = {"Accept": "application/vnd.github+json", "Authorization": f'Bearer {self.github_token}'}
-        load_content = requests.get(get_repo_variable, headers=headers)
+        load_content = requests.get(get_repo_variable, headers=headers, timeout=5)
         time.sleep(1)
 
         if load_content.status_code == 200:

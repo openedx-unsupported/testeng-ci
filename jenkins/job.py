@@ -50,7 +50,8 @@ class JenkinsJob:
             params={
                 "tree": ("builds[building,timestamp,"
                          "number,actions[parameters[*]]]"),
-            }
+            },
+            timeout=5,
         )
 
         response.raise_for_status()
@@ -73,6 +74,7 @@ class JenkinsJob:
             params={
                 'description': description,
             },
+            timeout=5,
         )
 
         logger.info("Updating description for build #{}. Response: {}".format(
@@ -91,7 +93,7 @@ class JenkinsJob:
         build_url = append_url(self.job_url, str(build_id))
         url = append_url(build_url, "/stop")
 
-        response = requests.post(url, auth=self.auth)
+        response = requests.post(url, auth=self.auth, timeout=5)
 
         logger.info("Aborting build #{}. Response: {}".format(
             build_id, response.status_code))

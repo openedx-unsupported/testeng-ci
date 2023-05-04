@@ -30,7 +30,8 @@ def get_repos(org):
     # If org has > 100, this code will need to be modified
     #  to include 'offset' requests
     req = requests.get(
-        BASE_URL + f'v3/owner/{org}/repos?active=true'
+        BASE_URL + f'v3/owner/{org}/repos?active=true',
+        timeout=5,
     )
     if req.status_code != 200:
         raise requests.HTTPError(req.status_code)
@@ -51,7 +52,8 @@ def get_builds(org, repo, is_finished=False):
     logger.debug('getting builds for repo: %s', repo)
     repo_slug = f'{org}/{repo}'
     req = requests.get(
-        BASE_URL + f'repos/{repo_slug}/builds'
+        BASE_URL + f'repos/{repo_slug}/builds',
+        timeout=5,
     )
     build_list = req.json()
     selected_build_list = []
@@ -136,7 +138,8 @@ def get_active_jobs(build_id):
     """
     jobs = []
     req = requests.get(
-        BASE_URL + f'v3/build/{build_id}/jobs'
+        BASE_URL + f'v3/build/{build_id}/jobs',
+        timeout=5,
     )
     job_resp = req.json()
     for job in job_resp['jobs']:
