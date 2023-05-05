@@ -10,7 +10,7 @@ class BuildTestCase(TestCase):
     TestCase class for testing the Build class
     """
 
-    def setUp(self):  # pylint: disable=super-method-not-called
+    def setUp(self):
         self.sample_build_data = sample_data(
             [Pr('2', author='bar').dict],
             []

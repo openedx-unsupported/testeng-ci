@@ -74,7 +74,7 @@ class Batch:
         split_dirs = [d.split('/') for d in self.directories]
         new_root = []
         for level in zip(*split_dirs):
-            if not(all([d == level[0] for d in level])):
+            if not (all([d == level[0] for d in level])):
                 break
             new_root.append(level[0])
         self.root = '/'.join(new_root)
