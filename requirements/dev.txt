@@ -9,9 +9,9 @@ astroid==2.15.4
     #   -r requirements/testing.txt
     #   pylint
     #   pylint-celery
-boto3==1.26.126
+boto3==1.26.130
     # via -r requirements/testing.txt
-botocore==1.29.126
+botocore==1.29.130
     # via
     #   -r requirements/testing.txt
     #   boto3
@@ -20,7 +20,7 @@ build==0.10.0
     # via
     #   -r requirements/pip-tools.txt
     #   pip-tools
-certifi==2022.12.7
+certifi==2023.5.7
     # via
     #   -r requirements/testing.txt
     #   requests
@@ -167,7 +167,7 @@ pyjwt[crypto]==2.6.0
     # via
     #   -r requirements/testing.txt
     #   pygithub
-pylint==2.17.3
+pylint==2.17.4
     # via
     #   -r requirements/testing.txt
     #   edx-lint
@@ -217,7 +217,7 @@ requests==2.30.0
     # via
     #   -r requirements/testing.txt
     #   pygithub
-s3transfer==0.6.0
+s3transfer==0.6.1
     # via
     #   -r requirements/testing.txt
     #   boto3
