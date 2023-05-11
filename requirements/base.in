@@ -1,7 +1,5 @@
 -c constraints.txt
 
--r aws.txt
-
 GitPython
 PyGithub
 packaging             # used in create pull request script to compare package versions

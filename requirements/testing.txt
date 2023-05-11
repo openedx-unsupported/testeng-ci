@@ -8,14 +8,7 @@ astroid==2.15.4
     # via
     #   pylint
     #   pylint-celery
-boto3==1.26.126
-    # via -r requirements/base.txt
-botocore==1.29.126
-    # via
-    #   -r requirements/base.txt
-    #   boto3
-    #   s3transfer
-certifi==2022.12.7
+certifi==2023.5.7
     # via
     #   -r requirements/base.txt
     #   requests
@@ -46,8 +39,6 @@ cryptography==40.0.2
     # via
     #   -r requirements/base.txt
     #   pyjwt
-ddt==1.6.0
-    # via -r requirements/testing.in
 deprecated==1.2.13
     # via
     #   -r requirements/base.txt
@@ -64,8 +55,6 @@ gitdb==4.0.10
     #   gitpython
 gitpython==3.1.31
     # via -r requirements/base.txt
-httpretty==1.1.4
-    # via -r requirements/testing.in
 idna==3.4
     # via
     #   -r requirements/base.txt
@@ -76,11 +65,6 @@ isort==5.12.0
     # via pylint
 jinja2==3.1.2
     # via code-annotations
-jmespath==1.0.1
-    # via
-    #   -r requirements/base.txt
-    #   boto3
-    #   botocore
 lazy-object-proxy==1.9.0
     # via astroid
 markupsafe==2.1.2
@@ -111,7 +95,7 @@ pyjwt[crypto]==2.6.0
     # via
     #   -r requirements/base.txt
     #   pygithub
-pylint==2.17.3
+pylint==2.17.4
     # via
     #   edx-lint
     #   pylint-celery
@@ -135,10 +119,6 @@ pytest==7.3.1
     #   pytest-cov
 pytest-cov==4.0.0
     # via -r requirements/testing.in
-python-dateutil==2.8.2
-    # via
-    #   -r requirements/base.txt
-    #   botocore
 python-slugify==8.0.1
     # via code-annotations
 pyyaml==6.0
@@ -147,15 +127,8 @@ requests==2.30.0
     # via
     #   -r requirements/base.txt
     #   pygithub
-s3transfer==0.6.0
-    # via
-    #   -r requirements/base.txt
-    #   boto3
 six==1.16.0
-    # via
-    #   -r requirements/base.txt
-    #   edx-lint
-    #   python-dateutil
+    # via edx-lint
 smmap==5.0.0
     # via
     #   -r requirements/base.txt
@@ -177,10 +150,9 @@ typing-extensions==4.5.0
     # via
     #   astroid
     #   pylint
-urllib3==1.26.15
+urllib3==2.0.2
     # via
     #   -r requirements/base.txt
-    #   botocore
     #   requests
 wrapt==1.15.0
     # via

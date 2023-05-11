@@ -4,14 +4,7 @@
 #
 #    make upgrade
 #
-boto3==1.26.126
-    # via -r requirements/aws.txt
-botocore==1.29.126
-    # via
-    #   -r requirements/aws.txt
-    #   boto3
-    #   s3transfer
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via
@@ -31,11 +24,6 @@ gitpython==3.1.31
     # via -r requirements/base.in
 idna==3.4
     # via requests
-jmespath==1.0.1
-    # via
-    #   -r requirements/aws.txt
-    #   boto3
-    #   botocore
 packaging==23.1
     # via -r requirements/base.in
 pycparser==2.21
@@ -46,28 +34,13 @@ pyjwt[crypto]==2.6.0
     # via pygithub
 pynacl==1.5.0
     # via pygithub
-python-dateutil==2.8.2
-    # via
-    #   -r requirements/aws.txt
-    #   botocore
 requests==2.30.0
     # via
     #   -r requirements/base.in
     #   pygithub
-s3transfer==0.6.0
-    # via
-    #   -r requirements/aws.txt
-    #   boto3
-six==1.16.0
-    # via
-    #   -r requirements/aws.txt
-    #   python-dateutil
 smmap==5.0.0
     # via gitdb
-urllib3==1.26.15
-    # via
-    #   -r requirements/aws.txt
-    #   botocore
-    #   requests
+urllib3==2.0.2
+    # via requests
 wrapt==1.15.0
     # via deprecated
