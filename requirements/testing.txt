@@ -4,7 +4,7 @@
 #
 #    make upgrade
 #
-astroid==2.15.4
+astroid==2.15.5
     # via
     #   pylint
     #   pylint-celery
@@ -79,7 +79,7 @@ packaging==23.1
     #   pytest
 pbr==5.11.1
     # via stevedore
-platformdirs==3.5.0
+platformdirs==3.5.1
     # via pylint
 pluggy==1.0.0
     # via pytest
@@ -89,9 +89,9 @@ pycparser==2.21
     # via
     #   -r requirements/base.txt
     #   cffi
-pygithub==1.58.1
+pygithub==1.58.2
     # via -r requirements/base.txt
-pyjwt[crypto]==2.6.0
+pyjwt[crypto]==2.7.0
     # via
     #   -r requirements/base.txt
     #   pygithub
@@ -105,7 +105,7 @@ pylint-celery==0.3
     # via edx-lint
 pylint-django==2.5.3
     # via edx-lint
-pylint-plugin-utils==0.7
+pylint-plugin-utils==0.8.2
     # via
     #   pylint-celery
     #   pylint-django
@@ -123,7 +123,7 @@ python-slugify==8.0.1
     # via code-annotations
 pyyaml==6.0
     # via code-annotations
-requests==2.30.0
+requests==2.31.0
     # via
     #   -r requirements/base.txt
     #   pygithub
@@ -133,7 +133,7 @@ smmap==5.0.0
     # via
     #   -r requirements/base.txt
     #   gitdb
-stevedore==5.0.0
+stevedore==5.1.0
     # via code-annotations
 testfixtures==7.1.0
     # via -r requirements/testing.in
@@ -146,7 +146,7 @@ tomli==2.0.1
     #   pytest
 tomlkit==0.11.8
     # via pylint
-typing-extensions==4.5.0
+typing-extensions==4.6.0
     # via
     #   astroid
     #   pylint
