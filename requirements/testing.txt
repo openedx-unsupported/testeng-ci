@@ -89,7 +89,7 @@ pycparser==2.21
     # via
     #   -r requirements/base.txt
     #   cffi
-pygithub==1.59.0
+pygithub==1.59.1
     # via -r requirements/base.txt
 pyjwt[crypto]==2.8.0
     # via

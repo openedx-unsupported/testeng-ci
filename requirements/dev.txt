@@ -121,7 +121,7 @@ pbr==5.11.1
     # via
     #   -r requirements/testing.txt
     #   stevedore
-pip-tools==7.1.0
+pip-tools==7.2.0
     # via -r requirements/pip-tools.txt
 platformdirs==3.10.0
     # via
@@ -145,7 +145,7 @@ pycparser==2.21
     # via
     #   -r requirements/testing.txt
     #   cffi
-pygithub==1.59.0
+pygithub==1.59.1
     # via -r requirements/testing.txt
 pyjwt[crypto]==2.8.0
     # via
@@ -253,7 +253,7 @@ virtualenv==20.24.2
     # via
     #   -r requirements/ci.txt
     #   tox
-wheel==0.41.0
+wheel==0.41.1
     # via
     #   -r requirements/pip-tools.txt
     #   pip-tools
