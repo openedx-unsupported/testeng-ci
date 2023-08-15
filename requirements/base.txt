@@ -28,7 +28,7 @@ packaging==23.1
     # via -r requirements/base.in
 pycparser==2.21
     # via cffi
-pygithub==1.59.0
+pygithub==1.59.1
     # via -r requirements/base.in
 pyjwt[crypto]==2.8.0
     # via pygithub
