@@ -423,8 +423,12 @@ class GitHubHelper:  # pylint: disable=missing-class-docstring
         input_trees_list = []
         base_git_tree = repository.get_git_tree(sha)
         for file_path in file_path_list:
-            content = self.get_file_contents(repo_root, file_path)
-            input_tree = InputGitTreeElement(file_path, "100644", "blob", content=content)
+            if os.path.exists(os.path.join(repo_root, file_path)):
+                content = self.get_file_contents(repo_root, file_path)
+                input_tree = InputGitTreeElement(file_path, "100644", "blob", content=content)
+            else:
+                # Remove file from git tree as the file is removed
+                input_tree = InputGitTreeElement(file_path, "100644", "blob", sha=None)
             input_trees_list.append(input_tree)
         if len(input_trees_list) > 0:
             new_git_tree = repository.create_git_tree(input_trees_list, base_tree=base_git_tree)
