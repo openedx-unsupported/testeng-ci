@@ -12,15 +12,15 @@ cffi==1.15.1
     #   pynacl
 charset-normalizer==3.2.0
     # via requests
-click==8.1.6
+click==8.1.7
     # via -r requirements/base.in
-cryptography==41.0.3
+cryptography==41.0.4
     # via pyjwt
 deprecated==1.2.14
     # via pygithub
 gitdb==4.0.10
     # via gitpython
-gitpython==3.1.32
+gitpython==3.1.37
     # via -r requirements/base.in
 idna==3.4
     # via requests
@@ -28,7 +28,7 @@ packaging==23.1
     # via -r requirements/base.in
 pycparser==2.21
     # via cffi
-pygithub==1.59.0
+pygithub==1.59.1
     # via -r requirements/base.in
 pyjwt[crypto]==2.8.0
     # via pygithub
@@ -38,9 +38,9 @@ requests==2.31.0
     # via
     #   -r requirements/base.in
     #   pygithub
-smmap==5.0.0
+smmap==5.0.1
     # via gitdb
-urllib3==2.0.4
+urllib3==2.0.5
     # via requests
 wrapt==1.15.0
     # via deprecated
