@@ -4,17 +4,17 @@
 #
 #    make upgrade
 #
-certifi==2023.7.22
+certifi==2023.11.17
     # via requests
 cffi==1.16.0
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.3.1
+charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via -r requirements/base.in
-cryptography==41.0.4
+cryptography==41.0.5
     # via pyjwt
 deprecated==1.2.14
     # via pygithub
@@ -48,9 +48,9 @@ smmap==5.0.1
     # via gitdb
 typing-extensions==4.8.0
     # via pygithub
-urllib3==2.0.7
+urllib3==2.1.0
     # via
     #   pygithub
     #   requests
-wrapt==1.15.0
+wrapt==1.16.0
     # via deprecated
