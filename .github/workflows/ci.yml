@@ -30,7 +30,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install pip==19.0.3
+        pip install pip==24.0
         pip install -r requirements/ci.txt
 
     - name: Run Tests
