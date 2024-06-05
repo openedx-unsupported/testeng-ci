@@ -1,5 +1,13 @@
 # testeng-ci
 
+⚠️⚠️⚠️⚠️ **THIS REPOSITORY IS DEPRECATED** ⚠️⚠️⚠️⚠️
+
+This PR Creator script has been moved to [Open edX repo-tools](https://github.com/openedx/repo-tools).
+
+The other tools have been moved from edX's Jenkins infrastructure into GitHub Actions workflows.
+
+Details: https://github.com/openedx/public-engineering/issues/265
+
 ## About
 
 This repo contains a script to programmatically create GitHub pull requests, used in GitHub Actions such as the ones used to periodically update Python dependencies in most of our repositories.
